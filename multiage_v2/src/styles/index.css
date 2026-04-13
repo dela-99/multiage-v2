@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+/* ── CSS Design Tokens ───────────────────────────────────────────── */
+:root {
+  --brand:        #C5620B;
+  --brand-dark:   #6A2B09;
+}
+
+/* DARK MODE (default) */
+body {
+  --bg-gradient:    linear-gradient(160deg,#0c0603 0%,#1a0800 25%,#110500 55%,#040404 100%);
+  --text-primary:   #f5f0e8;
+  --text-secondary: rgba(245,240,232,0.72);
+  --text-muted:     rgba(245,240,232,0.48);
+  --surface:        rgba(255,255,255,0.05);
+  --surface-hover:  rgba(255,255,255,0.09);
+  --border:         rgba(255,255,255,0.10);
+  --card-bg:        rgba(255,255,255,0.05);
+  --card-border:    rgba(255,255,255,0.10);
+  --nav-bg:         rgba(12,6,3,0.86);
+  --input-bg:       rgba(255,255,255,0.06);
+  --input-border:   rgba(255,255,255,0.14);
+  --slider-fade:    #0c0603;
+  --scrollbar-track:#0c0603;
+  --badge-bg:       rgba(255,255,255,0.08);
+}
+
+/* LIGHT MODE */
+body.theme-light {
+  --bg-gradient:    linear-gradient(160deg,#fff5eb 0%,#fdefd6 25%,#f7e4c4 50%,#fff8f2 100%);
+  --text-primary:   #1a0a00;
+  --text-secondary: #4a2210;
+  --text-muted:     #7a4525;
+  --surface:        rgba(106,43,9,0.07);
+  --surface-hover:  rgba(106,43,9,0.13);
+  --border:         rgba(106,43,9,0.16);
+  --card-bg:        rgba(255,248,240,0.85);
+  --card-border:    rgba(106,43,9,0.16);
+  --nav-bg:         rgba(255,245,235,0.92);
+  --input-bg:       rgba(106,43,9,0.06);
+  --input-border:   rgba(106,43,9,0.22);
+  --slider-fade:    #fff5eb;
+  --scrollbar-track:#fff5eb;
+  --badge-bg:       rgba(106,43,9,0.09);
+}
+
+/* ── Global Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-primary);
+  transition: color 0.3s, background 0.3s;
+}
+a { color: inherit; }
+
+/* ── Scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: #C5620B55; border-radius: 3px; }
+
+/* ── Nav responsive helpers ───────────────────────────────────────── */
+/* Desktop (≥ 860px): show links pill, hide hamburger              */
+/* Tablet + mobile (≤ 859px): hide links pill, show hamburger      */
+.nav-desktop { display: flex !important; }
+.nav-mobile  { display: none !important; }
+@media (max-width: 859px) {
+  .nav-desktop { display: none  !important; }
+  .nav-mobile  { display: flex  !important; }
+}
+
+/* ── Responsive grid helpers ──────────────────────────────────────── */
+@media (max-width: 900px) {
+  .grid-responsive { grid-template-columns: 1fr !important; }
+  .footer-grid     { grid-template-columns: 1fr 1fr !important; }
+}
+@media (max-width: 600px) {
+  .footer-grid     { grid-template-columns: 1fr !important; }
+}
+
+/* ── Select dropdown theming ──────────────────────────────────────── */
+select option { background: #1a0a00; color: #f5f0e8; }
+body.theme-light select option { background: #fff5eb; color: #1a0a00; }
+
+/* ── Page enter animation ─────────────────────────────────────────── */
+.page-enter { animation: pgIn 0.35s ease; }
+@keyframes pgIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
