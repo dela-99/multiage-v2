@@ -17,7 +17,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type:     String,
-      required: [true, "Password is required"],
+      required: function () {
+        return !this.firebaseId;
+      },
       minlength: [6, "Password must be at least 6 characters"],
       select:   false, // never return password in queries by default
     },
@@ -26,12 +28,24 @@ const userSchema = new mongoose.Schema(
       enum:    ["user", "admin"],
       default: "user",
     },
+    firebaseId: {
+      type:    String,
+      default: "",
+      trim:    true,
+      index:   true,
+    },
+    profilePicture: {
+      type:    String,
+      default: "",
+      trim:    true,
+    },
   },
   { timestamps: true }
 );
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {
+  if (!this.password) return next();
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
@@ -40,6 +54,9 @@ userSchema.pre("save", async function (next) {
 
 // Compare entered password with hashed password
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) {
+    return false;
+  }
   return await bcrypt.compare(enteredPassword, this.password);
 };
 

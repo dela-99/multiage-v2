@@ -110,23 +110,47 @@ async function sendNewMessageNotifications(message) {
   return Promise.allSettled(jobs);
 }
 
-async function sendOrderNotifications(order, user) {
+async function sendAdminNewOrderNotification(order, user) {
   const adminTo = adminRecipients();
   const itemsText = order.items.map((item) => `- ${item.name} x${item.quantity} (GHS ${item.price})`).join("\n");
+
+  if (adminTo.length === 0) {
+    return { skipped: true, reason: "missing-recipient" };
+  }
+
+  return sendEmail({
+    to: adminTo,
+    subject: `[${APP_NAME}] New Order ${order._id}`,
+    text: `A new order has been created.\nCustomer: ${user?.name || "Customer"}\nEmail: ${user?.email || "N/A"}\nOrder ID: ${order._id}\nTotal: GHS ${order.totalPrice}\n\n${itemsText}`,
+    html: layout("New Order Received", `
+      <p><strong>Customer:</strong> ${user?.name || "Customer"}</p>
+      <p><strong>Email:</strong> ${user?.email || "N/A"}</p>
+      <p><strong>Order ID:</strong> ${order._id}</p>
+      <p><strong>Total:</strong> GHS ${order.totalPrice}</p>
+      <p><strong>Payment Status:</strong> ${order.paymentStatus || "pending"}</p>
+      <p><strong>Items:</strong></p>
+      <ul>${order.items.map((item) => `<li>${item.name} x${item.quantity} (GHS ${item.price})</li>`).join("")}</ul>
+    `),
+  });
+}
+
+async function sendPaidOrderConfirmation(order, user) {
+  const adminTo = adminRecipients();
   const jobs = [];
+  const paymentReference = order.paymentReference || "N/A";
 
   if (adminTo.length > 0) {
     jobs.push(sendEmail({
       to: adminTo,
-      subject: `[${APP_NAME}] New Order ${order._id}`,
-      text: `A new order has been created.\nCustomer: ${user?.name || "Customer"}\nEmail: ${user?.email || "N/A"}\nOrder ID: ${order._id}\nTotal: GHS ${order.totalPrice}\n\n${itemsText}`,
-      html: layout("New Order Received", `
+      subject: `[${APP_NAME}] Payment Confirmed ${order._id}`,
+      text: `Payment confirmed for order ${order._id}.\nCustomer: ${user?.name || "Customer"}\nEmail: ${user?.email || "N/A"}\nReference: ${paymentReference}\nAmount: GHS ${order.totalPrice}`,
+      html: layout("Payment Confirmed", `
         <p><strong>Customer:</strong> ${user?.name || "Customer"}</p>
         <p><strong>Email:</strong> ${user?.email || "N/A"}</p>
         <p><strong>Order ID:</strong> ${order._id}</p>
-        <p><strong>Total:</strong> GHS ${order.totalPrice}</p>
-        <p><strong>Items:</strong></p>
-        <ul>${order.items.map((item) => `<li>${item.name} x${item.quantity} (GHS ${item.price})</li>`).join("")}</ul>
+        <p><strong>Payment Reference:</strong> ${paymentReference}</p>
+        <p><strong>Amount Paid:</strong> GHS ${order.totalPrice}</p>
+        <p><strong>Channel:</strong> ${order.paymentChannel || "N/A"}</p>
       `),
     }));
   }
@@ -134,14 +158,15 @@ async function sendOrderNotifications(order, user) {
   if (user?.email) {
     jobs.push(sendEmail({
       to: user.email,
-      subject: `${APP_NAME} order confirmation`,
-      text: `Hello ${user.name || "Customer"}, your order has been received. Order ID: ${order._id}. Total: GHS ${order.totalPrice}.`,
-      html: layout("Order Confirmation", `
+      subject: `${APP_NAME} payment confirmed`,
+      text: `Hello ${user.name || "Customer"}, your payment has been confirmed. Order ID: ${order._id}. Reference: ${paymentReference}. Total: GHS ${order.totalPrice}.`,
+      html: layout("Payment Confirmed", `
         <p>Hello ${user.name || "Customer"},</p>
-        <p>Your order has been received successfully.</p>
+        <p>Your payment has been confirmed successfully.</p>
         <p><strong>Order ID:</strong> ${order._id}</p>
-        <p><strong>Total:</strong> GHS ${order.totalPrice}</p>
-        <p>We will contact you with the next update.</p>
+        <p><strong>Payment Reference:</strong> ${paymentReference}</p>
+        <p><strong>Amount Paid:</strong> GHS ${order.totalPrice}</p>
+        <p><strong>Status:</strong> ${order.paymentStatus || "success"}</p>
       `),
     }));
   }
@@ -170,6 +195,7 @@ module.exports = {
   isEmailConfigured,
   sendEmail,
   sendNewMessageNotifications,
-  sendOrderNotifications,
+  sendAdminNewOrderNotification,
+  sendPaidOrderConfirmation,
   sendWelcomeNotification,
 };

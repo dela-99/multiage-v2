@@ -16,6 +16,11 @@ import AdminLogin       from "./pages/AdminLogin";
 import HardwarePage     from "./pages/HardwarePage";
 import AdminDashboard   from "./pages/AdminDashboard";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import RegisterPage from "./pages/RegisterPage";
+import MyOrdersPage from "./pages/MyOrdersPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import PaymentCallbackPage from "./pages/PaymentCallbackPage";
+import ProductDetails from "./pages/ProductDetails";
 
 export default function App() {
   return (
@@ -32,7 +37,9 @@ export default function App() {
                 <Route path="/services"             element={<ServicesPage />} />
                 <Route path="/hardware"             element={<HardwarePage />} />
                 <Route path="/contact"              element={<ContactPage />} />
+                <Route path="/product/:id"          element={<ProductDetails />} />
                 <Route path="/login"                element={<LoginPage />} />
+                <Route path="/register"             element={<RegisterPage />} />
                 <Route path="/admin/login"          element={<AdminLogin />} />
                 <Route path="/admin-login"          element={<AdminLogin />} />
                 <Route
@@ -44,6 +51,10 @@ export default function App() {
                   )}
                 />
                 <Route
+                  path="/payment/callback"
+                  element={<PaymentCallbackPage />}
+                />
+                <Route
                   path="/order-confirmation"
                   element={(
                     <ProtectedRoute>
@@ -51,7 +62,15 @@ export default function App() {
                     </ProtectedRoute>
                   )}
                 />
-                <Route path="*"                     element={<Home />} />
+                <Route
+                  path="/my-orders"
+                  element={(
+                    <ProtectedRoute>
+                      <MyOrdersPage />
+                    </ProtectedRoute>
+                  )}
+                />
+                <Route path="*"                     element={<NotFoundPage />} />
               </Routes>
             </DeviceColorProvider>
           </CartProvider>

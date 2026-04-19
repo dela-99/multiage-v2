@@ -1,12 +1,23 @@
 const jwt  = require("jsonwebtoken");
 const User = require("../models/User");
 const { sendWelcomeNotification } = require("../services/emailService");
+const { verifyFirebaseIdToken } = require("../services/firebaseAdmin");
 
 // ── Generate JWT ──────────────────────────────────────────────────
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
+
+const buildAuthPayload = (user) => ({
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  firebaseId: user.firebaseId || "",
+  profilePicture: user.profilePicture || "",
+  token: generateToken(user._id),
+});
 
 // ── @route  POST /api/auth/register ──────────────────────────────
 // ── @access Public
@@ -29,13 +40,7 @@ const register = async (req, res, next) => {
       console.error("Welcome email failed:", error.message);
     });
 
-    res.status(201).json({
-      _id:   user._id,
-      name:  user.name,
-      email: user.email,
-      role:  user.role,
-      token: generateToken(user._id),
-    });
+    res.status(201).json(buildAuthPayload(user));
   } catch (err) {
     next(err);
   }
@@ -57,13 +62,67 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    res.json({
-      _id:   user._id,
-      name:  user.name,
-      email: user.email,
-      role:  user.role,
-      token: generateToken(user._id),
-    });
+    res.json(buildAuthPayload(user));
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ── @route  POST /api/auth/google ─────────────────────────────────
+// ── @access Public
+const googleLogin = async (req, res, next) => {
+  try {
+    const { name, email, photo, uid, idToken } = req.body;
+
+    if (!name || !email || !uid || !idToken) {
+      return res.status(400).json({ message: "Please provide name, email, uid, and idToken" });
+    }
+
+    const decoded = await verifyFirebaseIdToken(idToken);
+    if (decoded.uid !== uid || decoded.email !== email) {
+      return res.status(401).json({ message: "Firebase identity verification failed" });
+    }
+
+    let user = await User.findOne({ email });
+    const isNewUser = !user;
+
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        firebaseId: uid,
+        profilePicture: photo || "",
+      });
+    } else {
+      let changed = false;
+
+      if (!user.firebaseId) {
+        user.firebaseId = uid;
+        changed = true;
+      }
+
+      if (!user.profilePicture && photo) {
+        user.profilePicture = photo;
+        changed = true;
+      }
+
+      if (!user.name && name) {
+        user.name = name;
+        changed = true;
+      }
+
+      if (changed) {
+        await user.save();
+      }
+    }
+
+    if (isNewUser) {
+      sendWelcomeNotification(user).catch((error) => {
+        console.error("Welcome email failed:", error.message);
+      });
+    }
+
+    res.json(buildAuthPayload(user));
   } catch (err) {
     next(err);
   }
@@ -77,6 +136,8 @@ const getMe = async (req, res) => {
     name:      req.user.name,
     email:     req.user.email,
     role:      req.user.role,
+    firebaseId: req.user.firebaseId || "",
+    profilePicture: req.user.profilePicture || "",
     createdAt: req.user.createdAt,
   });
 };
@@ -108,4 +169,36 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getMe, getAllUsers, deleteUser };
+// ── @route  PUT /api/auth/password ───────────────────────────────
+// ── @access Private (any authenticated user or admin)
+const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Please provide currentPassword and newPassword" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+
+    if (newPassword === currentPassword) {
+      return res.status(400).json({ message: "New password must be different from your current password" });
+    }
+
+    const user = await User.findById(req.user._id).select("+password");
+    if (!user || !(await user.matchPassword(currentPassword))) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { register, login, googleLogin, getMe, getAllUsers, deleteUser, changePassword };

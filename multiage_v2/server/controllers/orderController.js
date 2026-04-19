@@ -1,6 +1,6 @@
 const Order   = require("../models/Order");
 const Product = require("../models/Product");
-const { sendOrderNotifications } = require("../services/emailService");
+const { sendAdminNewOrderNotification } = require("../services/emailService");
 
 // ── @route  POST /api/orders ──────────────────────────────────────
 // ── @access Private (logged-in user)
@@ -48,14 +48,39 @@ const createOrder = async (req, res, next) => {
       items:           resolvedItems,
       totalPrice,
       shippingAddress: shippingAddress || {},
+      paymentGateway:  "paystack",
+      paymentStatus:   "pending",
       note:            note || "",
     });
 
-    sendOrderNotifications(order, req.user).catch((error) => {
-      console.error("Order notification email failed:", error.message);
+    // Initialize Paystack Transaction
+    const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: req.user.email,
+        amount: totalPrice * 100,
+        currency: "GHS",
+        callback_url: "https://multiage.com.gh/checkout/success",
+        metadata: { orderId: order._id },
+      }),
     });
 
-    res.status(201).json(order);
+    const paystackData = await paystackResponse.json();
+    if (!paystackResponse.ok) throw new Error(paystackData.message || "Paystack initialization failed");
+
+    sendAdminNewOrderNotification(order, req.user).catch((error) => {
+      console.error("Admin order email failed:", error.message);
+    });
+
+    res.status(201).json({
+      order,
+      paymentUrl: paystackData.data.authorization_url,
+      reference: paystackData.data.reference,
+    });
   } catch (err) {
     next(err);
   }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "../router";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import ChangePasswordForm from "./ChangePasswordForm";
 
 /* ── Hardware added; Login handled via separate button ───────────── */
 const NAV_LINKS = [
@@ -129,11 +130,12 @@ function PersonIcon() {
    ════════════════════════════════════════════════════════════════════ */
 export default function Navbar() {
   const { isLight, toggleTheme, t } = useTheme();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, token, logout, isAuthenticated } = useAuth();
   const navigate     = useNavigate();
   const { pathname } = useLocation();
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
+  const [pwdOpen,  setPwdOpen]    = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30);
@@ -208,6 +210,45 @@ export default function Navbar() {
                 }}>
                   {user?.name || "Account"}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/my-orders")}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "7px 16px",
+                    background: pathname === "/my-orders" ? "rgba(197,98,11,0.14)" : t.surface,
+                    border: `1px solid ${pathname === "/my-orders" ? "rgba(197,98,11,0.35)" : t.border}`,
+                    borderRadius: 100,
+                    fontSize: 13, fontWeight: 600, color: pathname === "/my-orders" ? "#C5620B" : t.textSecondary,
+                    cursor: "pointer", fontFamily: "inherit",
+                    transition: "all 0.25s ease",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; e.currentTarget.style.color = t.textPrimary; e.currentTarget.style.borderColor = "rgba(197,98,11,0.35)"; }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = pathname === "/my-orders" ? "rgba(197,98,11,0.14)" : t.surface;
+                    e.currentTarget.style.color = pathname === "/my-orders" ? "#C5620B" : t.textSecondary;
+                    e.currentTarget.style.borderColor = pathname === "/my-orders" ? "rgba(197,98,11,0.35)" : t.border;
+                  }}
+                >
+                  My orders
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPwdOpen(true)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "7px 16px",
+                    background: t.surface, border: `1px solid ${t.border}`,
+                    borderRadius: 100,
+                    fontSize: 13, fontWeight: 600, color: t.textSecondary,
+                    cursor: "pointer", fontFamily: "inherit",
+                    transition: "all 0.25s ease",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; e.currentTarget.style.color = t.textPrimary; e.currentTarget.style.borderColor = "rgba(197,98,11,0.35)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = t.surface; e.currentTarget.style.color = t.textSecondary; e.currentTarget.style.borderColor = t.border; }}
+                >
+                  Change password
+                </button>
                 <button
                   onClick={handleLogout}
                   style={{
@@ -293,22 +334,58 @@ export default function Navbar() {
           <div style={{ height: 1, background: t.border, margin: "6px 8px" }} />
 
           {isAuthenticated ? (
-            <button
-              onClick={() => { handleLogout(); setMenuOpen(false); }}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                width: "100%", border: "none",
-                padding: "13px 16px", borderRadius: 12,
-                fontSize: 14, fontWeight: 600,
-                color: t.textPrimary, background: t.surface, border: `1px solid ${t.border}`,
-                transition: "background 0.2s",
-                cursor: "pointer", fontFamily: "inherit"
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = t.surfaceHover}
-              onMouseLeave={e => e.currentTarget.style.background = t.surface}
-            >
-              Logout
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => { navigate("/my-orders"); setMenuOpen(false); }}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  width: "100%",
+                  padding: "13px 16px", borderRadius: 12,
+                  fontSize: 14, fontWeight: 600,
+                  color: t.textPrimary, background: t.surface, border: `1px solid ${t.border}`,
+                  transition: "background 0.2s",
+                  cursor: "pointer", fontFamily: "inherit",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; }}
+                onMouseLeave={e => { e.currentTarget.style.background = t.surface; }}
+              >
+                My orders
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPwdOpen(true); setMenuOpen(false); }}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  width: "100%",
+                  padding: "13px 16px", borderRadius: 12,
+                  fontSize: 14, fontWeight: 600,
+                  color: t.textPrimary, background: t.surface, border: `1px solid ${t.border}`,
+                  transition: "background 0.2s",
+                  cursor: "pointer", fontFamily: "inherit",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = t.surfaceHover}
+                onMouseLeave={e => e.currentTarget.style.background = t.surface}
+              >
+                Change password
+              </button>
+              <button
+                onClick={() => { handleLogout(); setMenuOpen(false); }}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  width: "100%", border: "none",
+                  padding: "13px 16px", borderRadius: 12,
+                  fontSize: 14, fontWeight: 600,
+                  color: t.textPrimary, background: t.surface, border: `1px solid ${t.border}`,
+                  transition: "background 0.2s",
+                  cursor: "pointer", fontFamily: "inherit",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = t.surfaceHover}
+                onMouseLeave={e => e.currentTarget.style.background = t.surface}
+              >
+                Logout
+              </button>
+            </>
           ) : (
             !onLoginPage && (
               <a
@@ -331,6 +408,54 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
+      {pwdOpen && isAuthenticated && token && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pwd-modal-title"
+          style={{
+            position: "fixed", inset: 0, zIndex: 200,
+            background: "rgba(0,0,0,0.55)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 20,
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setPwdOpen(false); }}
+        >
+          <div style={{
+            width: "100%",
+            maxWidth: 440,
+            borderRadius: 20,
+            padding: "24px 22px 22px",
+            background: t.cardBg,
+            border: `1px solid ${t.cardBorder}`,
+            boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
+          }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+              <h2 id="pwd-modal-title" style={{ margin: 0, fontSize: 20, fontWeight: 800, color: t.textPrimary }}>
+                Change password
+              </h2>
+              <button
+                type="button"
+                onClick={() => setPwdOpen(false)}
+                aria-label="Close"
+                style={{
+                  border: "none", background: "transparent", cursor: "pointer",
+                  fontSize: 22, lineHeight: 1, color: t.textMuted, padding: 4,
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <p style={{ margin: "0 0 18px", fontSize: 13, color: t.textSecondary, lineHeight: 1.5 }}>
+              Enter your current password, then choose a new one (at least 6 characters).
+            </p>
+            <ChangePasswordForm token={token} />
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

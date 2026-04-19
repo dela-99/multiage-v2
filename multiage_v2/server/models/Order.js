@@ -39,6 +39,27 @@ const orderSchema = new mongoose.Schema(
     },
     isPaid:   { type: Boolean, default: false },
     paidAt:   { type: Date },
+    paymentGateway: {
+      type:    String,
+      default: "",
+      trim:    true,
+    },
+    paymentReference: {
+      type:    String,
+      default: "",
+      trim:    true,
+      index:   true,
+    },
+    paymentStatus: {
+      type:    String,
+      default: "pending",
+      trim:    true,
+    },
+    paymentChannel: {
+      type:    String,
+      default: "",
+      trim:    true,
+    },
     note:     { type: String, default: "" },
   },
   { timestamps: true }

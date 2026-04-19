@@ -1,31 +1,43 @@
-const rateBuckets = new Map();
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 
-const securityHeaders = (req, res, next) => {
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "SAMEORIGIN");
-  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  next();
+// JSON API — CSP disabled (for HTML). HSTS only in production (set NODE_ENV behind TLS).
+const helmetMiddleware = helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  hsts:
+    process.env.NODE_ENV === "production"
+      ? { maxAge: 31536000, includeSubDomains: true }
+      : false,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  permissionsPolicy: {
+    features: {
+      camera: [],
+      microphone: [],
+      geolocation: [],
+    },
+  },
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_MAX) || 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many requests. Please try again later." },
+  skip: (req) => req.method === "GET" && req.originalUrl.split("?")[0] === "/api/health",
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_AUTH_MAX) || 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many attempts. Please wait and try again." },
+});
+
+module.exports = {
+  helmetMiddleware,
+  apiLimiter,
+  authLimiter,
 };
-
-const rateLimiter = ({ windowMs = 15 * 60 * 1000, max = 200 } = {}) => {
-  return (req, res, next) => {
-    const key = req.ip || req.connection.remoteAddress || "unknown";
-    const now = Date.now();
-    const current = rateBuckets.get(key);
-
-    if (!current || now > current.expiresAt) {
-      rateBuckets.set(key, { count: 1, expiresAt: now + windowMs });
-      return next();
-    }
-
-    if (current.count >= max) {
-      return res.status(429).json({ message: "Too many requests. Please try again later." });
-    }
-
-    current.count += 1;
-    return next();
-  };
-};
-
-module.exports = { securityHeaders, rateLimiter };

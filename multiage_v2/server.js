@@ -2,6 +2,11 @@ import 'dotenv/config';
 import express from 'express';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import cors from 'cors';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const orderRoutes = require('./server/routes/orderRoutes');
+const paymentRoutes = require('./server/routes/paymentRoutes');
 
 const app = express();
 const port = 5000;
@@ -132,6 +137,10 @@ const initialProducts = [
 
 app.use(cors());
 app.use(express.json());
+
+// --- Order & Payment Routes ---
+app.use('/api/orders', orderRoutes);
+app.use('/api/payment', paymentRoutes);
 
 const uri = process.env.MONGODB_URI;
 if (!uri) {

@@ -39,13 +39,17 @@ function bannerInput(theme) {
   };
 }
 
-function ProductCard({ product, onBuyNow, loadingId }) {
+function ProductCard({ product, onBuyNow, onOpenDetails, loadingId }) {
   const { t } = useTheme();
   const [hov, setHov] = useState(false);
   const emoji = EMOJI_BY_CATEGORY[product.category] || "📦";
 
   return (
-    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      onClick={() => onOpenDetails(product)}
+      style={{
       borderRadius: 20,
       overflow: "hidden",
       background: hov ? t.surfaceHover : t.cardBg,
@@ -85,7 +89,10 @@ function ProductCard({ product, onBuyNow, loadingId }) {
             GHS {Number(product.price || 0).toLocaleString()}
           </span>
           <button
-            onClick={() => onBuyNow(product)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onBuyNow(product);
+            }}
             style={{
               padding: "7px 16px",
               background: "linear-gradient(135deg,#C5620B,#6A2B09)",
@@ -176,14 +183,26 @@ export default function StorePage() {
         note: `Quick order for ${product.name}`,
       }, token);
 
+      const payment = await api.initializePayment({ orderId: order._id }, token);
+
       localStorage.setItem("multiage_last_order", JSON.stringify(order));
+      localStorage.setItem("multiage_pending_order", JSON.stringify(order));
       clearCart();
-      navigate("/order-confirmation");
+
+      if (!payment.authorization_url) {
+        throw new Error("Payment link was not returned");
+      }
+
+      window.location.href = payment.authorization_url;
     } catch (err) {
       setError(err.message || "Failed to create order");
     } finally {
       setBuyingId("");
     }
+  };
+
+  const openDetails = (product) => {
+    navigate(`/product/${product._id}`);
   };
 
   const updateInquiry = (field) => (event) => {
@@ -333,7 +352,13 @@ export default function StorePage() {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 22 }}>
             {visibleProducts.map((product) => (
-              <ProductCard key={product._id} product={product} onBuyNow={handleBuyNow} loadingId={buyingId} />
+              <ProductCard
+                key={product._id}
+                product={product}
+                onBuyNow={handleBuyNow}
+                onOpenDetails={openDetails}
+                loadingId={buyingId}
+              />
             ))}
           </div>
         )}

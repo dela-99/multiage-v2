@@ -41,6 +41,38 @@ export function AuthProvider({ children }) {
       name: data.name,
       email: data.email,
       role: data.role,
+      firebaseId: data.firebaseId || "",
+      profilePicture: data.profilePicture || "",
+    };
+
+    persistAuth(data.token, nextUser);
+    return nextUser;
+  };
+
+  const register = async (payload) => {
+    const data = await api.register(payload);
+    const nextUser = {
+      _id: data._id,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      firebaseId: data.firebaseId || "",
+      profilePicture: data.profilePicture || "",
+    };
+
+    persistAuth(data.token, nextUser);
+    return nextUser;
+  };
+
+  const loginWithGoogle = async (payload) => {
+    const data = await api.googleLogin(payload);
+    const nextUser = {
+      _id: data._id,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      firebaseId: data.firebaseId || "",
+      profilePicture: data.profilePicture || "",
     };
 
     persistAuth(data.token, nextUser);
@@ -71,6 +103,8 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(token),
     isReady,
     login,
+    register,
+    loginWithGoogle,
     logout,
     refreshProfile,
   }), [token, user, isReady]);

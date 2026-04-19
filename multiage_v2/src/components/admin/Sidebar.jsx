@@ -1,0 +1,132 @@
+import { useTheme } from "../../context/ThemeContext";
+
+function MenuIcon({ path }) {
+  return (
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d={path} />
+    </svg>
+  );
+}
+
+const ICONS = {
+  Dashboard: "M3 13h8V3H3v10ZM13 21h8V11h-8v10ZM13 3v6h8V3h-8ZM3 21v-6h8v6H3Z",
+  Products: "M12 2l8 4.5v11L12 22l-8-4.5v-11L12 2Z M12 22V11 M20 6.5l-8 4.5-8-4.5",
+  Inventory: "M20 7 12 3 4 7 M20 7v10l-8 4-8-4V7 M12 3v18",
+  Orders: "M7 4h10l1 2h3v2H3V6h3l1-2Z M5 8h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8Z",
+  Sales: "M4 19V9 M10 19V5 M16 19v-8 M22 19v-12",
+  Customers: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M16 3.13a4 4 0 0 1 0 7.75 M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
+  Newsletter: "M4 6h16v12H4z M4 7l8 6 8-6",
+  Settings: "M12 3v3 M12 18v3 M4.93 4.93l2.12 2.12 M16.95 16.95l2.12 2.12 M3 12h3 M18 12h3 M4.93 19.07l2.12-2.12 M16.95 7.05l2.12-2.12 M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
+};
+
+export default function Sidebar({ items, active, onSelect, isMobile, isOpen, onClose }) {
+  const { t } = useTheme();
+
+  return (
+    <>
+      {isMobile && isOpen && (
+        <button
+          onClick={onClose}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            border: "none",
+            zIndex: 29,
+            cursor: "pointer",
+          }}
+          aria-label="Close sidebar"
+        />
+      )}
+
+      <aside style={{
+        width: isMobile ? 286 : "100%",
+        maxWidth: isMobile ? 286 : "none",
+        background: t.cardBg,
+        border: `1px solid ${t.cardBorder}`,
+        borderRadius: isMobile ? "0 24px 24px 0" : 28,
+        padding: 22,
+        backdropFilter: "blur(16px)",
+        position: isMobile ? "fixed" : "sticky",
+        top: isMobile ? 0 : 88,
+        left: isMobile ? (isOpen ? 0 : -320) : "auto",
+        height: isMobile ? "100vh" : "calc(100vh - 120px)",
+        zIndex: 30,
+        transition: "left 0.25s ease",
+        overflowY: "auto",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
+          <div style={{
+            width: 46,
+            height: 46,
+            borderRadius: 16,
+            background: "linear-gradient(135deg,#C5620B,#6A2B09)",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: 800,
+            fontSize: 18,
+            boxShadow: "0 14px 24px rgba(197,98,11,0.24)",
+            flexShrink: 0,
+          }}>
+            M
+          </div>
+          <div>
+            <div style={{ color: t.textPrimary, fontWeight: 800, fontSize: 17 }}>Multiage</div>
+            <div style={{ color: t.textMuted, fontSize: 12 }}>Admin Console</div>
+          </div>
+        </div>
+
+        <nav style={{ display: "grid", gap: 8 }}>
+          {items.map((item) => {
+            const activeItem = active === item.key;
+            return (
+              <button
+                key={item.key}
+                onClick={() => {
+                  onSelect(item.key);
+                  if (isMobile) onClose();
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 14,
+                  width: "100%",
+                  textAlign: "left",
+                  border: "none",
+                  cursor: "pointer",
+                  borderRadius: 18,
+                  padding: "14px 14px",
+                  background: activeItem ? "linear-gradient(135deg,#C5620B,#6A2B09)" : "transparent",
+                  color: activeItem ? "#fff" : t.textSecondary,
+                  boxShadow: activeItem ? "0 14px 30px rgba(197,98,11,0.22)" : "none",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <span style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+                  <span style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 12,
+                    background: activeItem ? "rgba(255,255,255,0.14)" : "rgba(197,98,11,0.08)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}>
+                    <MenuIcon path={ICONS[item.key]} />
+                  </span>
+                  <span style={{ fontWeight: 700, fontSize: 14 }}>{item.label}</span>
+                </span>
+                <span style={{ opacity: activeItem ? 1 : 0.35, fontWeight: 700 }}>{">"}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+    </>
+  );
+}

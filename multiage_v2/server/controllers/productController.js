@@ -1,5 +1,9 @@
+const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const { uploadToCloudinary } = require("../utils/cloudinary");
+const seedProducts = require("../data/seedProducts");
+
+let catalogBootstrapPromise = null;
 
 const normalizeProductPayload = async (payload = {}) => {
   const nextPayload = { ...payload };
@@ -15,6 +19,37 @@ const normalizeProductPayload = async (payload = {}) => {
       nextPayload.image = uploaded.url || nextPayload.image;
       nextPayload.imagePublicId = uploaded.publicId || "";
     }
+  }
+
+  if (Array.isArray(nextPayload.images)) {
+    const uploadedImages = [];
+
+    for (const image of nextPayload.images) {
+      if (!image || typeof image !== "string") {
+        continue;
+      }
+
+      if (image.includes("res.cloudinary.com")) {
+        uploadedImages.push(image);
+        continue;
+      }
+
+      const uploaded = await uploadToCloudinary(image);
+      uploadedImages.push(uploaded.url || image);
+      if (!nextPayload.imagePublicId && uploaded.publicId) {
+        nextPayload.imagePublicId = uploaded.publicId;
+      }
+    }
+
+    nextPayload.images = uploadedImages;
+  }
+
+  if ((!Array.isArray(nextPayload.images) || nextPayload.images.length === 0) && nextPayload.image) {
+    nextPayload.images = [nextPayload.image];
+  }
+
+  if (!nextPayload.image && Array.isArray(nextPayload.images) && nextPayload.images.length > 0) {
+    nextPayload.image = nextPayload.images[0];
   }
 
   if (nextPayload.type !== "used") {
@@ -33,13 +68,46 @@ const normalizeProductPayload = async (payload = {}) => {
     nextPayload.isFeatured = nextPayload.isFeatured === true || nextPayload.isFeatured === "true";
   }
 
+  if (nextPayload.specs && typeof nextPayload.specs === "string") {
+    try {
+      nextPayload.specs = JSON.parse(nextPayload.specs);
+    } catch {
+      nextPayload.specs = {};
+    }
+  }
+
   return nextPayload;
+};
+
+const ensureCatalogAvailable = async () => {
+  const existingCount = await Product.countDocuments();
+  if (existingCount > 0) {
+    return;
+  }
+
+  if (!catalogBootstrapPromise) {
+    catalogBootstrapPromise = Product.insertMany(seedProducts, { ordered: false })
+      .catch(async (error) => {
+        const countAfterAttempt = await Product.countDocuments();
+        if (countAfterAttempt > 0) {
+          return;
+        }
+        throw error;
+      })
+      .finally(() => {
+        catalogBootstrapPromise = null;
+      });
+  }
+
+  await catalogBootstrapPromise;
 };
 
 // ── @route  GET /api/products ─────────────────────────────────────
 // ── @access Public
 const getProducts = async (req, res, next) => {
   try {
+    await ensureCatalogAvailable();
+
     const {
       category,
       search,
@@ -89,6 +157,12 @@ const getProducts = async (req, res, next) => {
 // ── @access Public
 const getProduct = async (req, res, next) => {
   try {
+    await ensureCatalogAvailable();
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.json(product);
@@ -113,6 +187,10 @@ const createProduct = async (req, res, next) => {
 // ── @access Admin
 const updateProduct = async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
     const payload = await normalizeProductPayload(req.body);
     const product = await Product.findByIdAndUpdate(
       req.params.id,
@@ -130,6 +208,10 @@ const updateProduct = async (req, res, next) => {
 // ── @access Admin
 const deleteProduct = async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
     await product.deleteOne();
@@ -139,4 +221,40 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
-module.exports = { getProducts, getProduct, createProduct, updateProduct, deleteProduct };
+// ── @route  POST /api/products/seed ───────────────────────────────
+// ── @access Admin
+const seedProductCatalog = async (req, res, next) => {
+  try {
+    const replace = req.query.replace === "true" || req.body?.replace === true;
+
+    if (replace) {
+      await Product.deleteMany({});
+    }
+
+    const existingCount = await Product.countDocuments();
+    if (!replace && existingCount > 0) {
+      return res.status(409).json({
+        message: "Products already exist. Use ?replace=true to overwrite current catalog.",
+        existingCount,
+      });
+    }
+
+    const inserted = await Product.insertMany(seedProducts, { ordered: false });
+    return res.status(201).json({
+      message: "Product catalog seeded successfully",
+      insertedCount: inserted.length,
+      replaced: replace,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  getProducts,
+  getProduct,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  seedProductCatalog,
+};

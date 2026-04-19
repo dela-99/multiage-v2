@@ -42,6 +42,10 @@ const productSchema = new mongoose.Schema(
       type:    String,
       default: "",
     },
+    images: {
+      type:    [String],
+      default: [],
+    },
     imagePublicId: {
       type:    String,
       default: "",
@@ -61,6 +65,10 @@ const productSchema = new mongoose.Schema(
       default: "",
       trim:    true,
     },
+    specs: {
+      type:    mongoose.Schema.Types.Mixed,
+      default: {},
+    },
     isFeatured: {
       type:    Boolean,
       default: false,
@@ -72,6 +80,10 @@ const productSchema = new mongoose.Schema(
 productSchema.pre("validate", function (next) {
   if (this.type !== "used") {
     this.condition = "";
+  }
+
+  if ((!this.images || this.images.length === 0) && this.image) {
+    this.images = [this.image];
   }
 
   next();

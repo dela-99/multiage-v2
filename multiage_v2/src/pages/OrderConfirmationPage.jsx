@@ -22,7 +22,9 @@ export default function OrderConfirmationPage() {
           </span>
         </PageHeroHeading>
         <p style={{ fontSize: 16, color: t.textSecondary, maxWidth: 560, lineHeight: 1.7, marginBottom: 32 }}>
-          We have saved your order and our team will contact you shortly to confirm fulfillment details.
+          {order?.isPaid
+            ? "Your payment has been confirmed and your order is now queued for fulfillment."
+            : "We have saved your order and our team will contact you shortly to confirm fulfillment details."}
         </p>
 
         <div style={{
@@ -58,13 +60,29 @@ export default function OrderConfirmationPage() {
                 <span>Total</span>
                 <span>GHS {Number(order.totalPrice || 0).toLocaleString()}</span>
               </div>
+              <div style={{ display: "grid", gap: 8, marginTop: 18, fontSize: 14, color: t.textSecondary }}>
+                <div>
+                  <strong style={{ color: t.textPrimary }}>Payment status:</strong>{" "}
+                  <span style={{ color: order.isPaid ? "#1e8449" : "#C5620B", fontWeight: 700 }}>
+                    {order.isPaid ? "Paid" : order.paymentStatus || "Pending"}
+                  </span>
+                </div>
+                {order.paymentReference && (
+                  <div>
+                    <strong style={{ color: t.textPrimary }}>Reference:</strong> {order.paymentReference}
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <p style={{ color: t.textMuted }}>No recent order summary found yet.</p>
           )}
         </div>
 
-        <BtnPrimary href="/store">Back to Store</BtnPrimary>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+          <BtnPrimary href="/my-orders">View my orders</BtnPrimary>
+          <BtnPrimary href="/store">Back to Store</BtnPrimary>
+        </div>
       </section>
     </PageLayout>
   );
