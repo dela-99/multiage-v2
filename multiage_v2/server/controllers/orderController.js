@@ -53,34 +53,11 @@ const createOrder = async (req, res, next) => {
       note:            note || "",
     });
 
-    // Initialize Paystack Transaction
-    const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: req.user.email,
-        amount: totalPrice * 100,
-        currency: "GHS",
-        callback_url: "https://multiage.com.gh/checkout/success",
-        metadata: { orderId: order._id },
-      }),
-    });
-
-    const paystackData = await paystackResponse.json();
-    if (!paystackResponse.ok) throw new Error(paystackData.message || "Paystack initialization failed");
-
     sendAdminNewOrderNotification(order, req.user).catch((error) => {
       console.error("Admin order email failed:", error.message);
     });
 
-    res.status(201).json({
-      order,
-      paymentUrl: paystackData.data.authorization_url,
-      reference: paystackData.data.reference,
-    });
+    res.status(201).json(order);
   } catch (err) {
     next(err);
   }

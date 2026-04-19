@@ -2,7 +2,7 @@ const crypto = require("crypto");
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || "";
 const PAYSTACK_BASE_URL = "https://api.paystack.co";
-const PAYSTACK_CURRENCY = "GHS";
+const PAYSTACK_CURRENCY = process.env.PAYSTACK_CURRENCY || "GHS";
 
 const isPaystackConfigured = Boolean(PAYSTACK_SECRET_KEY);
 

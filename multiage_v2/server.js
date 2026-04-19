@@ -142,10 +142,10 @@ app.use(express.json());
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment', paymentRoutes);
 
-const uri = process.env.MONGODB_URI;
+const uri = process.env.MONGO_URI;
 if (!uri) {
-  console.error("❌ ERROR: MONGODB_URI is not defined in the environment.");
-  console.error("Please ensure that the .env file exists in the root directory and contains a valid MONGODB_URI variable.");
+  console.error("❌ ERROR: MONGO_URI is not defined in the environment.");
+  console.error("Please ensure that the .env file exists in the root directory and contains a valid MONGO_URI variable.");
   process.exit(1);
 }
 
