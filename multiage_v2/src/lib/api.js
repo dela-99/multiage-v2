@@ -1,20 +1,10 @@
-function resolveApiBase() {
-  const fromEnv = import.meta.env.VITE_API_BASE_URL?.trim();
-  if (fromEnv) {
-    return fromEnv.replace(/\/+$/, "");
-  }
-  if (import.meta.env.DEV) {
-    return "/api";
-  }
-  throw new Error(
-    "VITE_API_BASE_URL must be set when building for production (your API origin, e.g. https://api.example.com/api)."
-  );
-}
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
+  || 'http://localhost:5000/api';   // fallback only for local dev
 
-const API_BASE = resolveApiBase();
+export const apiBaseUrl = API_BASE_URL;
 
 async function apiRequest(path, { method = "GET", body, token } = {}) {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers: {
       "Content-Type": "application/json",
@@ -74,5 +64,3 @@ export const api = {
   getMessages: (token) => apiRequest("/messages", { token }),
   createProduct: (body, token) => apiRequest("/products", { method: "POST", body, token }),
 };
-
-export { API_BASE };
