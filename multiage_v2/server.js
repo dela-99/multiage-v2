@@ -3,10 +3,16 @@ import express from 'express';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import cors from 'cors';
 import { createRequire } from 'module';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const require = createRequire(import.meta.url);
 const orderRoutes = require('./server/routes/orderRoutes');
 const paymentRoutes = require('./server/routes/paymentRoutes');
+
+// Get the directory name in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = 5000;
@@ -138,6 +144,9 @@ const initialProducts = [
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the dist folder
+app.use(express.static(path.join(__dirname, 'dist')));
+
 // --- Order & Payment Routes ---
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment', paymentRoutes);
@@ -260,6 +269,11 @@ app.post('/api/login', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
+});
+
+// SPA fallback route - serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 // 2. Start the server immediately

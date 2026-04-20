@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express      = require("express");
 const cors         = require("cors");
+const path         = require("path");
 const connectDB    = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 const { helmetMiddleware, apiLimiter } = require("./middleware/security");
@@ -45,6 +46,10 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: false }));
 
+// ── Serve static files from the frontend build ─────────────────────
+const distPath = path.join(__dirname, "../dist");
+app.use(express.static(distPath));
+
 // ── Health check ──────────────────────────────────────────────────
 app.get("/api/health", (req, res) => {
   res.json({
@@ -64,9 +69,9 @@ app.use("/api/payment",  paymentRoutes);
 // Legacy / docs alias — identical to POST /api/products/seed
 app.post("/api/seed-products", protect, adminOnly, seedProductCatalog);
 
-// ── 404 handler ───────────────────────────────────────────────────
-app.use((req, res) => {
-  res.status(404).json({ message: `Route ${req.originalUrl} not found` });
+// ── SPA fallback route - serve index.html for client-side routing ──
+app.get("*", (req, res) => {
+  res.sendFile(path.join(distPath, "index.html"));
 });
 
 // ── Global error handler (must be last) ───────────────────────────
