@@ -9,7 +9,7 @@
     "dev": "node scripts/dev.mjs",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "npm --prefix server start"
+    "start": "node server/index.js"
   },
   "dependencies": {
     "@vercel/speed-insights": "^2.0.0",
