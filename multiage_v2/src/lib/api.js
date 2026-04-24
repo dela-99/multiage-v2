@@ -1,10 +1,11 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
-  || 'http://localhost:5000/api';   // fallback only for local dev
+// In production, set VITE_API_BASE_URL to the backend host (no /api suffix).
+// In local dev, leave it unset to route through the Vite proxy (/api → localhost:5000).
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
 export const apiBaseUrl = API_BASE_URL;
 
 async function apiRequest(path, { method = "GET", body, token } = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${API_BASE_URL}/api${path}`, {
     method,
     headers: {
       "Content-Type": "application/json",
