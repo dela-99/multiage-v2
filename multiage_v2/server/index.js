@@ -36,7 +36,7 @@ if (process.env.NODE_ENV === "production") {
 app.use(helmetMiddleware);
 app.use("/api", apiLimiter);
 app.use(cors({
-  origin:      process.env.CLIENT_URL || "http://localhost:5173",
+  origin:      process.env.CLIENT_URL,
   credentials: true,
 }));
 app.use(express.json({
@@ -68,6 +68,11 @@ app.use("/api/payment",  paymentRoutes);
 
 // Legacy / docs alias — identical to POST /api/products/seed
 app.post("/api/seed-products", protect, adminOnly, seedProductCatalog);
+
+// ── Root health route ─────────────────────────────────────────────
+app.get("/", (req, res) => {
+  res.send("API running");
+});
 
 // ── SPA fallback route - serve index.html for client-side routing ──
 app.get("*", (req, res) => {
