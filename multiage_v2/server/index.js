@@ -15,16 +15,29 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const { seedProductCatalog } = require("./controllers/productController");
 const { protect, adminOnly } = require("./middleware/auth");
 
-// ── Connect to database ───────────────────────────────────────────
-connectDB();
+// ── Validate required environment variables ───────────────────────
+const REQUIRED_ENV_VARS = [
+  "MONGO_URI",
+  "JWT_SECRET",
+  "CLIENT_URL",
+  "CLOUDINARY_CLOUD_NAME",
+  "CLOUDINARY_API_KEY",
+  "CLOUDINARY_API_SECRET",
+  "PAYSTACK_SECRET_KEY",
+];
 
-if (!process.env.JWT_SECRET) {
+const missingVars = REQUIRED_ENV_VARS.filter((v) => !process.env[v]);
+
+if (missingVars.length > 0) {
   if (process.env.NODE_ENV === "production") {
-    console.error("FATAL: JWT_SECRET is required in production.");
+    console.error(`FATAL: Missing required environment variables: ${missingVars.join(", ")}`);
     process.exit(1);
   }
-  console.warn("⚠️  JWT_SECRET is not set. Login and protected routes will fail until it is configured.");
+  console.warn(`⚠️  Missing environment variables: ${missingVars.join(", ")}. Some features will not work until these are configured.`);
 }
+
+// ── Connect to database ───────────────────────────────────────────
+connectDB();
 
 const app = express();
 
