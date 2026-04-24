@@ -1,4 +1,0 @@
-{
-  "buildCommand": "npm install --prefix multiage_v2 && npm --prefix multiage_v2 run build",
-  "outputDirectory": "multiage_v2/dist"
-}
