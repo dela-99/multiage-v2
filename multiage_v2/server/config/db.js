@@ -62,7 +62,7 @@ const connectDB = async (retryCount = 0) => {
     if (maybeApplyDnsFallback(error)) {
       console.warn(`⚠️ MongoDB SRV DNS lookup failed once: ${error.message}`);
       console.log("🔄 Retrying MongoDB connection with DNS fallback...");
-      return connectDB(retryCount);
+      return await connectDB(retryCount);
     }
 
     console.error(`❌ MongoDB connection error: ${error.message}`);
@@ -70,11 +70,12 @@ const connectDB = async (retryCount = 0) => {
     if (retryCount < MAX_RETRIES) {
       const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
       console.log(`🔄 Retrying MongoDB connection in ${delay / 1000}s... (${retryCount + 1}/${MAX_RETRIES})`);
-      setTimeout(() => connectDB(retryCount + 1), delay);
-    } else {
-      console.error("⚠️ Max connection retries reached. Database features will remain unavailable.");
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return await connectDB(retryCount + 1);
     }
-    return null;
+
+    console.error("⚠️ Max connection retries reached. Database features will remain unavailable.");
+    throw error;
   }
 };
 

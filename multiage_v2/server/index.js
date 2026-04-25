@@ -38,7 +38,9 @@ if (missingVars.length > 0) {
 }
 
 // ── Connect to database ───────────────────────────────────────────
-connectDB();
+connectDB().catch((error) => {
+  console.error(`❌ MongoDB connection failed: ${error.message}`);
+});
 
 const app = express();
 

@@ -2,28 +2,25 @@ const AuditLog = require("../models/AuditLog");
 
 /**
  * Middleware to log successful authorized actions.
- * Usage: router.get('/path', protect, authorise('perm'), auditSuccess('perm'), controller)
+ * Usage: router.get('/path', protect, authorise('perm'), auditLogger('perm'), controller)
  */
 const auditLogger = (action) => {
-  return async (req, res, next) => {
-    try {
-      // Log the intent/access as SUCCESS because it passed the 'authorise' middleware
-      await AuditLog.create({
+  return (req, res, next) => {
+    res.on("finish", () => {
+      AuditLog.create({
         userId: req.user?._id,
         userName: req.user?.name || "Unknown",
         userRole: req.user?.role || "GUEST",
         action: action || req.originalUrl,
         resource: req.originalUrl,
-        status: "SUCCESS",
-        ip: req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress,
+        status: res.statusCode < 400 ? "SUCCESS" : "FAILURE",
+        ip: AuditLog.anonymizeIp(req.ip || req.headers["x-forwarded-for"] || req.connection?.remoteAddress),
+      }).catch((error) => {
+        console.error("Audit Logging Error:", error.message);
       });
-      next();
-    } catch (error) {
-      // We don't call next(error) here to ensure the primary request 
-      // isn't blocked by a logging failure, but we log it to console.
-      console.error("Audit Logging Error:", error.message);
-      next();
-    }
+    });
+
+    next();
   };
 };
 

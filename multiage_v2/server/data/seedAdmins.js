@@ -1,53 +1,57 @@
 const User = require("../models/User");
 
-const admins = [
-  {
-    name: "Japhet Mensah",
-    email: "mrmensah121@gmail.com",
-    role: "CEO",
-  },
-  {
-    name: "Samuel Arthur",
-    email: "samratarthur@gmail.com",
-    role: "ADMINISTRATOR",
-  },
-  {
-    name: "Rutherford Tetteh",
-    email: "ruthertett303@gmail.com",
-    role: "FINANCE",
-  },
-  {
-    name: "Renders Nketia",
-    email: "nketialudorenders@gmail.com",
-    role: "MEDIA",
-  },
-  {
-    name: "Ridge Dela Torjagbo",
-    email: "ridgedela444@gmail.com",
-    role: "CYBER_IT",
-  },
-  {
-    name: "Willentina Edem (Tina)",
-    email: "edemwellingtina@gmail.com",
-    role: "GRAPHICS",
-  },
-];
+function loadSeedAdminsConfig() {
+  const rawAdmins = process.env.SEED_ADMINS_JSON;
+  const defaultPassword = process.env.DEFAULT_TEMP_PASSWORD;
+
+  if (!rawAdmins) {
+    throw new Error("SEED_ADMINS_JSON is required to seed admin accounts");
+  }
+
+  if (!defaultPassword) {
+    throw new Error("DEFAULT_TEMP_PASSWORD is required to seed admin accounts");
+  }
+
+  let admins;
+  try {
+    admins = JSON.parse(rawAdmins);
+  } catch {
+    throw new Error("SEED_ADMINS_JSON must be valid JSON");
+  }
+
+  if (!Array.isArray(admins) || admins.length === 0) {
+    throw new Error("SEED_ADMINS_JSON must be a non-empty array");
+  }
+
+  return { admins, defaultPassword };
+}
 
 const seedAdmins = async () => {
   console.log("🚀 Starting Admin Seeding...");
-  const defaultPassword = "Multiage@2026";
+  const { admins, defaultPassword } = loadSeedAdminsConfig();
 
   for (const adminData of admins) {
-    const exists = await User.findOne({ email: adminData.email.toLowerCase() });
+    const name = String(adminData.name || "").trim();
+    const email = String(adminData.email || "").trim().toLowerCase();
+    const role = String(adminData.role || "").trim().toLowerCase();
+    const password = String(adminData.password || defaultPassword || "").trim();
+
+    if (!name || !email || !role || !password) {
+      throw new Error("Each admin entry must include name, email, role, and password");
+    }
+
+    const exists = await User.findOne({ email });
     if (!exists) {
       await User.create({
-        ...adminData,
-        password: defaultPassword,
+        name,
+        email,
+        role,
+        password,
         mustChangePassword: true,
       });
-      console.log(`✅ Created Admin: ${adminData.name} (${adminData.role})`);
+      console.log(`✅ Created Admin: ${name} (${role})`);
     } else {
-      console.log(`ℹ️ Admin already exists: ${adminData.email}`);
+      console.log(`ℹ️ Admin already exists: ${email}`);
     }
   }
 };

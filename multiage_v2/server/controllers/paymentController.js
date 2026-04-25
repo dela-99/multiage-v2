@@ -20,6 +20,7 @@ function resolveCallbackUrl() {
 
 async function finalizeOrderPayment(order, payment) {
   const wasPaid = order.isPaid;
+  let alreadyPaid = false;
 
   if (payment.status === "success" && !wasPaid) {
     const session = await mongoose.startSession();
@@ -32,6 +33,8 @@ async function finalizeOrderPayment(order, payment) {
         }
 
         if (freshOrder.isPaid) {
+          alreadyPaid = true;
+          order = freshOrder;
           return;
         }
 
@@ -66,6 +69,11 @@ async function finalizeOrderPayment(order, payment) {
     } finally {
       await session.endSession();
     }
+
+    if (alreadyPaid) {
+      return order;
+    }
+
     const user = await User.findById(order.user).select("name email");
     sendPaidOrderConfirmation(order, user).catch((error) => {
       console.error("Paid order confirmation email failed:", error.message);
@@ -166,7 +174,7 @@ const verifyPayment = async (req, res, next) => {
       return res.status(404).json({ message: "Order not found for this payment reference" });
     }
 
-    if (order.user.toString() !== req.user.id) {
+    if (order.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res.status(403).json({ message: "Not authorized" });
     }
 

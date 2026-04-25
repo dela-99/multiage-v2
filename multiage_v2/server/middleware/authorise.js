@@ -8,6 +8,9 @@ const AuditLog = require("../models/AuditLog");
  */
 const authorise = (permission) => {
   return (req, res, next) => {
+    const forwardedFor = req.headers["x-forwarded-for"];
+    const clientIp = req.ip || (typeof forwardedFor === "string" ? forwardedFor.split(",")[0].trim() : undefined);
+
     // Note: 'protect' middleware must run before this to populate req.user
     if (!req.user || !req.user.role) {
       return res.status(403).json({
@@ -35,7 +38,7 @@ const authorise = (permission) => {
       action: permission,
       resource: req.originalUrl,
       status: "DENIED",
-      ip: req.ip || req.headers["x-forwarded-for"],
+      ip: AuditLog.anonymizeIp(clientIp),
     }).catch(err => console.error("Denial Logging Failed:", err.message));
 
     // 3. Default Deny: If no permission found, reject request

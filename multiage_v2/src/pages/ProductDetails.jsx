@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import PageLayout from "../components/PageLayout";
 import { BtnPrimary, PageHeroHeading, SectionLabel } from "../components/ui";
 import { useTheme } from "../context/ThemeContext";
@@ -28,24 +28,6 @@ export default function ProductDetails() {
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
   const sliderRef = useRef(null);
-
-  // Synchronize the selected index with the scroll position for swiping
-  const handleScroll = () => {
-    if (sliderRef.current) {
-      const index = Math.round(sliderRef.current.scrollLeft / sliderRef.current.offsetWidth);
-      const imagesList = Array.isArray(product?.images) && product.images.length > 0 ? product.images : [product.image];
-      if (imagesList[index]) {
-        setSelectedImage(imagesList[index]);
-      }
-    }
-  };
-
-  const scrollToImage = (index) => {
-    if (sliderRef.current) {
-      sliderRef.current.scrollTo({ left: index * sliderRef.current.offsetWidth, behavior: "smooth" });
-    }
-    setSelectedImage(images[index]);
-  };
 
   useEffect(() => {
     let active = true;
@@ -91,6 +73,22 @@ export default function ProductDetails() {
     const single = product.image ? [product.image] : [];
     return single.length > 0 ? single : [FALLBACK_IMAGE];
   }, [product]);
+
+  const handleScroll = useCallback(() => {
+    if (!sliderRef.current || images.length === 0) {
+      return;
+    }
+
+    const index = Math.round(sliderRef.current.scrollLeft / sliderRef.current.offsetWidth);
+    setSelectedImage(images[index] || FALLBACK_IMAGE);
+  }, [images]);
+
+  const scrollToImage = useCallback((index) => {
+    if (sliderRef.current) {
+      sliderRef.current.scrollTo({ left: index * sliderRef.current.offsetWidth, behavior: "smooth" });
+    }
+    setSelectedImage(images[index] || FALLBACK_IMAGE);
+  }, [images]);
 
   const specsEntries = useMemo(() => {
     if (!product?.specs || typeof product.specs !== "object" || Array.isArray(product.specs)) {
@@ -172,18 +170,19 @@ export default function ProductDetails() {
                   background: t.surface,
                   border: `1px solid ${t.border}`,
                   display: "flex",
-                  overflowX: "auto",
+                  overflow: "hidden",
                   scrollSnapType: "x mandatory",
                   scrollbarWidth: "none", // Firefox
                   msOverflowStyle: "none", // IE/Edge
                 }}>
-                  <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+                  <style>{`.slider-container::-webkit-scrollbar { display: none; }`}</style>
                   
                   {images.length > 0 ? (
                     <div 
                       ref={sliderRef}
                       onScroll={handleScroll}
-                      style={{ display: "flex", width: "100%", overflowX: "auto", scrollSnapType: "x mandatory" }}
+                      className="slider-container"
+                      style={{ display: "flex", width: "100%", overflowX: "auto", scrollSnapType: "x mandatory", scrollbarWidth: "none", msOverflowStyle: "none" }}
                     >
                       {images.map((img, idx) => (
                         <div key={idx} style={{ minWidth: "100%", height: "100%", scrollSnapAlign: "start" }}>

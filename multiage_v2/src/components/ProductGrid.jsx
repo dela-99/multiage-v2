@@ -1,6 +1,10 @@
 import React from 'react';
 
-const ProductGrid = ({ products }) => {
+const ProductGrid = ({ products = [], onAddToCart }) => {
+  if (!Array.isArray(products) || products.length === 0) {
+    return null;
+  }
+
   return (
     <div className="container mx-auto px-2 py-6">
       {/* 
@@ -45,7 +49,12 @@ const ProductGrid = ({ products }) => {
                   </span>
                 </div>
 
-                <button className="w-full bg-gradient-to-r from-[#C5620B] to-[#6A2B09] text-white text-sm font-bold py-2.5 rounded-full transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-orange-900/20">
+                <button
+                  type="button"
+                  aria-label={`Add ${product.name} to cart`}
+                  onClick={() => onAddToCart?.(product._id || product.id)}
+                  className="w-full bg-gradient-to-r from-[#C5620B] to-[#6A2B09] text-white text-sm font-bold py-2.5 rounded-full transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-orange-900/20"
+                >
                   Add to Cart
                 </button>
               </div>

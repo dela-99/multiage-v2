@@ -3,23 +3,23 @@
  * Maps Roles to specific Permissions.
  */
 const roles = {
-  CEO: ["*"], // Wildcard: Full Access
-  CYBER_IT: ["*"], // Wildcard: Full System Access
-  ADMINISTRATOR: [
+  ceo: ["*"], // Wildcard: Full Access
+  cyber_it: ["*"], // Wildcard: Full System Access
+  administrator: [
     "users:manage",
     "dashboard:read",
     "orders:manage"
   ],
-  FINANCE: [
+  finance: [
     "finance:read",
     "finance:write",
     "orders:read"
   ],
-  MEDIA: [
+  media: [
     "media:read",
     "media:write"
   ],
-  GRAPHICS: [
+  graphics: [
     "design:read",
     "design:write"
   ],

@@ -25,7 +25,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type:    String,
-      enum:    ["user", "admin", "CEO", "ADMINISTRATOR", "FINANCE", "MEDIA", "CYBER_IT", "GRAPHICS"],
+      enum:    ["user", "admin", "ceo", "administrator", "finance", "media", "cyber_it", "graphics"],
+      lowercase: true,
       default: "user",
     },
     mustChangePassword: {
@@ -53,6 +54,14 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+userSchema.pre("validate", function (next) {
+  if (this.role) {
+    this.role = String(this.role).toLowerCase();
+  }
+
   next();
 });
 

@@ -62,7 +62,8 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
+    // Temporary unique placeholder until the final 12 mini asset is added.
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vvujmssqgtoddscpp34m.png",
     "description": "Compact 5.4-inch Super Retina XDR.",
     "stock": 100,
     "brand": "Apple",
@@ -74,7 +75,8 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
+    // Temporary unique placeholder until the final 12 Pro asset is added.
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476099/kfulpbblcakdxiedhmiq.png",
     "description": "6.1-inch Super Retina XDR, triple camera with LiDAR.",
     "stock": 100,
     "brand": "Apple",
@@ -86,7 +88,8 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
+    // Temporary unique placeholder until the final 12 Pro Max asset is added.
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777051016/gmnuv6keg7aunidruppo.png",
     "description": "6.7-inch Super Retina XDR, advanced triple camera.",
     "stock": 100,
     "brand": "Apple",
@@ -115,7 +118,8 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
+    // Temporary unique placeholder until the final 13 mini asset is added.
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777051012/uju9srrh9lmjo33irzfz.png",
     "description": "Compact 5.4-inch Super Retina XDR.",
     "stock": 100,
     "brand": "Apple",
@@ -127,7 +131,8 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
+    // Temporary unique placeholder until the final 13 Pro asset is added.
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777051005/gmdjyhws8xxnk4cebfze.png",
     "description": "6.1-inch Super Retina XDR, triple camera.",
     "stock": 100,
     "brand": "Apple",

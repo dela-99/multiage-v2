@@ -3,6 +3,8 @@ const User = require("../models/User");
 const { sendWelcomeNotification } = require("../services/emailService");
 const { verifyFirebaseIdToken } = require("../services/firebaseAdmin");
 
+const DEFAULT_TEMP_PASSWORD = process.env.DEFAULT_TEMP_PASSWORD;
+
 // ── Generate JWT ──────────────────────────────────────────────────
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -184,7 +186,7 @@ const changePassword = async (req, res, next) => {
       return res.status(400).json({ message: "New password must be at least 6 characters" });
     }
 
-    if (newPassword === "Multiage@2026") {
+    if (DEFAULT_TEMP_PASSWORD && newPassword === DEFAULT_TEMP_PASSWORD) {
       return res.status(400).json({ message: "You cannot reuse the default temporary password" });
     }
 
