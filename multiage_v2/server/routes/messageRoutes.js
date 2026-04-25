@@ -4,9 +4,10 @@ const {
   createMessage, getMessages, getMessage, deleteMessage,
 } = require("../controllers/messageController");
 const { protect, adminOnly } = require("../middleware/auth");
+const { messageLimiter } = require("../middleware/security");
 
 // Public (contact form)
-router.post("/", createMessage);
+router.post("/", messageLimiter, createMessage);
 
 // Admin
 router.get("/",        protect, adminOnly, getMessages);

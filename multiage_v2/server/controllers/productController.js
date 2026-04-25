@@ -102,6 +102,8 @@ const ensureCatalogAvailable = async () => {
   await catalogBootstrapPromise;
 };
 
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 // ── @route  GET /api/products ─────────────────────────────────────
 // ── @access Public
 const getProducts = async (req, res, next) => {
@@ -119,15 +121,16 @@ const getProducts = async (req, res, next) => {
     const filter = {};
     const currentPage = Math.max(Number(page) || 1, 1);
     const pageSize = Math.min(Math.max(Number(limit) || 12, 1), 50);
+    const safeSearch = search ? escapeRegex(search) : "";
 
     if (category)  filter.category   = category;
     if (featured)  filter.isFeatured = true;
     if (type)      filter.type       = String(type).toLowerCase();
     if (search) {
       filter.$or = [
-        { name:        { $regex: search, $options: "i" } },
-        { brand:       { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
+        { name:        { $regex: safeSearch, $options: "i" } },
+        { brand:       { $regex: safeSearch, $options: "i" } },
+        { description: { $regex: safeSearch, $options: "i" } },
       ];
     }
 
@@ -239,7 +242,13 @@ const seedProductCatalog = async (req, res, next) => {
       });
     }
 
-    const inserted = await Product.insertMany(seedProducts, { ordered: false });
+    // Optional: Normalize each product from the seed file to ensure 
+    // consistency with manually created products.
+    const normalizedSeeds = await Promise.all(
+      seedProducts.map(p => normalizeProductPayload(p))
+    );
+
+    const inserted = await Product.insertMany(normalizedSeeds, { ordered: false });
     return res.status(201).json({
       message: "Product catalog seeded successfully",
       insertedCount: inserted.length,

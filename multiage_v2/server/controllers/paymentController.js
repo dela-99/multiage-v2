@@ -1,4 +1,6 @@
+const mongoose = require("mongoose");
 const Order = require("../models/Order");
+const Product = require("../models/Product");
 const User = require("../models/User");
 const {
   isPaystackConfigured,
@@ -19,6 +21,59 @@ function resolveCallbackUrl() {
 async function finalizeOrderPayment(order, payment) {
   const wasPaid = order.isPaid;
 
+  if (payment.status === "success" && !wasPaid) {
+    const session = await mongoose.startSession();
+
+    try {
+      await session.withTransaction(async () => {
+        const freshOrder = await Order.findById(order._id).session(session);
+        if (!freshOrder) {
+          throw new Error("Order not found");
+        }
+
+        if (freshOrder.isPaid) {
+          return;
+        }
+
+        for (const item of freshOrder.items) {
+          const product = await Product.findById(item.product).session(session);
+          if (!product) {
+            throw new Error(`Product ${item.product} not found`);
+          }
+
+          if (product.stock < item.quantity) {
+            throw new Error(`Insufficient stock for ${product.name}`);
+          }
+
+          product.stock -= item.quantity;
+          await product.save({ session });
+        }
+
+        freshOrder.paymentGateway = "paystack";
+        freshOrder.paymentReference = payment.reference || freshOrder.paymentReference;
+        freshOrder.paymentStatus = payment.status || freshOrder.paymentStatus;
+        freshOrder.paymentChannel = payment.channel || freshOrder.paymentChannel;
+        freshOrder.isPaid = true;
+        freshOrder.paidAt = payment.paid_at ? new Date(payment.paid_at) : new Date();
+
+        if (freshOrder.status === "pending") {
+          freshOrder.status = "confirmed";
+        }
+
+        await freshOrder.save({ session });
+        order = freshOrder;
+      });
+    } finally {
+      await session.endSession();
+    }
+    const user = await User.findById(order.user).select("name email");
+    sendPaidOrderConfirmation(order, user).catch((error) => {
+      console.error("Paid order confirmation email failed:", error.message);
+    });
+
+    return order;
+  }
+
   order.paymentGateway = "paystack";
   order.paymentReference = payment.reference || order.paymentReference;
   order.paymentStatus = payment.status || order.paymentStatus;
@@ -34,12 +89,7 @@ async function finalizeOrderPayment(order, payment) {
 
   await order.save();
 
-  if (payment.status === "success" && !wasPaid) {
-    const user = await User.findById(order.user).select("name email");
-    sendPaidOrderConfirmation(order, user).catch((error) => {
-      console.error("Paid order confirmation email failed:", error.message);
-    });
-  }
+  return order;
 }
 
 const initializePayment = async (req, res, next) => {
@@ -116,13 +166,17 @@ const verifyPayment = async (req, res, next) => {
       return res.status(404).json({ message: "Order not found for this payment reference" });
     }
 
-    await finalizeOrderPayment(order, payment);
+    if (order.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const updatedOrder = await finalizeOrderPayment(order, payment);
 
     res.json({
       message: payment.status === "success" ? "Payment verified successfully" : "Payment verification completed",
       status: payment.status || null,
       reference: payment.reference || reference,
-      order,
+      order: updatedOrder,
       paid_at: payment.paid_at || null,
       channel: payment.channel || null,
     });

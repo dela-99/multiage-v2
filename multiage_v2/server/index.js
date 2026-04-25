@@ -1,7 +1,8 @@
-require("dotenv").config();
+const path         = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
+
 const express      = require("express");
 const cors         = require("cors");
-const path         = require("path");
 const connectDB    = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 const { helmetMiddleware, apiLimiter } = require("./middleware/security");
@@ -97,7 +98,16 @@ app.use(errorHandler);
 
 // ── Start server ──────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`   Environment: ${process.env.NODE_ENV || "development"}`);
+});
+
+server.on("error", (error) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(`❌ Port ${PORT} is already in use. Stop the other process or change PORT in server/.env.`);
+  } else {
+    console.error(`❌ Server startup error: ${error.message}`);
+  }
+  process.exit(1);
 });

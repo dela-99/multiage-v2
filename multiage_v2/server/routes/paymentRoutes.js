@@ -5,6 +5,6 @@ const { protect } = require("../middleware/auth");
 
 router.post("/webhook", paymentWebhook);
 router.post("/initialize", protect, initializePayment);
-router.get("/verify", verifyPayment);
+router.get("/verify", protect, verifyPayment);
 
 module.exports = router;

@@ -17,6 +17,10 @@ const createOrder = async (req, res, next) => {
     const resolvedItems = [];
 
     for (const item of items) {
+      if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+        return res.status(400).json({ message: "Invalid quantity" });
+      }
+
       const product = await Product.findById(item.product);
       if (!product) {
         return res.status(404).json({ message: `Product ${item.product} not found` });
@@ -37,10 +41,6 @@ const createOrder = async (req, res, next) => {
       });
 
       totalPrice += product.price * item.quantity;
-
-      // Deduct stock
-      product.stock -= item.quantity;
-      await product.save();
     }
 
     const order = await Order.create({

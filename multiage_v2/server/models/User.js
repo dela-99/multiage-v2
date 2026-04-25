@@ -25,8 +25,12 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type:    String,
-      enum:    ["user", "admin"],
+      enum:    ["user", "admin", "CEO", "ADMINISTRATOR", "FINANCE", "MEDIA", "CYBER_IT", "GRAPHICS"],
       default: "user",
+    },
+    mustChangePassword: {
+      type:    Boolean,
+      default: false,
     },
     firebaseId: {
       type:    String,

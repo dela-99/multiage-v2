@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import PageLayout from "../components/PageLayout";
 import { BtnPrimary, PageHeroHeading, SectionLabel } from "../components/ui";
 import { useTheme } from "../context/ThemeContext";
@@ -16,6 +16,8 @@ function placeholderStyle(theme) {
   };
 }
 
+const FALLBACK_IMAGE = "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png";
+
 export default function ProductDetails() {
   const { t } = useTheme();
   const { token } = useAuth();
@@ -25,6 +27,25 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
+  const sliderRef = useRef(null);
+
+  // Synchronize the selected index with the scroll position for swiping
+  const handleScroll = () => {
+    if (sliderRef.current) {
+      const index = Math.round(sliderRef.current.scrollLeft / sliderRef.current.offsetWidth);
+      const imagesList = Array.isArray(product?.images) && product.images.length > 0 ? product.images : [product.image];
+      if (imagesList[index]) {
+        setSelectedImage(imagesList[index]);
+      }
+    }
+  };
+
+  const scrollToImage = (index) => {
+    if (sliderRef.current) {
+      sliderRef.current.scrollTo({ left: index * sliderRef.current.offsetWidth, behavior: "smooth" });
+    }
+    setSelectedImage(images[index]);
+  };
 
   useEffect(() => {
     let active = true;
@@ -67,7 +88,8 @@ export default function ProductDetails() {
     if (Array.isArray(product.images) && product.images.length > 0) {
       return product.images;
     }
-    return product.image ? [product.image] : [];
+    const single = product.image ? [product.image] : [];
+    return single.length > 0 ? single : [FALLBACK_IMAGE];
   }, [product]);
 
   const specsEntries = useMemo(() => {
@@ -142,27 +164,51 @@ export default function ProductDetails() {
 
             <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.05fr) minmax(0,0.95fr)", gap: 28 }} className="grid-responsive">
               <div style={{ display: "grid", gap: 16 }}>
+                {/* Main Swipeable Slider */}
                 <div style={{
+                  position: "relative",
                   aspectRatio: "1 / 1",
                   borderRadius: 26,
-                  overflow: "hidden",
-                  ...(selectedImage ? {} : placeholderStyle(t)),
+                  background: t.surface,
+                  border: `1px solid ${t.border}`,
+                  display: "flex",
+                  overflowX: "auto",
+                  scrollSnapType: "x mandatory",
+                  scrollbarWidth: "none", // Firefox
+                  msOverflowStyle: "none", // IE/Edge
                 }}>
-                  {selectedImage ? (
-                    <img src={selectedImage} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+                  
+                  {images.length > 0 ? (
+                    <div 
+                      ref={sliderRef}
+                      onScroll={handleScroll}
+                      style={{ display: "flex", width: "100%", overflowX: "auto", scrollSnapType: "x mandatory" }}
+                    >
+                      {images.map((img, idx) => (
+                        <div key={idx} style={{ minWidth: "100%", height: "100%", scrollSnapAlign: "start" }}>
+                          <img src={img} alt={`${product.name} ${idx}`} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "10px" }} />
+                        </div>
+                      ))}
+                    </div>
                   ) : (
-                    <div style={{ fontSize: 14, fontWeight: 700 }}>No image available</div>
+                    <div style={{ ...placeholderStyle(t), width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
+                      <span style={{ fontSize: 14, fontWeight: 700 }}>No image available</span>
+                    </div>
                   )}
                 </div>
 
-                {images.length > 0 && (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(90px,1fr))", gap: 12 }}>
+                {/* Thumbnails */}
+                {images.length > 1 && (
+                  <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 10 }}>
                     {images.map((image, index) => (
                       <button
                         key={`${image}-${index}`}
-                        onClick={() => setSelectedImage(image)}
+                        onClick={() => scrollToImage(index)}
                         style={{
-                          aspectRatio: "1 / 1",
+                          width: 80,
+                          height: 80,
+                          flexShrink: 0,
                           borderRadius: 16,
                           overflow: "hidden",
                           border: selectedImage === image ? "2px solid #C5620B" : `1px solid ${t.border}`,
@@ -171,7 +217,7 @@ export default function ProductDetails() {
                           cursor: "pointer",
                         }}
                       >
-                        <img src={image} alt={`${product.name} ${index + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={image} alt={`${product.name} thumbnail`} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} />
                       </button>
                     ))}
                   </div>

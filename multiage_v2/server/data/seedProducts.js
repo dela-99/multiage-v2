@@ -5,7 +5,12 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476086/ylcq0pzmaz3hseevetnn.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1776476086/ylcq0pzmaz3hseevetnn.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1776476117/yvfz6fucjcbtwvsaqyqy.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vvujmssqgtoddscpp34m.png"
+    ],
     "description": "6.1-inch Liquid Retina HD display, dual-camera system, A13 Bionic chip.",
     "stock": 100,
     "brand": "Apple",
@@ -41,7 +46,11 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476099/kfulpbblcakdxiedhmiq.png",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vvujmssqgtoddscpp34m.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vvujmssqgtoddscpp34m.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1776476099/kfulpbblcakdxiedhmiq.png"
+    ],
     "description": "6.1-inch Super Retina XDR, 5G capable.",
     "stock": 100,
     "brand": "Apple",
@@ -53,7 +62,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
     "description": "Compact 5.4-inch Super Retina XDR.",
     "stock": 100,
     "brand": "Apple",
@@ -65,7 +74,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
     "description": "6.1-inch Super Retina XDR, triple camera with LiDAR.",
     "stock": 100,
     "brand": "Apple",
@@ -77,7 +86,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
     "description": "6.7-inch Super Retina XDR, advanced triple camera.",
     "stock": 100,
     "brand": "Apple",
@@ -89,7 +98,12 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777051016/gmnuv6keg7aunidruppo.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051016/gmnuv6keg7aunidruppo.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051012/uju9srrh9lmjo33irzfz.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051011/o6idy9pytbo9hgimfify.png"
+    ],
     "description": "6.1-inch Super Retina XDR, improved battery.",
     "stock": 100,
     "brand": "Apple",
@@ -101,7 +115,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
     "description": "Compact 5.4-inch Super Retina XDR.",
     "stock": 100,
     "brand": "Apple",
@@ -113,7 +127,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png",
     "description": "6.1-inch Super Retina XDR, triple camera.",
     "stock": 100,
     "brand": "Apple",
@@ -125,7 +139,12 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777050833/tuox5xrj9prxxamttovh.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050833/tuox5xrj9prxxamttovh.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050832/mth5qvj3gt5nl1bo7sad.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050990/ycfjlrdaqzikxdhb5kwu.jpg"
+    ],
     "description": "6.7-inch Super Retina XDR, best battery in series.",
     "stock": 100,
     "brand": "Apple",
@@ -173,7 +192,11 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777050949/uxabeimec10kbgb62xof.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050949/uxabeimec10kbgb62xof.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050989/vadpqt4aatjskiodauxm.jpg"
+    ],
     "description": "6.1-inch Super Retina XDR, Dynamic Island.",
     "stock": 100,
     "brand": "Apple",
@@ -185,7 +208,11 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777051005/gmdjyhws8xxnk4cebfze.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051005/gmdjyhws8xxnk4cebfze.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050999/voczxunlmzfwmtfnlvcv.png"
+    ],
     "description": "6.7-inch Super Retina XDR, longest battery.",
     "stock": 100,
     "brand": "Apple",
@@ -197,7 +224,12 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vrrjejj54jq9tbgljszi.jpg",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vrrjejj54jq9tbgljszi.jpg",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050997/nujhfnqmtsg2oftzqcad.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051008/okiggilcnmc4viyrucxi.png"
+    ],
     "description": "6.1-inch Super Retina XDR, USB-C, Dynamic Island.",
     "stock": 100,
     "brand": "Apple",
@@ -221,7 +253,11 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777050966/vi8ptnmav7jnnidge7px.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050966/vi8ptnmav7jnnidge7px.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050989/vadpqt4aatjskiodauxm.jpg"
+    ],
     "description": "6.1-inch Super Retina XDR, titanium frame.",
     "stock": 100,
     "brand": "Apple",
@@ -233,7 +269,12 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476124/wvi0flgro7bihulxkewc.png",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777050856/s469dg3iigs1jmmvyaqq.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050856/s469dg3iigs1jmmvyaqq.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051007/kkoo6d1wxgnmm62b9ozp.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1776476124/wvi0flgro7bihulxkewc.png"
+    ],
     "description": "6.7-inch Super Retina XDR, 5x telephoto.",
     "stock": 100,
     "brand": "Apple",
@@ -245,7 +286,13 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777051009/ajb6klclawbwmcoshtah.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051009/ajb6klclawbwmcoshtah.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050992/s4hd6pdls85si1rmgsu5.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777057356/ryj9t6ckszzv0kyhvp99.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050944/rfoq66abzcdz7b0ql7zb.png"
+    ],
     "description": "6.1-inch Super Retina XDR, Apple Intelligence.",
     "stock": 100,
     "brand": "Apple",
@@ -269,7 +316,11 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777050984/pml2e2iau4llfupmdrtg.jpg",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050984/pml2e2iau4llfupmdrtg.jpg",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050989/vadpqt4aatjskiodauxm.jpg"
+    ],
     "description": "6.3-inch Super Retina XDR, Pro camera system.",
     "stock": 100,
     "brand": "Apple",
@@ -281,7 +332,11 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777050999/voczxunlmzfwmtfnlvcv.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050999/voczxunlmzfwmtfnlvcv.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050989/vadpqt4aatjskiodauxm.jpg"
+    ],
     "description": "6.9-inch Super Retina XDR, largest Pro.",
     "stock": 100,
     "brand": "Apple",
@@ -294,6 +349,14 @@ module.exports = [
     "type": "new",
     "condition": "",
     "image": "https://res.cloudinary.com/delaridge/image/upload/v1776476153/qnhqm8quolpxl8bstfof.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1776476153/qnhqm8quolpxl8bstfof.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050994/lm0ao2drjssjipxddg7k.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050995/rwsgijfotrf2sl0u4qfu.jpg",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050988/i8whfzbitaux7xj3f5ih.jpg",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050986/sv7ungulnjtcgrn9h0ph.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051010/xwqlcfessfpeg8c4pnnx.jpg"
+    ],
     "description": "2025 base model with 120Hz display.",
     "stock": 100,
     "brand": "Apple",
@@ -317,7 +380,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777051008/pk1lq7ouye8qsnmdei6x.png",
     "description": "Ultra-thin 2025 iPhone Air.",
     "stock": 100,
     "brand": "Apple",
@@ -329,7 +392,11 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777050953/q7wshi5jhv7phbljwwgd.png",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050953/q7wshi5jhv7phbljwwgd.png",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050989/vadpqt4aatjskiodauxm.jpg"
+    ],
     "description": "2025 Pro with advanced cameras.",
     "stock": 100,
     "brand": "Apple",
@@ -341,7 +408,11 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "image": "",
+    "image": "https://res.cloudinary.com/delaridge/image/upload/v1777050989/vadpqt4aatjskiodauxm.jpg",
+    "images": [
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050989/vadpqt4aatjskiodauxm.jpg",
+      "https://res.cloudinary.com/delaridge/image/upload/v1777050953/q7wshi5jhv7phbljwwgd.png"
+    ],
     "description": "2025 flagship Pro Max.",
     "stock": 100,
     "brand": "Apple",

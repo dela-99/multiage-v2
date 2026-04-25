@@ -14,6 +14,7 @@ const buildAuthPayload = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  mustChangePassword: user.mustChangePassword,
   firebaseId: user.firebaseId || "",
   profilePicture: user.profilePicture || "",
   token: generateToken(user._id),
@@ -183,6 +184,10 @@ const changePassword = async (req, res, next) => {
       return res.status(400).json({ message: "New password must be at least 6 characters" });
     }
 
+    if (newPassword === "Multiage@2026") {
+      return res.status(400).json({ message: "You cannot reuse the default temporary password" });
+    }
+
     if (newPassword === currentPassword) {
       return res.status(400).json({ message: "New password must be different from your current password" });
     }
@@ -193,6 +198,7 @@ const changePassword = async (req, res, next) => {
     }
 
     user.password = newPassword;
+    user.mustChangePassword = false;
     await user.save();
 
     res.json({ message: "Password updated successfully" });

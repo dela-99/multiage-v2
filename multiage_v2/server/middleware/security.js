@@ -36,8 +36,17 @@ const authLimiter = rateLimit({
   message: { message: "Too many attempts. Please wait and try again." },
 });
 
+const messageLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_MESSAGE_MAX) || 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many attempts. Please wait and try again." },
+});
+
 module.exports = {
   helmetMiddleware,
   apiLimiter,
   authLimiter,
+  messageLimiter,
 };
