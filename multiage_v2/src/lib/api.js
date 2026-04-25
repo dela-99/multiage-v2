@@ -1,23 +1,53 @@
-// In production, set VITE_API_BASE_URL to the backend host (no /api suffix).
-// In local dev, leave it unset to route through the Vite proxy (/api → localhost:5000).
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+function resolveApiBaseUrl() {
+  const fromEnv = (import.meta.env.VITE_API_BASE_URL || "").trim().replace(/\/+$/, "");
+
+  if (fromEnv) {
+    return fromEnv;
+  }
+
+  if (import.meta.env.DEV) {
+    return "";
+  }
+
+  throw new Error("VITE_API_BASE_URL is required for production builds.");
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 export const apiBaseUrl = API_BASE_URL;
 
 async function apiRequest(path, { method = "GET", body, token } = {}) {
-  const response = await fetch(`${API_BASE_URL}/api${path}`, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  });
+  let response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}/api${path}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+  } catch {
+    const error = new Error("Network error. Please check your connection and try again.");
+    error.status = 0;
+    throw error;
+  }
 
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.message || "Request failed");
+    const error = new Error(
+      data.message ||
+      (response.status === 401
+        ? "You need to log in to continue."
+        : response.status === 403
+          ? "You do not have permission to perform this action."
+          : "Request failed")
+    );
+    error.status = response.status;
+    error.data = data;
+    throw error;
   }
 
   return data;

@@ -43,6 +43,7 @@ connectDB().catch((error) => {
 });
 
 const app = express();
+const allowedOrigin = (process.env.CLIENT_URL || "").replace(/\/+$/, "");
 
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
@@ -52,8 +53,20 @@ if (process.env.NODE_ENV === "production") {
 app.use(helmetMiddleware);
 app.use("/api", apiLimiter);
 app.use(cors({
-  origin:      process.env.CLIENT_URL,
+  origin(origin, callback) {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (origin.replace(/\/+$/, "") === allowedOrigin) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("CORS origin not allowed"));
+  },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json({
   verify: (req, _res, buf) => {
