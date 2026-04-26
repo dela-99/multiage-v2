@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import PageLayout from "../components/PageLayout";
 import { PageHeroHeading, SectionLabel, BtnPrimary } from "../components/ui";
+import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { api } from "../lib/api";
 import { useNavigate } from "../router";
 
 export default function PaymentCallbackPage() {
   const { t } = useTheme();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const [status, setStatus] = useState("verifying");
   const [message, setMessage] = useState("We are confirming your payment with Paystack.");
@@ -26,7 +28,7 @@ export default function PaymentCallbackPage() {
       }
 
       try {
-        const result = await api.verifyPayment(reference);
+        const result = await api.verifyPayment(reference, token);
         if (!active) {
           return;
         }
@@ -56,7 +58,7 @@ export default function PaymentCallbackPage() {
 
     verify();
     return () => { active = false; };
-  }, [navigate]);
+  }, [navigate, token]);
 
   return (
     <PageLayout>

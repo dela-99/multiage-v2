@@ -91,7 +91,8 @@ export const api = {
   getOrders: (token) => apiRequest("/orders", { token }),
   getMyOrders: (token) => apiRequest("/orders/my", { token }),
   initializePayment: (body, token) => apiRequest("/payment/initialize", { method: "POST", body, token }),
-  verifyPayment: (reference) => apiRequest(`/payment/verify?reference=${encodeURIComponent(reference)}`),
+  verifyPayment: (reference, token) =>
+    apiRequest(`/payment/verify?reference=${encodeURIComponent(reference)}`, { token }),
   getMessages: (token) => apiRequest("/messages", { token }),
   createProduct: (body, token) => apiRequest("/products", { method: "POST", body, token }),
 };
