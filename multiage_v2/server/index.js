@@ -13,6 +13,7 @@ const productRoutes = require("./routes/productRoutes");
 const orderRoutes   = require("./routes/orderRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const adminRoutes   = require("./routes/adminRoutes");
 const { seedProductCatalog } = require("./controllers/productController");
 const { protect, adminOnly } = require("./middleware/auth");
 
@@ -97,6 +98,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders",   orderRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/payment",  paymentRoutes);
+app.use("/api/admin",    adminRoutes);
 
 // Legacy / docs alias — identical to POST /api/products/seed
 app.post("/api/seed-products", protect, adminOnly, seedProductCatalog);

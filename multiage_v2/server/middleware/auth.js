@@ -37,4 +37,14 @@ const adminOnly = (req, res, next) => {
   return res.status(403).json({ message: "Access denied — admins only" });
 };
 
-module.exports = { protect, adminOnly };
+const emailReplyRolesOnly = (req, res, next) => {
+  const allowedRoles = new Set(["ceo", "administrator", "cyber_it"]);
+
+  if (req.user && allowedRoles.has(req.user.role)) {
+    return next();
+  }
+
+  return res.status(403).json({ message: "Access denied — insufficient role for email replies" });
+};
+
+module.exports = { protect, adminOnly, emailReplyRolesOnly };

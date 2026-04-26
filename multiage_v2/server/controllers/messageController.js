@@ -1,5 +1,5 @@
 const Message = require("../models/Message");
-const { sendNewMessageNotifications } = require("../services/emailService");
+const { sendUserRequestEmail } = require("../services/emailService");
 
 // ── @route  POST /api/messages ────────────────────────────────────
 // ── @access Public (contact form)
@@ -35,11 +35,23 @@ const createMessage = async (req, res, next) => {
       source: source || "website",
     });
 
-    sendNewMessageNotifications(msg).catch((error) => {
-      console.error("Message notification email failed:", error.message);
-    });
+    let emailSent = false;
+    let emailError = "";
 
-    res.status(201).json({ message: "Message sent successfully", id: msg._id });
+    try {
+      await sendUserRequestEmail(msg);
+      emailSent = true;
+    } catch (error) {
+      emailError = error.message || "Failed to send service request email";
+      console.error("Service request email failed:", emailError);
+    }
+
+    res.status(201).json({
+      message: emailSent ? "Message sent successfully" : "Message saved, but email notification failed",
+      id: msg._id,
+      emailSent,
+      ...(emailError ? { emailError } : {}),
+    });
   } catch (err) {
     next(err);
   }
