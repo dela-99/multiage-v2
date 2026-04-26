@@ -45,13 +45,42 @@ connectDB().catch((error) => {
 
 const app = express();
 const allowedOrigin = (process.env.CLIENT_URL || "").replace(/\/+$/, "");
+const allowedOriginUrl = allowedOrigin ? new URL(allowedOrigin) : null;
+const allowedHost = allowedOriginUrl?.hostname || "";
+const allowedProtocol = allowedOriginUrl?.protocol || "https:";
+const allowedVercelProjectSlug = allowedHost.endsWith(".vercel.app")
+  ? allowedHost.replace(/\.vercel\.app$/i, "")
+  : "";
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function isAllowedOrigin(origin) {
+  if (!origin) {
+    return true;
+  }
+
+  const normalizedOrigin = origin.replace(/\/+$/, "");
+  if (normalizedOrigin === allowedOrigin) {
+    return true;
+  }
+
+  if (!allowedVercelProjectSlug) {
+    return false;
+  }
+
+  const previewPattern = new RegExp(
+    `^${escapeRegex(allowedProtocol)}//${escapeRegex(allowedVercelProjectSlug)}(?:-[a-z0-9-]+)?\\.vercel\\.app$`,
+    "i"
+  );
+
+  return previewPattern.test(normalizedOrigin);
+}
+
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    if (origin.replace(/\/+$/, "") === allowedOrigin) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
 
