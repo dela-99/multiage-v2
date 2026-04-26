@@ -1,194 +1,171 @@
-const EMAIL_PROVIDER = (process.env.EMAIL_PROVIDER || "resend").toLowerCase();
-const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
-const EMAIL_FROM = process.env.EMAIL_FROM || "onboarding@resend.dev";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
+const nodemailer = require("nodemailer");
+const EmailLog = require("../models/EmailLog");
+
+const COMPANY_EMAIL = "multiagetechnologies@gmail.com";
+const EMAIL_USER = process.env.EMAIL_USER || COMPANY_EMAIL;
+const EMAIL_PASS = process.env.EMAIL_PASS || "";
 const APP_NAME = process.env.APP_NAME || "Multiage Technologies";
-const COMPANY_SERVICE_REQUEST_EMAIL = "multiagetechnologies@gmail.com";
 
-const isEmailConfigured = Boolean(RESEND_API_KEY && EMAIL_FROM);
+const isEmailConfigured = Boolean(EMAIL_USER && EMAIL_PASS);
 
-async function sendWithResend({ to, subject, html, text }) {
-  const recipients = Array.isArray(to) ? to : [to];
-  console.log("[email] Resend request", {
-    from: EMAIL_FROM,
-    to: recipients,
-    subject,
-  });
+let transporter;
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: EMAIL_FROM,
-      to: recipients,
-      subject,
-      html,
-      text,
-    }),
-  });
-
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    console.error("[email] Resend error response", {
-      status: response.status,
-      data,
+function getTransporter() {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS,
+      },
     });
-    throw new Error(data.message || data.error?.message || "Failed to send email");
   }
 
-  console.log("[email] Resend success response", data);
-
-  return data;
+  return transporter;
 }
 
-async function sendEmail({ to, subject, html, text }) {
-  if (!to) {
-    return { skipped: true, reason: "missing-recipient" };
+async function writeEmailLog(payload) {
+  try {
+    await EmailLog.create(payload);
+  } catch (error) {
+    console.error("[email-log] failed to save log:", error.message);
   }
+}
+
+async function sendEmail({ to, subject, text, html, direction, meta = {} }) {
+  const recipients = Array.isArray(to) ? to : [to];
 
   if (!isEmailConfigured) {
-    console.warn("Email skipped: provider credentials are not configured yet.");
-    return { skipped: true, reason: "not-configured" };
+    const error = new Error("Email credentials are not configured");
+    console.error("[email] configuration error:", error.message);
+    throw error;
   }
 
-  if (EMAIL_PROVIDER !== "resend") {
-    throw new Error(`Unsupported email provider: ${EMAIL_PROVIDER}`);
-  }
-
-  return sendWithResend({ to, subject, html, text });
-}
-
-function adminRecipients() {
-  return ADMIN_EMAIL
-    .split(",")
-    .map((email) => email.trim())
-    .filter(Boolean);
-}
-
-function layout(title, body) {
-  return `
-    <div style="font-family:Arial,sans-serif;background:#f6f7fb;padding:24px;color:#1f2937;">
-      <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;">
-        <div style="padding:20px 24px;background:linear-gradient(135deg,#C5620B,#6A2B09);color:#ffffff;">
-          <h1 style="margin:0;font-size:22px;">${APP_NAME}</h1>
-        </div>
-        <div style="padding:24px;">
-          <h2 style="margin-top:0;color:#111827;">${title}</h2>
-          ${body}
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-async function sendNewMessageNotifications(message) {
-  const typeLabel = message.kind === "used-device-inquiry" ? "Used Device Inquiry" : "Contact Message";
-  const requestPayload = {
-    id: message._id ? String(message._id) : "",
-    type: typeLabel,
-    name: message.name,
-    email: message.email,
-    phone: message.phone || "",
-    deviceRequested: message.deviceRequested || "",
-    service: message.service || "",
-    source: message.source || "website",
-    message: message.message || "",
-  };
-
-  console.log("[service-request] payload", requestPayload);
-  console.log("[service-request] recipient", COMPANY_SERVICE_REQUEST_EMAIL);
+  const transport = getTransporter();
+  console.log("[email] sending", {
+    from: EMAIL_USER,
+    to: recipients,
+    subject,
+    direction,
+  });
 
   try {
-    const result = await sendEmail({
-      to: [COMPANY_SERVICE_REQUEST_EMAIL],
-      subject: `[${APP_NAME}] New ${typeLabel}`,
-      text: `${typeLabel} from ${message.name} (${message.email})\nPhone: ${message.phone || "N/A"}\nDevice: ${message.deviceRequested || "N/A"}\nService: ${message.service || "N/A"}\nSource: ${message.source || "website"}\n\n${message.message}`,
-      html: layout(`New ${typeLabel}`, `
-        <p><strong>Name:</strong> ${message.name}</p>
-        <p><strong>Email:</strong> ${message.email}</p>
-        <p><strong>Phone:</strong> ${message.phone || "N/A"}</p>
-        <p><strong>Device Requested:</strong> ${message.deviceRequested || "N/A"}</p>
-        <p><strong>Service:</strong> ${message.service || "N/A"}</p>
-        <p><strong>Source:</strong> ${message.source || "website"}</p>
-        <p><strong>Message:</strong></p>
-        <p>${String(message.message || "").replace(/\n/g, "<br />")}</p>
-      `),
+    const info = await transport.sendMail({
+      from: `"${APP_NAME}" <${EMAIL_USER}>`,
+      to: recipients.join(", "),
+      subject,
+      text,
+      html,
+      replyTo: EMAIL_USER,
     });
 
-    console.log("[service-request] email delivered to company inbox", result);
-    return result;
+    console.log("[email] sent successfully", {
+      messageId: info.messageId,
+      accepted: info.accepted,
+      rejected: info.rejected,
+      response: info.response,
+    });
+
+    await writeEmailLog({
+      sender: EMAIL_USER,
+      receiver: recipients.join(", "),
+      subject,
+      message: text || "",
+      direction,
+      status: "sent",
+      meta: {
+        ...meta,
+        messageId: info.messageId,
+        accepted: info.accepted,
+        rejected: info.rejected,
+        response: info.response,
+      },
+    });
+
+    return info;
   } catch (error) {
-    console.error("[service-request] email delivery failed", error.message);
+    console.error("[email] send failed", {
+      recipient: recipients,
+      subject,
+      error: error.message,
+    });
+
+    await writeEmailLog({
+      sender: EMAIL_USER,
+      receiver: recipients.join(", "),
+      subject,
+      message: text || "",
+      direction,
+      status: "failed",
+      meta: {
+        ...meta,
+        error: error.message,
+      },
+    });
+
     throw error;
   }
 }
 
-async function sendAdminNewOrderNotification(order, user) {
-  const adminTo = adminRecipients();
-  const itemsText = order.items.map((item) => `- ${item.name} x${item.quantity} (GHS ${item.price})`).join("\n");
+function serviceRequestHtml(message, submittedAt) {
+  return `
+    <div style="font-family:Arial,sans-serif;padding:24px;color:#111827;">
+      <h2 style="margin-top:0;">New Service Request</h2>
+      <p><strong>Name:</strong> ${message.name}</p>
+      <p><strong>Email:</strong> ${message.email}</p>
+      <p><strong>Phone:</strong> ${message.phone || "N/A"}</p>
+      <p><strong>Service:</strong> ${message.service || "N/A"}</p>
+      <p><strong>Request Type:</strong> ${message.kind || "contact"}</p>
+      <p><strong>Device Requested:</strong> ${message.deviceRequested || "N/A"}</p>
+      <p><strong>Source:</strong> ${message.source || "website"}</p>
+      <p><strong>Submitted At:</strong> ${submittedAt}</p>
+      <p><strong>Request Details:</strong></p>
+      <p>${String(message.message || "").replace(/\n/g, "<br />")}</p>
+    </div>
+  `;
+}
 
-  if (adminTo.length === 0) {
-    return { skipped: true, reason: "missing-recipient" };
-  }
+async function sendUserRequestEmail(message) {
+  const submittedAt = message.createdAt
+    ? new Date(message.createdAt).toLocaleString()
+    : new Date().toLocaleString();
+  const requestType = message.kind === "used-device-inquiry" ? "Used Device Inquiry" : "Service Request";
+  const text = `${requestType}\nName: ${message.name}\nEmail: ${message.email}\nPhone: ${message.phone || "N/A"}\nService: ${message.service || "N/A"}\nDevice Requested: ${message.deviceRequested || "N/A"}\nSource: ${message.source || "website"}\nSubmitted At: ${submittedAt}\n\nRequest Details:\n${message.message}`;
 
   return sendEmail({
-    to: adminTo,
-    subject: `[${APP_NAME}] New Order ${order._id}`,
-    text: `A new order has been created.\nCustomer: ${user?.name || "Customer"}\nEmail: ${user?.email || "N/A"}\nOrder ID: ${order._id}\nTotal: GHS ${order.totalPrice}\n\n${itemsText}`,
-    html: layout("New Order Received", `
-      <p><strong>Customer:</strong> ${user?.name || "Customer"}</p>
-      <p><strong>Email:</strong> ${user?.email || "N/A"}</p>
-      <p><strong>Order ID:</strong> ${order._id}</p>
-      <p><strong>Total:</strong> GHS ${order.totalPrice}</p>
-      <p><strong>Payment Status:</strong> ${order.paymentStatus || "pending"}</p>
-      <p><strong>Items:</strong></p>
-      <ul>${order.items.map((item) => `<li>${item.name} x${item.quantity} (GHS ${item.price})</li>`).join("")}</ul>
-    `),
+    to: [COMPANY_EMAIL],
+    subject: `[${APP_NAME}] New ${requestType}`,
+    text,
+    html: serviceRequestHtml(message, submittedAt),
+    direction: "user_to_company",
+    meta: {
+      requestId: message._id ? String(message._id) : "",
+      userEmail: message.email,
+    },
   });
 }
 
-async function sendPaidOrderConfirmation(order, user) {
-  const adminTo = adminRecipients();
-  const jobs = [];
-  const paymentReference = order.paymentReference || "N/A";
+function replyHtml(message) {
+  return `
+    <div style="font-family:Arial,sans-serif;padding:24px;color:#111827;">
+      <h2 style="margin-top:0;">Reply from ${APP_NAME}</h2>
+      <p>${String(message).replace(/\n/g, "<br />")}</p>
+    </div>
+  `;
+}
 
-  if (adminTo.length > 0) {
-    jobs.push(sendEmail({
-      to: adminTo,
-      subject: `[${APP_NAME}] Payment Confirmed ${order._id}`,
-      text: `Payment confirmed for order ${order._id}.\nCustomer: ${user?.name || "Customer"}\nEmail: ${user?.email || "N/A"}\nReference: ${paymentReference}\nAmount: GHS ${order.totalPrice}`,
-      html: layout("Payment Confirmed", `
-        <p><strong>Customer:</strong> ${user?.name || "Customer"}</p>
-        <p><strong>Email:</strong> ${user?.email || "N/A"}</p>
-        <p><strong>Order ID:</strong> ${order._id}</p>
-        <p><strong>Payment Reference:</strong> ${paymentReference}</p>
-        <p><strong>Amount Paid:</strong> GHS ${order.totalPrice}</p>
-        <p><strong>Channel:</strong> ${order.paymentChannel || "N/A"}</p>
-      `),
-    }));
-  }
-
-  if (user?.email) {
-    jobs.push(sendEmail({
-      to: user.email,
-      subject: `${APP_NAME} payment confirmed`,
-      text: `Hello ${user.name || "Customer"}, your payment has been confirmed. Order ID: ${order._id}. Reference: ${paymentReference}. Total: GHS ${order.totalPrice}.`,
-      html: layout("Payment Confirmed", `
-        <p>Hello ${user.name || "Customer"},</p>
-        <p>Your payment has been confirmed successfully.</p>
-        <p><strong>Order ID:</strong> ${order._id}</p>
-        <p><strong>Payment Reference:</strong> ${paymentReference}</p>
-        <p><strong>Amount Paid:</strong> GHS ${order.totalPrice}</p>
-        <p><strong>Status:</strong> ${order.paymentStatus || "success"}</p>
-      `),
-    }));
-  }
-
-  return Promise.allSettled(jobs);
+async function sendReplyToUserEmail({ userEmail, message, adminName = "Admin" }) {
+  return sendEmail({
+    to: [userEmail],
+    subject: `${APP_NAME} response to your request`,
+    text: `Hello,\n\n${message}\n\nRegards,\n${adminName}\n${APP_NAME}`,
+    html: replyHtml(`Hello,<br /><br />${String(message).replace(/\n/g, "<br />")}<br /><br />Regards,<br />${adminName}<br />${APP_NAME}`),
+    direction: "company_to_user",
+    meta: {
+      userEmail,
+      adminName,
+    },
+  });
 }
 
 async function sendWelcomeNotification(user) {
@@ -197,22 +174,113 @@ async function sendWelcomeNotification(user) {
   }
 
   return sendEmail({
-    to: user.email,
+    to: [user.email],
     subject: `Welcome to ${APP_NAME}`,
-    text: `Hello ${user.name}, your account has been created successfully.`,
-    html: layout("Welcome", `
-      <p>Hello ${user.name},</p>
-      <p>Your account has been created successfully on ${APP_NAME}.</p>
-      <p>You can now sign in and continue with your orders and requests.</p>
-    `),
+    text: `Hello ${user.name || "there"}, your account has been created successfully.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;padding:24px;color:#111827;">
+        <h2 style="margin-top:0;">Welcome to ${APP_NAME}</h2>
+        <p>Hello ${user.name || "there"},</p>
+        <p>Your account has been created successfully.</p>
+      </div>
+    `,
+    direction: "company_to_user",
+    meta: {
+      userEmail: user.email,
+      category: "welcome",
+    },
   });
 }
 
+async function sendAdminNewOrderNotification(order, user) {
+  const itemsText = (order.items || [])
+    .map((item) => `- ${item.name} x${item.quantity} (GHS ${item.price})`)
+    .join("\n");
+
+  return sendEmail({
+    to: [COMPANY_EMAIL],
+    subject: `[${APP_NAME}] New Order ${order._id}`,
+    text: `A new order has been created.\nCustomer: ${user?.name || "Customer"}\nEmail: ${user?.email || "N/A"}\nOrder ID: ${order._id}\nTotal: GHS ${order.totalPrice}\n\n${itemsText}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;padding:24px;color:#111827;">
+        <h2 style="margin-top:0;">New Order Received</h2>
+        <p><strong>Customer:</strong> ${user?.name || "Customer"}</p>
+        <p><strong>Email:</strong> ${user?.email || "N/A"}</p>
+        <p><strong>Order ID:</strong> ${order._id}</p>
+        <p><strong>Total:</strong> GHS ${order.totalPrice}</p>
+        <ul>${(order.items || []).map((item) => `<li>${item.name} x${item.quantity} (GHS ${item.price})</li>`).join("")}</ul>
+      </div>
+    `,
+    direction: "user_to_company",
+    meta: {
+      orderId: String(order._id),
+      userEmail: user?.email || "",
+      category: "order-admin",
+    },
+  });
+}
+
+async function sendPaidOrderConfirmation(order, user) {
+  const paymentReference = order.paymentReference || "N/A";
+  const jobs = [];
+
+  jobs.push(sendEmail({
+    to: [COMPANY_EMAIL],
+    subject: `[${APP_NAME}] Payment Confirmed ${order._id}`,
+    text: `Payment confirmed for order ${order._id}.\nCustomer: ${user?.name || "Customer"}\nEmail: ${user?.email || "N/A"}\nReference: ${paymentReference}\nAmount: GHS ${order.totalPrice}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;padding:24px;color:#111827;">
+        <h2 style="margin-top:0;">Payment Confirmed</h2>
+        <p><strong>Customer:</strong> ${user?.name || "Customer"}</p>
+        <p><strong>Email:</strong> ${user?.email || "N/A"}</p>
+        <p><strong>Order ID:</strong> ${order._id}</p>
+        <p><strong>Payment Reference:</strong> ${paymentReference}</p>
+        <p><strong>Amount Paid:</strong> GHS ${order.totalPrice}</p>
+      </div>
+    `,
+    direction: "user_to_company",
+    meta: {
+      orderId: String(order._id),
+      userEmail: user?.email || "",
+      category: "payment-admin",
+    },
+  }));
+
+  if (user?.email) {
+    jobs.push(sendEmail({
+      to: [user.email],
+      subject: `${APP_NAME} payment confirmed`,
+      text: `Hello ${user.name || "Customer"}, your payment has been confirmed. Order ID: ${order._id}. Reference: ${paymentReference}. Total: GHS ${order.totalPrice}.`,
+      html: `
+        <div style="font-family:Arial,sans-serif;padding:24px;color:#111827;">
+          <h2 style="margin-top:0;">Payment Confirmed</h2>
+          <p>Hello ${user.name || "Customer"},</p>
+          <p>Your payment has been confirmed successfully.</p>
+          <p><strong>Order ID:</strong> ${order._id}</p>
+          <p><strong>Payment Reference:</strong> ${paymentReference}</p>
+          <p><strong>Amount Paid:</strong> GHS ${order.totalPrice}</p>
+        </div>
+      `,
+      direction: "company_to_user",
+      meta: {
+        orderId: String(order._id),
+        userEmail: user.email,
+        category: "payment-user",
+      },
+    }));
+  }
+
+  return Promise.allSettled(jobs);
+}
+
 module.exports = {
+  COMPANY_EMAIL,
+  EMAIL_USER,
   isEmailConfigured,
   sendEmail,
-  sendNewMessageNotifications,
+  sendUserRequestEmail,
+  sendReplyToUserEmail,
+  sendWelcomeNotification,
   sendAdminNewOrderNotification,
   sendPaidOrderConfirmation,
-  sendWelcomeNotification,
 };
