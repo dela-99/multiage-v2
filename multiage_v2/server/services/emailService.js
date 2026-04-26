@@ -1,12 +1,20 @@
 const EMAIL_PROVIDER = (process.env.EMAIL_PROVIDER || "resend").toLowerCase();
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
-const EMAIL_FROM = process.env.EMAIL_FROM || "";
+const EMAIL_FROM = process.env.EMAIL_FROM || "onboarding@resend.dev";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
 const APP_NAME = process.env.APP_NAME || "Multiage Technologies";
+const COMPANY_SERVICE_REQUEST_EMAIL = "multiagetechnologies@gmail.com";
 
 const isEmailConfigured = Boolean(RESEND_API_KEY && EMAIL_FROM);
 
 async function sendWithResend({ to, subject, html, text }) {
+  const recipients = Array.isArray(to) ? to : [to];
+  console.log("[email] Resend request", {
+    from: EMAIL_FROM,
+    to: recipients,
+    subject,
+  });
+
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -15,7 +23,7 @@ async function sendWithResend({ to, subject, html, text }) {
     },
     body: JSON.stringify({
       from: EMAIL_FROM,
-      to: Array.isArray(to) ? to : [to],
+      to: recipients,
       subject,
       html,
       text,
@@ -25,8 +33,14 @@ async function sendWithResend({ to, subject, html, text }) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    console.error("[email] Resend error response", {
+      status: response.status,
+      data,
+    });
     throw new Error(data.message || data.error?.message || "Failed to send email");
   }
+
+  console.log("[email] Resend success response", data);
 
   return data;
 }
@@ -72,15 +86,25 @@ function layout(title, body) {
 }
 
 async function sendNewMessageNotifications(message) {
-  const adminTo = adminRecipients();
-  const customerText = `Hello ${message.name}, we have received your message and will get back to you shortly.`;
   const typeLabel = message.kind === "used-device-inquiry" ? "Used Device Inquiry" : "Contact Message";
+  const requestPayload = {
+    id: message._id ? String(message._id) : "",
+    type: typeLabel,
+    name: message.name,
+    email: message.email,
+    phone: message.phone || "",
+    deviceRequested: message.deviceRequested || "",
+    service: message.service || "",
+    source: message.source || "website",
+    message: message.message || "",
+  };
 
-  const jobs = [];
+  console.log("[service-request] payload", requestPayload);
+  console.log("[service-request] recipient", COMPANY_SERVICE_REQUEST_EMAIL);
 
-  if (adminTo.length > 0) {
-    jobs.push(sendEmail({
-      to: adminTo,
+  try {
+    const result = await sendEmail({
+      to: [COMPANY_SERVICE_REQUEST_EMAIL],
       subject: `[${APP_NAME}] New ${typeLabel}`,
       text: `${typeLabel} from ${message.name} (${message.email})\nPhone: ${message.phone || "N/A"}\nDevice: ${message.deviceRequested || "N/A"}\nService: ${message.service || "N/A"}\nSource: ${message.source || "website"}\n\n${message.message}`,
       html: layout(`New ${typeLabel}`, `
@@ -93,21 +117,14 @@ async function sendNewMessageNotifications(message) {
         <p><strong>Message:</strong></p>
         <p>${String(message.message || "").replace(/\n/g, "<br />")}</p>
       `),
-    }));
+    });
+
+    console.log("[service-request] email delivered to company inbox", result);
+    return result;
+  } catch (error) {
+    console.error("[service-request] email delivery failed", error.message);
+    throw error;
   }
-
-  jobs.push(sendEmail({
-    to: message.email,
-    subject: `${APP_NAME} received your message`,
-    text: customerText,
-    html: layout("We received your message", `
-      <p>Hello ${message.name},</p>
-      <p>Thanks for reaching out to ${APP_NAME}. We have received your message and our team will get back to you shortly.</p>
-      <p><strong>Reference Type:</strong> ${typeLabel}</p>
-    `),
-  }));
-
-  return Promise.allSettled(jobs);
 }
 
 async function sendAdminNewOrderNotification(order, user) {
