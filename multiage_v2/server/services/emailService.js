@@ -273,6 +273,64 @@ async function sendPaidOrderConfirmation(order, user) {
   return Promise.allSettled(jobs);
 }
 
+async function sendPasswordResetEmail({ user, resetLink, expiresInMinutes = 15 }) {
+  if (!user?.email) {
+    return { skipped: true, reason: "missing-recipient" };
+  }
+
+  return sendEmail({
+    to: [user.email],
+    subject: `${APP_NAME} password reset request`,
+    text: `Hello ${user.name || "there"},\n\nWe received a request to reset your password.\n\nReset your password here:\n${resetLink}\n\nThis link will expire in ${expiresInMinutes} minutes.\nIf you did not request this, you can ignore this email.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;padding:24px;color:#111827;">
+        <h2 style="margin-top:0;">Reset your password</h2>
+        <p>Hello ${user.name || "there"},</p>
+        <p>We received a request to reset your password.</p>
+        <p>
+          <a href="${resetLink}" style="display:inline-block;padding:12px 18px;border-radius:10px;background:#C5620B;color:#ffffff;text-decoration:none;font-weight:700;">
+            Reset Password
+          </a>
+        </p>
+        <p>If the button does not work, copy and paste this link into your browser:</p>
+        <p>${resetLink}</p>
+        <p>This link will expire in ${expiresInMinutes} minutes.</p>
+        <p>If you did not request this, you can ignore this email.</p>
+      </div>
+    `,
+    direction: "company_to_user",
+    meta: {
+      userEmail: user.email,
+      category: "password-reset",
+    },
+  });
+}
+
+async function sendPasswordChangedAlert(user) {
+  if (!user?.email) {
+    return { skipped: true, reason: "missing-recipient" };
+  }
+
+  return sendEmail({
+    to: [user.email],
+    subject: `${APP_NAME} password changed successfully`,
+    text: `Hello ${user.name || "there"},\n\nYour password was changed successfully.\nIf this was not you, contact support immediately.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;padding:24px;color:#111827;">
+        <h2 style="margin-top:0;">Password changed successfully</h2>
+        <p>Hello ${user.name || "there"},</p>
+        <p>Your password was changed successfully.</p>
+        <p>If this was not you, contact support immediately.</p>
+      </div>
+    `,
+    direction: "company_to_user",
+    meta: {
+      userEmail: user.email,
+      category: "password-changed",
+    },
+  });
+}
+
 module.exports = {
   COMPANY_EMAIL,
   EMAIL_USER,
@@ -283,4 +341,6 @@ module.exports = {
   sendWelcomeNotification,
   sendAdminNewOrderNotification,
   sendPaidOrderConfirmation,
+  sendPasswordResetEmail,
+  sendPasswordChangedAlert,
 };

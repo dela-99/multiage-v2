@@ -1,9 +1,15 @@
+const crypto = require("crypto");
 const jwt  = require("jsonwebtoken");
 const User = require("../models/User");
-const { sendWelcomeNotification } = require("../services/emailService");
+const {
+  sendWelcomeNotification,
+  sendPasswordResetEmail,
+  sendPasswordChangedAlert,
+} = require("../services/emailService");
 const { verifyFirebaseIdToken } = require("../services/firebaseAdmin");
 
 const DEFAULT_TEMP_PASSWORD = process.env.DEFAULT_TEMP_PASSWORD;
+const RESET_TOKEN_TTL_MINUTES = 15;
 
 // ── Generate JWT ──────────────────────────────────────────────────
 const generateToken = (id) =>
@@ -21,6 +27,11 @@ const buildAuthPayload = (user) => ({
   profilePicture: user.profilePicture || "",
   token: generateToken(user._id),
 });
+
+const buildResetLink = (token) => {
+  const base = (process.env.CLIENT_URL || "https://multiage-v2-updated-1.vercel.app").replace(/\/+$/, "");
+  return `${base}/reset-password?token=${encodeURIComponent(token)}`;
+};
 
 // ── @route  POST /api/auth/register ──────────────────────────────
 // ── @access Public
@@ -203,10 +214,111 @@ const changePassword = async (req, res, next) => {
     user.mustChangePassword = false;
     await user.save();
 
+    sendPasswordChangedAlert(user).catch((error) => {
+      console.error("Password changed email failed:", error.message);
+    });
+
     res.json({ message: "Password updated successfully" });
   } catch (err) {
     next(err);
   }
 };
 
-module.exports = { register, login, googleLogin, getMe, getAllUsers, deleteUser, changePassword };
+// ── @route  POST /api/auth/forgot-password ───────────────────────
+// ── @access Public
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Please provide an email address" });
+    }
+
+    const user = await User.findOne({ email }).select("+resetPasswordToken +resetPasswordExpires");
+
+    if (!user) {
+      return res.json({
+        message: "If an account with that email exists, a password reset link has been sent.",
+      });
+    }
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MINUTES * 60 * 1000);
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = expiresAt;
+    await user.save();
+
+    try {
+      await sendPasswordResetEmail({
+        user,
+        resetLink: buildResetLink(rawToken),
+        expiresInMinutes: RESET_TOKEN_TTL_MINUTES,
+      });
+    } catch (error) {
+      user.resetPasswordToken = "";
+      user.resetPasswordExpires = undefined;
+      await user.save();
+      throw error;
+    }
+
+    res.json({
+      message: "If an account with that email exists, a password reset link has been sent.",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ── @route  POST /api/auth/reset-password ────────────────────────
+// ── @access Public
+const resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ message: "Please provide token and password" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: new Date() },
+    }).select("+password +resetPasswordToken +resetPasswordExpires");
+
+    if (!user) {
+      return res.status(400).json({ message: "Reset token is invalid or has expired" });
+    }
+
+    user.password = password;
+    user.mustChangePassword = false;
+    user.resetPasswordToken = "";
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    sendPasswordChangedAlert(user).catch((error) => {
+      console.error("Password changed email failed:", error.message);
+    });
+
+    res.json({ message: "Password reset successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  googleLogin,
+  getMe,
+  getAllUsers,
+  deleteUser,
+  changePassword,
+  forgotPassword,
+  resetPassword,
+};
