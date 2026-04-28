@@ -1,6 +1,11 @@
 {
-<<<<<<< HEAD
+  "name": "multiage-server",
+  "version": "1.0.0",
   "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -12,24 +17,5 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.1",
     "nodemailer": "^6.10.1"
-=======
-  "name": "multiage-server",
-  "version": "1.0.0",
-  "type": "commonjs",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.3.1",
-    "firebase-admin": "^12.2.0",
-    "helmet": "^7.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.4.0"
->>>>>>> 727c83848ab3bbe6a9a9bb6d0b2bca7f432f8479
   }
 }
