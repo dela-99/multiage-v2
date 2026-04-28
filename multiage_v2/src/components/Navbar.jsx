@@ -440,25 +440,36 @@ export default function Navbar() {
           aria-labelledby="pwd-modal-title"
           style={{
             position: "fixed", inset: 0, zIndex: 200,
-            background: "rgba(0,0,0,0.55)",
+            background: "rgba(0,0,0,0.5)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
             display: "flex", alignItems: "center", justifyContent: "center",
             padding: 20,
           }}
           onClick={(e) => { if (e.target === e.currentTarget) setPwdOpen(false); }}
         >
+          <style>{`
+            @keyframes modalEnter {
+              from { opacity: 0; transform: scale(0.95); }
+              to { opacity: 1; transform: scale(1); }
+            }
+          `}</style>
           <div style={{
             width: "100%",
             maxWidth: 440,
-            borderRadius: 20,
-            padding: "24px 22px 22px",
-            background: t.cardBg,
-            border: `1px solid ${t.cardBorder}`,
-            boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
+            borderRadius: 24,
+            padding: "32px",
+            background: "rgba(30, 30, 30, 0.95)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
+            animation: "modalEnter 0.3s ease-out",
+            position: "relative",
+            color: "#ffffff"
           }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
-              <h2 id="pwd-modal-title" style={{ margin: 0, fontSize: 20, fontWeight: 800, color: t.textPrimary }}>
+              <h2 id="pwd-modal-title" style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#ffffff", letterSpacing: "-0.5px" }}>
                 Change password
               </h2>
               <button
@@ -467,13 +478,13 @@ export default function Navbar() {
                 aria-label="Close"
                 style={{
                   border: "none", background: "transparent", cursor: "pointer",
-                  fontSize: 22, lineHeight: 1, color: t.textMuted, padding: 4,
+                  fontSize: 24, lineHeight: 1, color: "rgba(255,255,255,0.5)", padding: 4,
                 }}
               >
                 ×
               </button>
             </div>
-            <p style={{ margin: "0 0 18px", fontSize: 13, color: t.textSecondary, lineHeight: 1.5 }}>
+            <p style={{ margin: "0 0 24px", fontSize: 14, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
               Enter your current password, then choose a new one (at least 6 characters).
             </p>
             <ChangePasswordForm token={token} />

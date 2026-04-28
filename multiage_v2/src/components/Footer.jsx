@@ -1,4 +1,4 @@
-import { SOCIALS, icons } from "../constants";
+import { icons } from "../constants";
 import { Icon } from "./ui";
 import { useTheme } from "../context/ThemeContext";
 
@@ -38,6 +38,14 @@ function FooterLogo({ t }) {
   );
 }
 
+const COMPANY_SOCIALS = [
+  { label: "Instagram", href: "https://www.instagram.com/multiage_tech_01", icon: "instagram", aria: "Follow us on Instagram" },
+  { label: "X (Twitter)", href: "https://x.com/multiage_tech", icon: "twitter", aria: "Follow us on X (Twitter)" },
+  { label: "TikTok", href: "https://www.tiktok.com/@multiage_tech_01", icon: "tiktok", aria: "Follow us on TikTok" },
+  { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61570689230114", icon: "facebook", aria: "Follow us on Facebook" },
+  { label: "WhatsApp", href: "https://whatsapp.com/channel/0029VbBFSR7BFLgVK4WXDY3w", icon: "whatsapp", aria: "Join our WhatsApp Channel" },
+];
+
 const FOOTER_COLS = [
   { heading: "Company",  links: [["About Us","#"],["Careers","#"],["Blog","#"],["Press","#"]] },
   { heading: "Services", links: [["Electronics Store","/store"],["Software Dev","/software-development"],["Networking","/networking"],["Creative Studio","/services"]] },
@@ -74,13 +82,13 @@ export default function Footer() {
 
             {/* Social icons — each wrapped in real anchor with target="_blank" */}
             <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
-              {SOCIALS.map(s => (
+              {COMPANY_SOCIALS.map(s => (
                 <a
                   key={s.label}
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title={s.label}
+                  aria-label={s.aria}
                   style={{
                     width: 36, height: 36, borderRadius: 10,
                     background: t.surface, border: `1px solid ${t.border}`,
@@ -89,11 +97,11 @@ export default function Footer() {
                     textDecoration: "none",
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.background   = s.color + "22";
-                    e.currentTarget.style.color        = s.color;
-                    e.currentTarget.style.borderColor  = s.color + "55";
+                    e.currentTarget.style.background   = "rgba(197,98,11,0.14)";
+                    e.currentTarget.style.color        = "#C5620B";
+                    e.currentTarget.style.borderColor  = "rgba(197,98,11,0.35)";
                     e.currentTarget.style.transform    = "translateY(-3px)";
-                    e.currentTarget.style.boxShadow    = `0 6px 16px ${s.color}33`;
+                    e.currentTarget.style.boxShadow    = "0 6px 16px rgba(197,98,11,0.2)";
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.background   = t.surface;

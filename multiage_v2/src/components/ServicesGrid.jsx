@@ -1,58 +1,116 @@
-import { useState } from "react";
-import { SERVICES_GRID, icons } from "../constants";
-import { Icon, SectionLabel, SectionHeading } from "./ui";
+import { Link } from "../router";
+import { SectionLabel, SectionHeading } from "./ui";
 import { useTheme } from "../context/ThemeContext";
 
-function ServiceCard({ svc }) {
+const STUDIO_IMAGES = [
+  { id: 1, alt: "studio image" },
+  { id: 2, alt: "studio image" },
+  { id: 3, alt: "studio image" },
+  { id: 4, alt: "studio image" },
+];
+
+function StudioTile({ image }) {
   const { t } = useTheme();
-  const [hov, setHov] = useState(false);
 
   return (
-    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
-      padding: "32px 28px", borderRadius: 20,
-      background: hov ? "rgba(197,98,11,0.10)" : t.cardBg,
-      border: `1px solid ${hov ? "rgba(197,98,11,0.38)" : t.cardBorder}`,
-      backdropFilter: "blur(16px)",
-      transform: hov ? "translateY(-6px)" : "none",
-      transition: "all 0.3s", cursor: "pointer",
-    }}>
-      <div style={{
-        width: 52, height: 52, borderRadius: 16,
-        background: hov ? "linear-gradient(135deg,#C5620B,#6A2B09)" : "rgba(197,98,11,0.15)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        marginBottom: 20, color: hov ? "#fff" : "#C5620B",
-        boxShadow: hov ? "0 8px 24px rgba(197,98,11,0.35)" : "none",
-        transition: "all 0.3s",
-      }}>
-        <Icon d={icons[svc.icon]} size={22} />
+    <Link
+      to="/studio"
+      aria-label="Open Multiage Studios"
+      style={{
+        display: "block",
+        textDecoration: "none",
+      }}
+    >
+      <div
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: 20,
+          background: t.cardBg,
+          border: `1px solid ${t.cardBorder}`,
+          boxShadow: "0 18px 40px rgba(0,0,0,0.12)",
+          transform: "translateZ(0)",
+        }}
+      >
+        <div
+          style={{
+            aspectRatio: "1 / 1",
+            background: "linear-gradient(135deg, rgba(197,98,11,0.12), rgba(255,255,255,0.03))",
+          }}
+        >
+          <img
+            src=""
+            alt={image.alt}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+              transition: "transform 260ms ease",
+            }}
+            className="studio-gallery-image"
+          />
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(180deg, rgba(0,0,0,0) 38%, rgba(0,0,0,0.28) 100%)",
+            pointerEvents: "none",
+          }}
+        />
       </div>
-      <h3 style={{ fontSize: 17, fontWeight: 700, color: t.textPrimary, marginBottom: 10 }}>{svc.title}</h3>
-      <p style={{ fontSize: 13, color: t.textMuted, lineHeight: 1.7 }}>{svc.desc}</p>
-      <div style={{
-        marginTop: 20, display: "flex", alignItems: "center", gap: 6,
-        fontSize: 13, fontWeight: 600, color: "#C5620B",
-        opacity: hov ? 1 : 0, transition: "opacity 0.3s",
-      }}>
-        Learn more <Icon d={icons.arrow} size={14} />
-      </div>
-    </div>
+    </Link>
   );
 }
 
 export default function ServicesGrid() {
   const { t } = useTheme();
+
   return (
     <section id="services" style={{ padding: "100px 0" }}>
+      <style>{`
+        .studio-gallery-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 18px;
+        }
+
+        .studio-gallery-grid a:hover .studio-gallery-image,
+        .studio-gallery-grid a:focus-visible .studio-gallery-image {
+          transform: scale(1.05);
+        }
+
+        @media (min-width: 900px) {
+          .studio-gallery-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+          }
+        }
+      `}</style>
+
       <div style={{ maxWidth: 1260, margin: "0 auto", padding: "0 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 64 }}>
-          <SectionLabel>Our Services</SectionLabel>
-          <SectionHeading>Everything your business needs</SectionHeading>
-          <p style={{ fontSize: 16, color: t.textSecondary, marginTop: 16, maxWidth: 480, margin: "16px auto 0" }}>
-            From premium hardware to custom software — we deliver complete technology ecosystems.
+          <SectionLabel>Multiage Studios</SectionLabel>
+          <SectionHeading>Creative moments in focus</SectionHeading>
+          <p
+            style={{
+              fontSize: 16,
+              color: t.textSecondary,
+              marginTop: 16,
+              maxWidth: 520,
+              margin: "16px auto 0",
+              lineHeight: 1.7,
+            }}
+          >
+            Explore the visual side of Multiage through a modern studio gallery built for upcoming image content.
           </p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 20 }}>
-          {SERVICES_GRID.map((svc, i) => <ServiceCard key={i} svc={svc} />)}
+
+        <div className="studio-gallery-grid">
+          {STUDIO_IMAGES.map((image) => (
+            <StudioTile key={image.id} image={image} />
+          ))}
         </div>
       </div>
     </section>
