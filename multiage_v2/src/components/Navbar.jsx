@@ -136,12 +136,20 @@ export default function Navbar() {
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
   const [pwdOpen,  setPwdOpen]    = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+    const fn = () => setIsDropdownOpen(false);
+    window.addEventListener("click", fn);
+    return () => window.removeEventListener("click", fn);
+  }, [isDropdownOpen]);
 
   const handleLogout = () => {
     logout();
@@ -199,16 +207,65 @@ export default function Navbar() {
 
             {isAuthenticated ? (
               <div className="nav-desktop" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{
-                  padding: "7px 14px",
-                  borderRadius: 100,
-                  background: "rgba(197,98,11,0.12)",
-                  border: "1px solid rgba(197,98,11,0.18)",
-                  color: t.textPrimary,
-                  fontSize: 13,
-                  fontWeight: 600,
-                }}>
-                  {user?.name || "Account"}
+                <div style={{ position: "relative" }}>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setIsDropdownOpen(!isDropdownOpen); }}
+                    style={{
+                      padding: "7px 14px",
+                      borderRadius: 100,
+                      background: "rgba(197,98,11,0.12)",
+                      border: "1px solid rgba(197,98,11,0.18)",
+                      color: t.textPrimary,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6
+                    }}
+                  >
+                    {user?.name || "Account"}
+                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ transform: isDropdownOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }}>
+                      <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+
+                  {isDropdownOpen && (
+                    <div style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: 0,
+                      background: t.cardBg,
+                      border: `1px solid ${t.border}`,
+                      borderRadius: 12,
+                      boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+                      padding: "6px",
+                      minWidth: "160px",
+                      zIndex: 1000,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2
+                    }}>
+                      <button
+                        onClick={() => { setPwdOpen(true); setIsDropdownOpen(false); }}
+                        style={{ textAlign: "left", padding: "10px 12px", borderRadius: 8, background: "transparent", border: "none", color: t.textPrimary, fontSize: 13, cursor: "pointer", transition: "all 0.2s" }}
+                        onMouseEnter={e => e.currentTarget.style.background = t.surfaceHover}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                      >
+                        Change password
+                      </button>
+                      <button
+                        onClick={() => { handleLogout(); setIsDropdownOpen(false); }}
+                        style={{ textAlign: "left", padding: "10px 12px", borderRadius: 8, background: "transparent", border: "none", color: t.textPrimary, fontSize: 13, cursor: "pointer", transition: "all 0.2s" }}
+                        onMouseEnter={e => e.currentTarget.style.background = t.surfaceHover}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -231,39 +288,6 @@ export default function Navbar() {
                   }}
                 >
                   My orders
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPwdOpen(true)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    padding: "7px 16px",
-                    background: t.surface, border: `1px solid ${t.border}`,
-                    borderRadius: 100,
-                    fontSize: 13, fontWeight: 600, color: t.textSecondary,
-                    cursor: "pointer", fontFamily: "inherit",
-                    transition: "all 0.25s ease",
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; e.currentTarget.style.color = t.textPrimary; e.currentTarget.style.borderColor = "rgba(197,98,11,0.35)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = t.surface; e.currentTarget.style.color = t.textSecondary; e.currentTarget.style.borderColor = t.border; }}
-                >
-                  Change password
-                </button>
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    padding: "7px 16px",
-                    background: t.surface, border: `1px solid ${t.border}`,
-                    borderRadius: 100,
-                    fontSize: 13, fontWeight: 600, color: t.textSecondary,
-                    cursor: "pointer", fontFamily: "inherit",
-                    transition: "all 0.25s ease",
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; e.currentTarget.style.color = t.textPrimary; e.currentTarget.style.borderColor = "rgba(197,98,11,0.35)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = t.surface; e.currentTarget.style.color = t.textSecondary; e.currentTarget.style.borderColor = t.border; }}
-                >
-                  Logout
                 </button>
               </div>
             ) : (
