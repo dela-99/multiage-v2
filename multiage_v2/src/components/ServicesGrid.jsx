@@ -119,7 +119,7 @@ export default function ServicesGrid() {
               lineHeight: 1.7,
             }}
           >
-            Explore the visual side of Multiage through a modern studio gallery built for upcoming image content.
+            Explore the visual side of Multiage through a modern studio gallery built for upcoming video and image contents.
           </p>
         </div>
 
