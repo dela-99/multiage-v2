@@ -3,10 +3,10 @@ import { SectionLabel, SectionHeading } from "./ui";
 import { useTheme } from "../context/ThemeContext";
 
 const STUDIO_IMAGES = [
-  { id: 1, alt: "studio image" },
-  { id: 2, alt: "studio image" },
-  { id: 3, alt: "studio image" },
-  { id: 4, alt: "studio image" },
+  { id: 1, alt: "https://res.cloudinary.com/delaridge/image/upload/v1777342424/huxsnefbhz6ucsunms7e.jpg" },
+  { id: 2, alt: "https://res.cloudinary.com/delaridge/image/upload/v1777342424/zzp3yuk7bzrq5fuwlwnz.jpg" },
+  { id: 3, alt: "https://res.cloudinary.com/delaridge/image/upload/v1777342423/qyh0beu7f5t6gbh8r6kt.jpg" },
+  { id: 4, alt: "https://res.cloudinary.com/delaridge/image/upload/v1777342423/bxotbg5mh77obhcyms3h.jpg" },
 ];
 
 function StudioTile({ image }) {
