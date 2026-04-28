@@ -3,10 +3,26 @@ import { SectionLabel, SectionHeading } from "./ui";
 import { useTheme } from "../context/ThemeContext";
 
 const STUDIO_IMAGES = [
-  { id: 1, alt: "https://res.cloudinary.com/delaridge/image/upload/v1777342424/huxsnefbhz6ucsunms7e.jpg" },
-  { id: 2, alt: "https://res.cloudinary.com/delaridge/image/upload/v1777342424/zzp3yuk7bzrq5fuwlwnz.jpg" },
-  { id: 3, alt: "https://res.cloudinary.com/delaridge/image/upload/v1777342423/qyh0beu7f5t6gbh8r6kt.jpg" },
-  { id: 4, alt: "https://res.cloudinary.com/delaridge/image/upload/v1777342423/bxotbg5mh77obhcyms3h.jpg" },
+  {
+    id: 1,
+    src: "https://res.cloudinary.com/delaridge/image/upload/v1777342424/huxsnefbhz6ucsunms7e.jpg",
+    alt: "Multiage Studios image 1",
+  },
+  {
+    id: 2,
+    src: "https://res.cloudinary.com/delaridge/image/upload/v1777342424/zzp3yuk7bzrq5fuwlwnz.jpg",
+    alt: "Multiage Studios image 2",
+  },
+  {
+    id: 3,
+    src: "https://res.cloudinary.com/delaridge/image/upload/v1777342423/qyh0beu7f5t6gbh8r6kt.jpg",
+    alt: "Multiage Studios image 3",
+  },
+  {
+    id: 4,
+    src: "https://res.cloudinary.com/delaridge/image/upload/v1777342423/bxotbg5mh77obhcyms3h.jpg",
+    alt: "Multiage Studios image 4",
+  },
 ];
 
 function StudioTile({ image }) {
@@ -39,7 +55,7 @@ function StudioTile({ image }) {
           }}
         >
           <img
-            src=""
+            src={image.src}
             alt={image.alt}
             style={{
               width: "100%",
