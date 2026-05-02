@@ -116,14 +116,6 @@ function Logo({ navigate, t }) {
 }
 
 function PasswordModal({ token, onClose }) {
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
-
   const modalRoot = typeof document !== "undefined" ? document.body : null;
 
   if (!modalRoot) {

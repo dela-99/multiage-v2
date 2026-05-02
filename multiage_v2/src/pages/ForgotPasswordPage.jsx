@@ -30,6 +30,7 @@ function EmailInput({ value, onChange, theme }) {
       </div>
       <input
         type="email"
+        aria-label="Email address"
         value={value}
         onChange={onChange}
         onFocus={() => setFocused(true)}
