@@ -13,7 +13,31 @@ function LockIcon() {
   );
 }
 
-function FormInput({ value, onChange, placeholder, theme }) {
+function EyeIcon({ open }) {
+  return open ? (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3l18 18" />
+      <path d="M10.58 10.58A2 2 0 0 0 13.42 13.42" />
+      <path d="M9.88 5.09A9.77 9.77 0 0 1 12 4.91c5 0 9.27 3.11 11 7.09a11.82 11.82 0 0 1-4.18 5.23" />
+      <path d="M6.61 6.61A11.81 11.81 0 0 0 1 12c1.73 3.98 6 7.09 11 7.09a9.77 9.77 0 0 0 4.09-.88" />
+    </svg>
+  ) : (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function evaluatePasswordStrength(password) {
+  return {
+    length: password.length >= 8,
+    number: /\d/.test(password),
+    symbol: /[^A-Za-z0-9]/.test(password),
+  };
+}
+
+function PasswordInput({ value, onChange, placeholder, visible, onToggle, theme }) {
   const [focused, setFocused] = useState(false);
 
   return (
@@ -29,7 +53,7 @@ function FormInput({ value, onChange, placeholder, theme }) {
         <LockIcon />
       </div>
       <input
-        type="password"
+        type={visible ? "text" : "password"}
         value={value}
         onChange={onChange}
         onFocus={() => setFocused(true)}
@@ -38,7 +62,7 @@ function FormInput({ value, onChange, placeholder, theme }) {
         required
         style={{
           width: "100%",
-          padding: "14px 16px 14px 46px",
+          padding: "14px 48px 14px 46px",
           borderRadius: 14,
           border: `1px solid ${focused ? "rgba(197,98,11,0.7)" : theme.inputBorder}`,
           background: focused ? "rgba(255,255,255,0.12)" : theme.inputBg,
@@ -51,6 +75,72 @@ function FormInput({ value, onChange, placeholder, theme }) {
           transition: "all 0.2s ease",
         }}
       />
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={visible ? "Hide password" : "Show password"}
+        style={{
+          position: "absolute",
+          right: 12,
+          top: "50%",
+          transform: "translateY(-50%)",
+          border: "none",
+          background: "transparent",
+          color: theme.textMuted,
+          cursor: "pointer",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 4,
+        }}
+      >
+        <EyeIcon open={visible} />
+      </button>
+    </div>
+  );
+}
+
+function StrengthRule({ ok, text }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, color: ok ? "#76d39a" : "rgba(255,255,255,0.6)", fontSize: 12 }}>
+      <span style={{
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        background: ok ? "#1e8449" : "rgba(255,255,255,0.18)",
+        flexShrink: 0,
+      }} />
+      <span>{text}</span>
+    </div>
+  );
+}
+
+function StrengthMeter({ password }) {
+  const checks = evaluatePasswordStrength(password);
+  const passed = Object.values(checks).filter(Boolean).length;
+  const barColor = passed === 3 ? "#1e8449" : passed === 2 ? "#C5620B" : "#c0392b";
+
+  return (
+    <div style={{ display: "grid", gap: 10 }}>
+      <div style={{
+        height: 8,
+        borderRadius: 999,
+        background: "rgba(255,255,255,0.08)",
+        overflow: "hidden",
+      }}>
+        <div style={{
+          width: `${(passed / 3) * 100}%`,
+          height: "100%",
+          borderRadius: 999,
+          background: barColor,
+          transition: "width 0.25s ease, background 0.25s ease",
+        }} />
+      </div>
+      <div style={{ display: "grid", gap: 6 }}>
+        <StrengthRule ok={checks.length} text="At least 8 characters" />
+        <StrengthRule ok={checks.number} text="Includes a number" />
+        <StrengthRule ok={checks.symbol} text="Includes a symbol" />
+      </div>
     </div>
   );
 }
@@ -64,6 +154,13 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const checks = evaluatePasswordStrength(password);
+  const passwordStrong = checks.length && checks.number && checks.symbol;
+  const passwordsMatch = password.length > 0 && password === confirmPassword;
+  const canSubmit = Boolean(token) && passwordStrong && passwordsMatch && !loading;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -71,16 +168,16 @@ export default function ResetPasswordPage() {
     setSuccess("");
 
     if (!token) {
-      setError("Reset token is missing from the link.");
+      setError("Reset link expired or invalid.");
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (!passwordStrong) {
+      setError("Password too weak.");
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (!passwordsMatch) {
       setError("Passwords do not match.");
       return;
     }
@@ -89,9 +186,9 @@ export default function ResetPasswordPage() {
     try {
       const result = await api.resetPassword({ token, password });
       setSuccess(result.message || "Password reset successfully.");
-      setTimeout(() => navigate("/login"), 1500);
+      setTimeout(() => navigate("/login"), 1600);
     } catch (err) {
-      setError(err.message || "Could not reset password.");
+      setError(err.message || "Reset link expired or invalid.");
     } finally {
       setLoading(false);
     }
@@ -106,7 +203,7 @@ export default function ResetPasswordPage() {
       justifyContent: "center",
       padding: "28px 18px",
     }}>
-      <div style={{ width: "100%", maxWidth: 430 }}>
+      <div style={{ width: "100%", maxWidth: 450 }}>
         <div style={{
           background: "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08))",
           border: "1px solid rgba(255,255,255,0.16)",
@@ -119,7 +216,7 @@ export default function ResetPasswordPage() {
           <div style={{ textAlign: "center", marginBottom: 24 }}>
             <h1 style={{ margin: 0, color: t.textPrimary, fontSize: 30, fontWeight: 800 }}>Reset password</h1>
             <p style={{ margin: "10px 0 0", color: t.textMuted, fontSize: 14, lineHeight: 1.7 }}>
-              Choose a new password for your account.
+              Create a strong new password for your account.
             </p>
           </div>
 
@@ -151,22 +248,35 @@ export default function ResetPasswordPage() {
               </div>
             )}
 
-            <FormInput
+            <PasswordInput
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="New password"
-              theme={t}
-            />
-            <FormInput
-              value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
-              placeholder="Confirm new password"
+              visible={showPassword}
+              onToggle={() => setShowPassword((current) => !current)}
               theme={t}
             />
 
+            <StrengthMeter password={password} />
+
+            <PasswordInput
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              placeholder="Confirm new password"
+              visible={showConfirmPassword}
+              onToggle={() => setShowConfirmPassword((current) => !current)}
+              theme={t}
+            />
+
+            {!passwordsMatch && confirmPassword && (
+              <div style={{ color: "#ff7262", fontSize: 13, marginTop: -4 }}>
+                Passwords do not match.
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={!canSubmit}
               style={{
                 width: "100%",
                 padding: "15px 18px",
@@ -176,8 +286,8 @@ export default function ResetPasswordPage() {
                 color: "#fff",
                 fontWeight: 800,
                 fontSize: 14,
-                cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading ? 0.72 : 1,
+                cursor: canSubmit ? "pointer" : "not-allowed",
+                opacity: canSubmit ? 1 : 0.55,
                 boxShadow: "0 12px 28px rgba(197,98,11,0.28)",
                 fontFamily: "inherit",
               }}

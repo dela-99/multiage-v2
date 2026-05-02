@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "../router";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
-import { api } from "../lib/api";
+ 
 
 const PersonIcon = () => (
   <svg width={16} height={16} viewBox="0 0 24 24" fill="none"
@@ -70,14 +70,11 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
-  const [forgotLoading, setForgotLoading] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
-    setInfo("");
     setLoading(true);
 
     try {
@@ -92,27 +89,6 @@ export default function LoginPage() {
       setError(err.message || "Cannot connect to server. Ensure backend is running.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async (event) => {
-    event.preventDefault();
-    setError("");
-    setInfo("");
-
-    if (!email) {
-      setError("Enter your email address first to reset your password.");
-      return;
-    }
-
-    setForgotLoading(true);
-    try {
-      const result = await api.forgotPassword({ email });
-      setInfo(result.message || "If an account exists, a reset link has been sent.");
-    } catch (err) {
-      setError(err.message || "Could not send password reset email.");
-    } finally {
-      setForgotLoading(false);
     }
   };
 
@@ -239,20 +215,6 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
-            {info && (
-              <div style={{
-                padding: "12px 14px",
-                borderRadius: 14,
-                background: "rgba(30,132,73,0.12)",
-                color: "#76d39a",
-                border: "1px solid rgba(30,132,73,0.24)",
-                fontSize: 13,
-                textAlign: "center",
-              }}>
-                {info}
-              </div>
-            )}
-
             <FormInput
               type="email"
               placeholder="Email address"
@@ -273,9 +235,9 @@ export default function LoginPage() {
 
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -2 }}>
               <a href="/forgot-password"
-                onClick={handleForgotPassword}
+                onClick={(event) => { event.preventDefault(); navigate("/forgot-password"); }}
                 style={{ color: "#C5620B", fontSize: 13, textDecoration: "none", fontWeight: 600 }}>
-                {forgotLoading ? "Sending reset link..." : "Forgot password?"}
+                Forgot password?
               </a>
             </div>
 
