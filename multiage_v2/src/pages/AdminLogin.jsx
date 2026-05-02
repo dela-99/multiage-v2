@@ -3,6 +3,8 @@ import { useNavigate } from "../router";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 
+const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance"]);
+
 const PersonIcon = () => (
   <svg width={16} height={16} viewBox="0 0 24 24" fill="none"
     stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -63,8 +65,6 @@ export default function AdminLogin() {
   const { t, bgGradient } = useTheme();
   const navigate = useNavigate();
   const { login, logout } = useAuth();
-
-  const role = "admin";
   const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
   const [error,    setError]    = useState("");
@@ -77,12 +77,13 @@ export default function AdminLogin() {
 
     try {
       const user = await login({ email, password });
-      if (user.role !== role) {
+      const normalizedRole = String(user.role || "").toLowerCase();
+      if (!ADMIN_ROLES.has(normalizedRole)) {
         logout();
         setError("This account is not an admin account.");
         return;
       }
-      navigate("/admin");
+      navigate("/admin/dashboard");
     } catch (err) {
       setError(err.message || "Cannot connect to server. Ensure backend is running.");
     } finally {

@@ -2,9 +2,12 @@ import { useEffect } from "react";
 import { useNavigate } from "../router";
 import { useAuth } from "../context/AuthContext";
 
+const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance"]);
+
 export default function ProtectedRoute({ children, adminOnly = false }) {
   const navigate = useNavigate();
   const { isReady, isAuthenticated, role } = useAuth();
+  const isAdminRole = ADMIN_ROLES.has(String(role || "").toLowerCase());
 
   useEffect(() => {
     if (!isReady) {
@@ -12,16 +15,16 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
     }
 
     if (!isAuthenticated) {
-      navigate(adminOnly ? "/admin-login" : "/login");
+      navigate(adminOnly ? "/admin/login" : "/login");
       return;
     }
 
-    if (adminOnly && role !== "admin") {
+    if (adminOnly && !isAdminRole) {
       navigate("/");
     }
-  }, [adminOnly, isAuthenticated, isReady, navigate, role]);
+  }, [adminOnly, isAdminRole, isAuthenticated, isReady, navigate, role]);
 
-  if (!isReady || !isAuthenticated || (adminOnly && role !== "admin")) {
+  if (!isReady || !isAuthenticated || (adminOnly && !isAdminRole)) {
     return null;
   }
 

@@ -53,6 +53,14 @@ export default function App() {
                   )}
                 />
                 <Route
+                  path="/admin/dashboard"
+                  element={(
+                    <ProtectedRoute adminOnly>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  )}
+                />
+                <Route
                   path="/payment/callback"
                   element={<PaymentCallbackPage />}
                 />
