@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import PageLayout from "../components/PageLayout";
 import { useTheme } from "../context/ThemeContext";
 import { Icon, SectionLabel, PageHeroHeading, BtnPrimary, GlowBlob } from "../components/ui";
@@ -39,7 +39,7 @@ function bannerInput(theme) {
   };
 }
 
-function ProductCard({ product, onBuyNow, onOpenDetails, loadingId }) {
+function ProductCard({ product, onBuyNow, onAddToCart, onOpenDetails, loadingId }) {
   const { t } = useTheme();
   const [hov, setHov] = useState(false);
   const emoji = EMOJI_BY_CATEGORY[product.category] || "📦";
@@ -84,29 +84,53 @@ function ProductCard({ product, onBuyNow, onOpenDetails, loadingId }) {
         </div>
         <h4 style={{ fontSize: 14, fontWeight: 700, color: t.textPrimary, marginBottom: 6 }}>{product.name}</h4>
         <p style={{ fontSize: 12, color: t.textMuted, lineHeight: 1.5, marginBottom: 12 }}>{product.description}</p>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "grid", gap: 12 }}>
           <span style={{ fontSize: 16, fontWeight: 800, color: "#C5620B" }}>
             GHS {Number(product.price || 0).toLocaleString()}
           </span>
-          <button
-            onClick={(event) => {
-              event.stopPropagation();
-              onBuyNow(product);
-            }}
-            style={{
-              padding: "7px 16px",
-              background: "linear-gradient(135deg,#C5620B,#6A2B09)",
-              border: "none",
-              borderRadius: 10,
-              fontSize: 12,
-              fontWeight: 700,
-              color: "#fff",
-              cursor: "pointer",
-              opacity: loadingId === product._id ? 0.75 : 1,
-            }}
-          >
-            {loadingId === product._id ? "Processing..." : "Buy Now"}
-          </button>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                onAddToCart(product);
+              }}
+              style={{
+                flex: 1,
+                minWidth: 110,
+                padding: "9px 14px",
+                background: t.surface,
+                border: `1px solid ${t.border}`,
+                borderRadius: 10,
+                fontSize: 12,
+                fontWeight: 700,
+                color: t.textPrimary,
+                cursor: "pointer",
+              }}
+            >
+              Add to Cart
+            </button>
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                onBuyNow(product);
+              }}
+              style={{
+                flex: 1,
+                minWidth: 110,
+                padding: "9px 14px",
+                background: "linear-gradient(135deg,#C5620B,#6A2B09)",
+                border: "none",
+                borderRadius: 10,
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#fff",
+                cursor: "pointer",
+                opacity: loadingId === product._id ? 0.75 : 1,
+              }}
+            >
+              {loadingId === product._id ? "Processing..." : "Buy Now"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -128,6 +152,8 @@ export default function StorePage() {
   const [bannerOpen, setBannerOpen] = useState(false);
   const [inquiry, setInquiry] = useState({ name: "", email: "", phone: "", deviceRequested: "", message: "" });
   const [inquiryState, setInquiryState] = useState({ loading: false, success: "", error: "" });
+  const [toast, setToast] = useState("");
+  const toastTimerRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -205,6 +231,17 @@ export default function StorePage() {
     navigate(`/product/${product._id}`);
   };
 
+  const showToast = (message) => {
+    setToast(message);
+    window.clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = window.setTimeout(() => setToast(""), 2200);
+  };
+
+  const handleAddToCart = (product) => {
+    addItem(product);
+    showToast("Item added to cart");
+  };
+
   const updateInquiry = (field) => (event) => {
     setInquiry((current) => ({ ...current, [field]: event.target.value }));
   };
@@ -234,6 +271,8 @@ export default function StorePage() {
       setInquiryState({ loading: false, success: "", error: err.message || "Failed to send inquiry" });
     }
   };
+
+  useEffect(() => () => window.clearTimeout(toastTimerRef.current), []);
 
   return (
     <PageLayout>
@@ -356,6 +395,7 @@ export default function StorePage() {
                 key={product._id}
                 product={product}
                 onBuyNow={handleBuyNow}
+                onAddToCart={handleAddToCart}
                 onOpenDetails={openDetails}
                 loadingId={buyingId}
               />
@@ -372,6 +412,23 @@ export default function StorePage() {
           <BtnPrimary href="/contact">Contact Us <Icon d={icons.arrow} size={15} /></BtnPrimary>
         </div>
       </div>
+
+      {toast && (
+        <div style={{
+          position: "fixed",
+          right: 20,
+          bottom: 20,
+          zIndex: 2500,
+          padding: "12px 16px",
+          borderRadius: 14,
+          background: "rgba(30,132,73,0.94)",
+          color: "#fff",
+          fontWeight: 700,
+          boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
+        }}>
+          {toast}
+        </div>
+      )}
     </PageLayout>
   );
 }

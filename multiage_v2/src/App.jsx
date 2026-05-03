@@ -23,6 +23,7 @@ import PaymentCallbackPage from "./pages/PaymentCallbackPage";
 import ProductDetails from "./pages/ProductDetails";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import CartPage from "./pages/CartPage";
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
                 <Route path="/hardware"             element={<HardwarePage />} />
                 <Route path="/contact"              element={<ContactPage />} />
                 <Route path="/product/:id"          element={<ProductDetails />} />
+                <Route path="/cart"                 element={<CartPage />} />
                 <Route path="/login"                element={<LoginPage />} />
                 <Route path="/register"             element={<RegisterPage />} />
                 <Route path="/forgot-password"      element={<ForgotPasswordPage />} />

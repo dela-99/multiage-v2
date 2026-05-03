@@ -36,13 +36,41 @@ export function CartProvider({ children }) {
     });
   };
 
+  const removeItem = (productId) => {
+    setItems((current) => current.filter((item) => item._id !== productId));
+  };
+
+  const updateQuantity = (productId, quantity) => {
+    setItems((current) => current.flatMap((item) => {
+      if (item._id !== productId) {
+        return [item];
+      }
+
+      if (quantity <= 0) {
+        return [];
+      }
+
+      return [{ ...item, quantity }];
+    }));
+  };
+
   const clearCart = () => setItems([]);
+
+  const totalItems = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const totalPrice = items.reduce(
+    (sum, item) => sum + (Number(item.price || 0) * Number(item.quantity || 0)),
+    0
+  );
 
   const value = useMemo(() => ({
     items,
     addItem,
+    removeItem,
+    updateQuantity,
     clearCart,
-  }), [items]);
+    totalItems,
+    totalPrice,
+  }), [items, totalItems, totalPrice]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

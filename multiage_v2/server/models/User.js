@@ -1,6 +1,15 @@
 const mongoose = require("mongoose");
 const bcrypt   = require("bcryptjs");
 
+const ADMIN_ROLE_VALUES = [
+  "CEO",
+  "CYBER_IT",
+  "FINANCE",
+  "ADMINISTRATOR",
+  "SECRETARY",
+  "GRAPHICS/MEDIA",
+];
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -28,6 +37,12 @@ const userSchema = new mongoose.Schema(
       enum:    ["user", "admin", "ceo", "administrator", "finance", "media", "cyber_it", "graphics"],
       lowercase: true,
       default: "user",
+    },
+    adminRole: {
+      type: String,
+      enum: ADMIN_ROLE_VALUES,
+      default: "ADMINISTRATOR",
+      trim: true,
     },
     mustChangePassword: {
       type:    Boolean,
@@ -69,6 +84,11 @@ userSchema.pre("save", async function (next) {
 userSchema.pre("validate", function (next) {
   if (this.role) {
     this.role = String(this.role).toLowerCase();
+  }
+
+  if (this.adminRole) {
+    const normalizedAdminRole = String(this.adminRole).trim().toUpperCase().replace(/\s*\/\s*/g, "/");
+    this.adminRole = normalizedAdminRole === "GRAPHICS" ? "GRAPHICS/MEDIA" : normalizedAdminRole;
   }
 
   next();

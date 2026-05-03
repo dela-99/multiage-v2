@@ -3,6 +3,7 @@ import PageLayout from "../components/PageLayout";
 import { BtnPrimary, PageHeroHeading, SectionLabel } from "../components/ui";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import { api } from "../lib/api";
 import { useNavigate, useParams } from "../router";
 
@@ -21,12 +22,14 @@ const FALLBACK_IMAGE = "https://res.cloudinary.com/delaridge/image/upload/v17764
 export default function ProductDetails() {
   const { t } = useTheme();
   const { token } = useAuth();
+  const { addItem } = useCart();
   const navigate = useNavigate();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
+  const [toast, setToast] = useState("");
   const sliderRef = useRef(null);
 
   useEffect(() => {
@@ -127,6 +130,25 @@ export default function ProductDetails() {
       setError(err.message || "Failed to create order");
     }
   };
+
+  const handleAddToCart = () => {
+    if (!product) {
+      return;
+    }
+
+    addItem(product);
+    setError("");
+    setToast("Item added to cart");
+  };
+
+  useEffect(() => {
+    if (!toast) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => setToast(""), 2200);
+    return () => window.clearTimeout(timeoutId);
+  }, [toast]);
 
   return (
     <PageLayout>
@@ -265,6 +287,7 @@ export default function ProductDetails() {
                 )}
 
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                  <BtnPrimary onClick={handleAddToCart}>Add to Cart</BtnPrimary>
                   <BtnPrimary onClick={handleBuyNow}>Buy Now</BtnPrimary>
                   <BtnPrimary href="/store">Back to Store</BtnPrimary>
                 </div>
@@ -273,6 +296,23 @@ export default function ProductDetails() {
           </>
         ) : null}
       </section>
+
+      {toast && (
+        <div style={{
+          position: "fixed",
+          right: 20,
+          bottom: 20,
+          zIndex: 2500,
+          padding: "12px 16px",
+          borderRadius: 14,
+          background: "rgba(30,132,73,0.94)",
+          color: "#fff",
+          fontWeight: 700,
+          boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
+        }}>
+          {toast}
+        </div>
+      )}
     </PageLayout>
   );
 }

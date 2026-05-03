@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
 function MenuIcon({ path }) {
@@ -16,47 +17,65 @@ const ICONS = {
   Orders: "M7 4h10l1 2h3v2H3V6h3l1-2Z M5 8h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8Z",
   Sales: "M4 19V9 M10 19V5 M16 19v-8 M22 19v-12",
   Customers: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M16 3.13a4 4 0 0 1 0 7.75 M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
+  Users: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M16 3.13a4 4 0 0 1 0 7.75 M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
   Newsletter: "M4 6h16v12H4z M4 7l8 6 8-6",
+  "Media / Content": "M4 7h16 M4 12h10 M4 17h7 M18 17a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+  Communications: "M4 6h16v12H4z M4 7l8 6 8-6",
   Settings: "M12 3v3 M12 18v3 M4.93 4.93l2.12 2.12 M16.95 16.95l2.12 2.12 M3 12h3 M18 12h3 M4.93 19.07l2.12-2.12 M16.95 7.05l2.12-2.12 M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
 };
 
 export default function Sidebar({ items, active, onSelect, isMobile, isOpen, onClose }) {
   const { t } = useTheme();
 
+  useEffect(() => {
+    if (isMobile && isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobile, isOpen]);
+
   return (
     <>
-      {isMobile && isOpen && (
-        <button
+      {isMobile && (
+        <div
           onClick={onClose}
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            border: "none",
-            zIndex: 29,
+            background: "rgba(0,0,0,0.5)",
+            backdropFilter: "blur(4px)",
+            opacity: isOpen ? 1 : 0,
+            visibility: isOpen ? "visible" : "hidden",
+            zIndex: 998,
+            transition: "all 0.3s ease",
             cursor: "pointer",
           }}
-          aria-label="Close sidebar"
+          aria-hidden="true"
         />
       )}
 
       <aside style={{
-        width: isMobile ? 286 : "100%",
-        maxWidth: isMobile ? 286 : "none",
+        width: isMobile ? 280 : "100%",
         background: t.cardBg,
-        border: `1px solid ${t.cardBorder}`,
-        borderRadius: isMobile ? "0 24px 24px 0" : 28,
+        borderRight: isMobile ? `1px solid ${t.border}` : "none",
+        border: isMobile ? "none" : `1px solid ${t.cardBorder}`,
+        borderRadius: isMobile ? 0 : 28,
         padding: 22,
         backdropFilter: "blur(16px)",
         position: isMobile ? "fixed" : "sticky",
         top: isMobile ? 0 : 88,
         left: isMobile ? (isOpen ? 0 : -320) : "auto",
         height: isMobile ? "100vh" : "calc(100vh - 120px)",
-        zIndex: 30,
-        transition: "left 0.25s ease",
+        zIndex: 999,
+        transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        boxShadow: isMobile && isOpen ? "10px 0 40px rgba(0,0,0,0.2)" : "none",
         overflowY: "auto",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
+        <div style={{ display: isMobile ? "none" : "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
           <div style={{
             width: 46,
             height: 46,
@@ -117,16 +136,6 @@ export default function Sidebar({ items, active, onSelect, isMobile, isOpen, onC
                     justifyContent: "center",
                     flexShrink: 0,
                   }}>
-                    <MenuIcon path={ICONS[item.key]} />
+                    <MenuIcon path={ICONS[item.key] || ICONS.Dashboard} />
                   </span>
-                  <span style={{ fontWeight: 700, fontSize: 14 }}>{item.label}</span>
-                </span>
-                <span style={{ opacity: activeItem ? 1 : 0.35, fontWeight: 700 }}>{">"}</span>
-              </button>
-            );
-          })}
-        </nav>
-      </aside>
-    </>
-  );
-}
+                  <span style={{ fo

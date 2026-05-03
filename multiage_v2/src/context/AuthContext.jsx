@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
       name: data.name,
       email: data.email,
       role: data.role,
+      adminRole: data.adminRole || data.role || "",
       firebaseId: data.firebaseId || "",
       profilePicture: data.profilePicture || "",
     };
@@ -56,6 +57,7 @@ export function AuthProvider({ children }) {
       name: data.name,
       email: data.email,
       role: data.role,
+      adminRole: data.adminRole || data.role || "",
       firebaseId: data.firebaseId || "",
       profilePicture: data.profilePicture || "",
     };
@@ -71,6 +73,7 @@ export function AuthProvider({ children }) {
       name: data.name,
       email: data.email,
       role: data.role,
+      adminRole: data.adminRole || data.role || "",
       firebaseId: data.firebaseId || "",
       profilePicture: data.profilePicture || "",
     };
@@ -100,6 +103,7 @@ export function AuthProvider({ children }) {
     token,
     user,
     role: user?.role || "",
+    adminRole: user?.adminRole || user?.role || "",
     isAuthenticated: Boolean(token),
     isReady,
     login,

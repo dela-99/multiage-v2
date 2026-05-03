@@ -2,6 +2,8 @@ const Order   = require("../models/Order");
 const Product = require("../models/Product");
 const { sendAdminNewOrderNotification } = require("../services/emailService");
 
+const ADMIN_OVERRIDE_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance"]);
+
 // ── @route  POST /api/orders ──────────────────────────────────────
 // ── @access Private (logged-in user)
 const createOrder = async (req, res, next) => {
@@ -112,12 +114,50 @@ const getOrder = async (req, res, next) => {
     // Users can only see their own orders; admins see all
     if (
       order.user._id.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
+      !ADMIN_OVERRIDE_ROLES.has(String(req.user.role || "").toLowerCase())
     ) {
       return res.status(403).json({ message: "Access denied" });
     }
 
     res.json(order);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ── @route  PATCH /api/orders/:id/cancel ──────────────────────────
+// ── @access Private
+const cancelOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const isOwner = order.user.toString() === req.user._id.toString();
+    const isAdmin = ADMIN_OVERRIDE_ROLES.has(String(req.user.role || "").toLowerCase());
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    if (order.status === "cancelled") {
+      return res.status(400).json({ message: "Order has already been cancelled" });
+    }
+
+    if (order.status !== "pending") {
+      return res.status(400).json({ message: "Only pending orders can be cancelled" });
+    }
+
+    order.status = "cancelled";
+
+    if (!order.isPaid) {
+      order.paymentStatus = "cancelled";
+    }
+
+    const updated = await order.save();
+    res.json(updated);
   } catch (err) {
     next(err);
   }
@@ -173,5 +213,5 @@ const deleteOrder = async (req, res, next) => {
 
 module.exports = {
   createOrder, getMyOrders, getOrder,
-  getAllOrders, updateOrderStatus, deleteOrder,
+  getAllOrders, updateOrderStatus, deleteOrder, cancelOrder,
 };

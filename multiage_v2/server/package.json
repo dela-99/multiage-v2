@@ -4,7 +4,10 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "roles:update": "node scripts/updateAdminRoles.js",
+    "roles:migrate": "node scripts/migrateRoles.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

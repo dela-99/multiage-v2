@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "../router";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import ChangePasswordForm from "./ChangePasswordForm";
 
 /* ── Hardware added; Login handled via separate button ───────────── */
@@ -15,6 +16,8 @@ const NAV_LINKS = [
   { label: "Studios",   href: "/services" },
   { label: "Contact",    href: "/contact" },
 ];
+
+const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance", "secretary", "graphics", "media"]);
 
 function HamburgerIcon({ open }) {
   const bar = {
@@ -46,6 +49,17 @@ function ThemeIconAnim({ isLight }) {
         }
       </svg>
     </span>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="20" r="1.5" />
+      <circle cx="18" cy="20" r="1.5" />
+      <path d="M3 4h2l2.4 10.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.76L20 7H7.2" />
+    </svg>
   );
 }
 
@@ -223,6 +237,7 @@ function PersonIcon() {
 export default function Navbar() {
   const { isLight, toggleTheme, t } = useTheme();
   const { user, token, logout, isAuthenticated } = useAuth();
+  const { totalItems } = useCart();
   const navigate     = useNavigate();
   const { pathname } = useLocation();
   const [scrolled,  setScrolled]  = useState(false);
@@ -284,6 +299,24 @@ export default function Navbar() {
   };
 
   const onLoginPage = pathname === "/login";
+  const isAdminUser = ADMIN_ROLES.has(String(user?.role || "").toLowerCase());
+
+  const navActionPillBase = {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "7px 16px",
+    background: t.surface,
+    border: `1px solid ${t.border}`,
+    borderRadius: 100,
+    fontSize: 13,
+    fontWeight: 600,
+    color: t.textSecondary,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    transition: "all 0.25s ease",
+    position: "relative",
+  };
 
   return (
     <nav style={{
@@ -317,9 +350,69 @@ export default function Navbar() {
 
           {/* Right actions */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8, flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => navigate("/cart")}
+              aria-label="Open cart"
+              style={{
+                ...iconBtn,
+                position: "relative",
+                color: pathname === "/cart" ? "#C5620B" : t.textPrimary,
+                border: `1px solid ${pathname === "/cart" ? "rgba(197,98,11,0.35)" : t.border}`,
+                background: pathname === "/cart" ? "rgba(197,98,11,0.14)" : t.surface,
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
+              onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+            >
+              <CartIcon />
+              {totalItems > 0 && (
+                <span style={{
+                  position: "absolute",
+                  top: -5,
+                  right: -5,
+                  minWidth: 18,
+                  height: 18,
+                  padding: "0 4px",
+                  borderRadius: 999,
+                  background: "#C5620B",
+                  color: "#fff",
+                  fontSize: 11,
+                  fontWeight: 800,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 8px 18px rgba(197,98,11,0.35)",
+                }}>
+                  {totalItems}
+                </span>
+              )}
+            </button>
 
             {isAuthenticated ? (
               <div className="nav-desktop" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {isAdminUser && (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/admin/dashboard")}
+                    style={{
+                      ...navActionPillBase,
+                      background: pathname === "/admin" || pathname === "/admin/dashboard"
+                        ? "rgba(197,98,11,0.14)"
+                        : t.surface,
+                      border: `1px solid ${pathname === "/admin" || pathname === "/admin/dashboard" ? "rgba(197,98,11,0.35)" : t.border}`,
+                      color: pathname === "/admin" || pathname === "/admin/dashboard" ? "#C5620B" : t.textSecondary,
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; e.currentTarget.style.color = t.textPrimary; e.currentTarget.style.borderColor = "rgba(197,98,11,0.35)"; }}
+                    onMouseLeave={e => {
+                      const isDashboardPath = pathname === "/admin" || pathname === "/admin/dashboard";
+                      e.currentTarget.style.background = isDashboardPath ? "rgba(197,98,11,0.14)" : t.surface;
+                      e.currentTarget.style.color = isDashboardPath ? "#C5620B" : t.textSecondary;
+                      e.currentTarget.style.borderColor = isDashboardPath ? "rgba(197,98,11,0.35)" : t.border;
+                    }}
+                  >
+                    Dashboard
+                  </button>
+                )}
                 <div style={{ position: "relative" }}>
                   <button
                     type="button"
@@ -409,13 +502,8 @@ export default function Navbar() {
                 onClick={e => { e.preventDefault(); navigate("/login"); }}
                 className="nav-desktop"
                 style={{
-                  display: "flex", alignItems: "center", gap: 6,
-                  padding: "7px 16px",
-                  background: t.surface, border: `1px solid ${t.border}`,
-                  borderRadius: 100,
-                  fontSize: 13, fontWeight: 600, color: t.textSecondary,
+                  ...navActionPillBase,
                   textDecoration: "none", whiteSpace: "nowrap",
-                  transition: "all 0.25s ease",
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; e.currentTarget.style.color = t.textPrimary; e.currentTarget.style.borderColor = "rgba(197,98,11,0.35)"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = t.surface; e.currentTarget.style.color = t.textSecondary; e.currentTarget.style.borderColor = t.border; }}
@@ -472,6 +560,42 @@ export default function Navbar() {
 
           {isAuthenticated ? (
             <>
+              {isAdminUser && (
+                <button
+                  type="button"
+                  onClick={() => { navigate("/admin/dashboard"); setMenuOpen(false); }}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    width: "100%",
+                    padding: "13px 16px", borderRadius: 12,
+                    fontSize: 14, fontWeight: 600,
+                    color: t.textPrimary, background: t.surface, border: `1px solid ${t.border}`,
+                    transition: "background 0.2s",
+                    cursor: "pointer", fontFamily: "inherit",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = t.surface; }}
+                >
+                  Dashboard
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => { navigate("/cart"); setMenuOpen(false); }}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  width: "100%",
+                  padding: "13px 16px", borderRadius: 12,
+                  fontSize: 14, fontWeight: 600,
+                  color: t.textPrimary, background: t.surface, border: `1px solid ${t.border}`,
+                  transition: "background 0.2s",
+                  cursor: "pointer", fontFamily: "inherit",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; }}
+                onMouseLeave={e => { e.currentTarget.style.background = t.surface; }}
+              >
+                <CartIcon /> Cart {totalItems > 0 ? `(${totalItems})` : ""}
+              </button>
               <button
                 type="button"
                 onClick={() => { navigate("/my-orders"); setMenuOpen(false); }}
@@ -525,22 +649,41 @@ export default function Navbar() {
             </>
           ) : (
             !onLoginPage && (
-              <a
-                href="/login"
-                onClick={e => { e.preventDefault(); navigate("/login"); setMenuOpen(false); }}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  padding: "13px 16px", borderRadius: 12,
-                  fontSize: 14, fontWeight: 600,
-                  color: t.textPrimary, textDecoration: "none",
-                  background: t.surface, border: `1px solid ${t.border}`,
-                  transition: "background 0.2s",
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = t.surfaceHover}
-                onMouseLeave={e => e.currentTarget.style.background = t.surface}
-              >
-                <PersonIcon /> Login
-              </a>
+              <>
+                <button
+                  type="button"
+                  onClick={() => { navigate("/cart"); setMenuOpen(false); }}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    width: "100%",
+                    padding: "13px 16px", borderRadius: 12,
+                    fontSize: 14, fontWeight: 600,
+                    color: t.textPrimary, background: t.surface, border: `1px solid ${t.border}`,
+                    transition: "background 0.2s",
+                    cursor: "pointer", fontFamily: "inherit",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = t.surfaceHover}
+                  onMouseLeave={e => e.currentTarget.style.background = t.surface}
+                >
+                  <CartIcon /> Cart {totalItems > 0 ? `(${totalItems})` : ""}
+                </button>
+                <a
+                  href="/login"
+                  onClick={e => { e.preventDefault(); navigate("/login"); setMenuOpen(false); }}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    padding: "13px 16px", borderRadius: 12,
+                    fontSize: 14, fontWeight: 600,
+                    color: t.textPrimary, textDecoration: "none",
+                    background: t.surface, border: `1px solid ${t.border}`,
+                    transition: "background 0.2s",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = t.surfaceHover}
+                  onMouseLeave={e => e.currentTarget.style.background = t.surface}
+                >
+                  <PersonIcon /> Login
+                </a>
+              </>
             )
           )}
         </div>

@@ -2,13 +2,14 @@ const express = require("express");
 const router  = express.Router();
 const {
   createOrder, getMyOrders, getOrder,
-  getAllOrders, updateOrderStatus, deleteOrder,
+  getAllOrders, updateOrderStatus, deleteOrder, cancelOrder,
 } = require("../controllers/orderController");
 const { protect, adminOnly } = require("../middleware/auth");
 
 // Private (user)
 router.post("/",     protect, createOrder);
 router.get("/my",    protect, getMyOrders);
+router.patch("/:id/cancel", protect, cancelOrder);
 router.get("/:id",   protect, getOrder);
 
 // Admin

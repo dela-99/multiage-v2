@@ -10,6 +10,11 @@ const roles = {
     "dashboard:read",
     "orders:manage"
   ],
+  secretary: [
+    "dashboard:read",
+    "orders:read",
+    "orders:manage"
+  ],
   finance: [
     "finance:read",
     "finance:write",

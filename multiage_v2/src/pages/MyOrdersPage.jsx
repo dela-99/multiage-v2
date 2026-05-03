@@ -10,6 +10,8 @@ export default function MyOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState("");
+  const [cancellingId, setCancellingId] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -34,6 +36,31 @@ export default function MyOrdersPage() {
     load();
     return () => { active = false; };
   }, [token]);
+
+  useEffect(() => {
+    if (!toast) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => setToast(""), 2200);
+    return () => window.clearTimeout(timeoutId);
+  }, [toast]);
+
+  const handleCancelOrder = async (orderId) => {
+    try {
+      setCancellingId(orderId);
+      const updatedOrder = await api.cancelOrder(orderId, token);
+      setOrders((current) => current.map((order) => (
+        order._id === orderId ? updatedOrder : order
+      )));
+      setToast("Order cancelled successfully");
+      setError("");
+    } catch (err) {
+      setError(err.message || "Could not cancel this order.");
+    } finally {
+      setCancellingId("");
+    }
+  };
 
   return (
     <PageLayout>
@@ -135,6 +162,28 @@ export default function MyOrdersPage() {
                     Payment reference: {order.paymentReference}
                   </div>
                 )}
+                {order.status === "pending" && (
+                  <div style={{ marginTop: 16 }}>
+                    <button
+                      type="button"
+                      onClick={() => handleCancelOrder(order._id)}
+                      disabled={cancellingId === order._id}
+                      style={{
+                        padding: "10px 16px",
+                        borderRadius: 12,
+                        border: "1px solid rgba(192,57,43,0.28)",
+                        background: "rgba(192,57,43,0.12)",
+                        color: "#c0392b",
+                        fontWeight: 700,
+                        cursor: cancellingId === order._id ? "not-allowed" : "pointer",
+                        opacity: cancellingId === order._id ? 0.65 : 1,
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      {cancellingId === order._id ? "Cancelling..." : "Cancel Order"}
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -143,6 +192,23 @@ export default function MyOrdersPage() {
         <div style={{ marginTop: 28 }}>
           <BtnPrimary href="/store">Back to store</BtnPrimary>
         </div>
+
+        {toast && (
+          <div style={{
+            position: "fixed",
+            right: 20,
+            bottom: 20,
+            zIndex: 2500,
+            padding: "12px 16px",
+            borderRadius: 14,
+            background: "rgba(30,132,73,0.94)",
+            color: "#fff",
+            fontWeight: 700,
+            boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
+          }}>
+            {toast}
+          </div>
+        )}
       </section>
     </PageLayout>
   );
