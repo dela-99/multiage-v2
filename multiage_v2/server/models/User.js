@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type:    String,
-      enum:    ["user", "admin", "ceo", "administrator", "finance", "graphics_media", "cyber_it"],
+      enum:    ["user", "admin", "ceo", "administrator", "finance", "graphics_media", "cyber_it", "secretary"],
       lowercase: true,
       default: "user",
     },
@@ -93,6 +93,9 @@ userSchema.pre("save", async function (next) {
 userSchema.pre("validate", function (next) {
   if (this.role) {
     this.role = String(this.role).toLowerCase();
+    if (this.role === "graphics" || this.role === "media") {
+      this.role = "graphics_media";
+    }
   }
 
   if (this.adminRole) {

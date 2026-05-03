@@ -10,6 +10,8 @@ const {
 } = require("../services/paystackService");
 const { sendPaidOrderConfirmation } = require("../services/emailService");
 
+const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "finance", "cyber_it", "secretary", "graphics_media"]);
+
 function buildReference(orderId) {
   return `MAG-${orderId}-${Date.now()}`;
 }
@@ -118,7 +120,7 @@ const initializePayment = async (req, res, next) => {
     }
 
     const ownsOrder = String(order.user) === String(req.user._id);
-    if (!ownsOrder && req.user.role !== "admin") {
+    if (!ownsOrder && !ADMIN_ROLES.has(String(req.user.role || "").toLowerCase())) {
       return res.status(403).json({ message: "Access denied" });
     }
 
@@ -174,7 +176,7 @@ const verifyPayment = async (req, res, next) => {
       return res.status(404).json({ message: "Order not found for this payment reference" });
     }
 
-    if (order.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+    if (order.user.toString() !== req.user._id.toString() && !ADMIN_ROLES.has(String(req.user.role || "").toLowerCase())) {
       return res.status(403).json({ message: "Not authorized" });
     }
 

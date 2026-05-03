@@ -36,21 +36,39 @@ export default function AdministratorDashboard({ role, token, user }) {
   const { products, orders, loading, error } = useAdminResources(token, { products: true, orders: true });
   const [productList, setProductList] = useState([]);
 
+  // RBAC logic for UI visibility
+  const isFullAdmin = ["ceo", "cyber_it", "administrator"].includes(role?.toLowerCase());
+  const isGraphicsMedia = role?.toLowerCase() === "graphics_media";
+  const canManageOrders = isFullAdmin || ["secretary", "finance"].includes(role?.toLowerCase());
+
   useEffect(() => {
     setProductList(products || []);
   }, [products]);
 
   const filteredOrders = useMemo(() => (orders ?? []).filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
 
-  const cards = [
-    { label: "Catalog Size", value: String(productList.length), subtitle: "Live backend products", change: 0, icon: <StatIcon type="shield" /> },
-    { label: "Active Orders", value: String(filteredOrders.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
-    { label: "Inventory Lines", value: String(productList.filter((item) => Number(item.stock || 0) > 0).length), subtitle: "Items in stock", change: 0, icon: <StatIcon type="balance" /> },
-  ];
+  const cards = useMemo(() => {
+    const baseCards = [
+      { label: "Catalog Size", value: String(productList.length), subtitle: "Live backend products", change: 0, icon: <StatIcon type="shield" /> },
+    ];
+
+    // Only show operational/financial stats to full admins or secretaries/finance
+    if (!isGraphicsMedia) {
+      baseCards.push(
+        { label: "Active Orders", value: String(filteredOrders.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
+        { label: "Inventory Lines", value: String(productList.filter((item) => Number(item.stock || 0) > 0).length), subtitle: "Items in stock", change: 0, icon: <StatIcon type="balance" /> }
+      );
+    }
+
+    return baseCards;
+  }, [productList, filteredOrders, orders, rangeDays, isGraphicsMedia]);
 
   const sections = {
     Dashboard: <MetricOverview cards={cards} />,
-    Products: (
+  };
+
+  if (isFullAdmin || isGraphicsMedia) {
+    sections.Products = (
       <ProductManagerSection
         products={productList}
         token={token}
@@ -71,18 +89,27 @@ export default function AdministratorDashboard({ role, token, user }) {
           }
         }}
       />
-    ),
-    Inventory: <InventorySection products={productList} />,
-    Orders: <OrdersSection orders={filteredOrders} title="Managed Orders" description="Orders currently visible to the administrative operations team." />,
-    Users: <SimpleInfoSection title="Users" description="Administrative access visibility." body="This area is reserved for controlled user and role governance. Backend RBAC remains the source of truth even when the frontend workspace evolves." />,
-    Settings: <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />,
-  };
+    );
+  }
+
+  if (isFullAdmin) {
+    sections.Inventory = <InventorySection products={productList} />;
+    sections.Users = <SimpleInfoSection title="Users" description="Administrative access visibility." body="This area is reserved for controlled user and role governance. Backend RBAC remains the source of truth even when the frontend workspace evolves." />;
+  }
+
+  if (canManageOrders) {
+    sections.Orders = <OrdersSection orders={filteredOrders} title="Managed Orders" description="Orders currently visible to the administrative operations team." />;
+  }
+
+  sections.Settings = <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />;
+
+  const dashboardTitle = isGraphicsMedia ? "Graphics & Media Workspace" : "Administrator Dashboard";
 
   return (
     <RoleDashboardLayout
       role={role}
-      title="Administrator Dashboard"
-      subtitle={`Welcome back, ${user?.name || "Administrator"}. This workspace focuses on catalog operations, stock, and order coordination.`}
+      title={dashboardTitle}
+      subtitle={`Welcome back, ${user?.name || "Member"}. Your workspace is tailored to your role's specific responsibilities.`}
       loading={loading}
       error={error}
       sections={sections}
