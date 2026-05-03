@@ -7,10 +7,10 @@ const ADMIN_ROLE_VALUES = [
   "FINANCE",
   "ADMINISTRATOR",
   "SECRETARY",
-  "GRAPHICS/MEDIA",
+  "GRAPHICS_MEDIA",
 ];
 
-const ADMIN_ROLES = ["admin", "ceo", "administrator", "finance", "cyber_it", "secretary", "media", "graphics"];
+const ADMIN_ROLES = ["admin", "ceo", "administrator", "finance", "cyber_it", "secretary", "graphics_media"];
 
 const userSchema = new mongoose.Schema(
   {
@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type:    String,
-      enum:    ["user", "admin", "ceo", "administrator", "finance", "media", "cyber_it", "graphics"],
+      enum:    ["user", "admin", "ceo", "administrator", "finance", "graphics_media", "cyber_it"],
       lowercase: true,
       default: "user",
     },
@@ -96,8 +96,8 @@ userSchema.pre("validate", function (next) {
   }
 
   if (this.adminRole) {
-    const normalizedAdminRole = String(this.adminRole).trim().toUpperCase().replace(/\s*\/\s*/g, "/");
-    this.adminRole = normalizedAdminRole === "GRAPHICS" ? "GRAPHICS/MEDIA" : normalizedAdminRole;
+    const normalizedAdminRole = String(this.adminRole).trim().toUpperCase().replace(/\s*\/\s*/g, "_");
+    this.adminRole = (normalizedAdminRole === "GRAPHICS" || normalizedAdminRole === "MEDIA") ? "GRAPHICS_MEDIA" : normalizedAdminRole;
   }
 
   next();

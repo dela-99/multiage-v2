@@ -2,7 +2,7 @@ const jwt  = require("jsonwebtoken");
 const User = require("../models/User");
 const rolesConfig = require("../config/roles");
 
-const ADMIN_ROLES = new Set(["admin", "ceo", "cyber_it", "administrator"]);
+const ADMIN_ROLES = new Set(["admin", "ceo", "cyber_it", "administrator", "finance", "secretary", "graphics_media"]);
 
 // ── Protect: any logged-in user ───────────────────────────────────
 const protect = async (req, res, next) => {
