@@ -432,7 +432,15 @@ export default function Navbar() {
                       gap: 6
                     }}
                   >
-                    {user?.name || "Account"}
+                    <span style={{ 
+                      maxWidth: 80, 
+                      overflow: "hidden", 
+                      textOverflow: "ellipsis", 
+                      whiteSpace: "nowrap",
+                      display: "inline-block"
+                    }}>
+                      {user?.name ? user.name.split(" ")[0] : "Account"}
+                    </span>
                     <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ transform: isDropdownOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }}>
                       <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>

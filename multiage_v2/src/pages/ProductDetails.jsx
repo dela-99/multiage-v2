@@ -19,6 +19,8 @@ function placeholderStyle(theme) {
 
 const FALLBACK_IMAGE = "https://res.cloudinary.com/delaridge/image/upload/v1776476116/vhgqjkjeclcvfrsrnhwl.png";
 
+const STORE_ACTIVE = false;
+
 export default function ProductDetails() {
   const { t } = useTheme();
   const { token } = useAuth();
@@ -287,8 +289,8 @@ export default function ProductDetails() {
                 )}
 
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                  <BtnPrimary onClick={handleAddToCart}>Add to Cart</BtnPrimary>
-                  <BtnPrimary onClick={handleBuyNow}>Buy Now</BtnPrimary>
+                  <BtnPrimary onClick={handleAddToCart} disabled={!STORE_ACTIVE}>{STORE_ACTIVE ? "Add to Cart" : "Coming Soon"}</BtnPrimary>
+                  <BtnPrimary onClick={handleBuyNow} disabled={!STORE_ACTIVE}>{STORE_ACTIVE ? "Buy Now" : "Coming Soon"}</BtnPrimary>
                   <BtnPrimary href="/store">Back to Store</BtnPrimary>
                 </div>
               </div>

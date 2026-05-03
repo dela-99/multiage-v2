@@ -10,6 +10,8 @@ import { useNavigate } from "../router";
 
 const STORE_CATS = ["All", "Phones", "Laptops", "Tablets", "Accessories", "Watches", "Audio"];
 
+const STORE_ACTIVE = false;
+
 const FALLBACK_PRODUCTS = [
   { _id: "fallback-1", category: "Phones", name: "iPhone 15 Pro", price: 9999, type: "new", brand: "Apple", description: "Titanium design, 48MP camera, A17 Pro chip", image: "" },
   { _id: "fallback-2", category: "Phones", name: "Samsung Galaxy S24 Ultra", price: 9499, type: "new", brand: "Samsung", description: "AI-powered, 200MP, integrated S Pen", image: "" },
@@ -65,9 +67,11 @@ function ProductCard({ product, onBuyNow, onAddToCart, onOpenDetails, loadingId 
         alignItems: "center",
         justifyContent: "center",
         background: hov ? "rgba(197,98,11,0.08)" : t.surface,
+        padding: 12,
+        overflow: "hidden"
       }}>
-        {product.image ? (
-          <img src={product.image} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        {product.images?.[0] ? (
+          <img src={product.images[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
         ) : (
           <span style={{
             fontSize: 72,
@@ -90,8 +94,10 @@ function ProductCard({ product, onBuyNow, onAddToCart, onOpenDetails, loadingId 
           </span>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button
+              disabled={!STORE_ACTIVE}
               onClick={(event) => {
                 event.stopPropagation();
+                if (!STORE_ACTIVE) return;
                 onAddToCart(product);
               }}
               style={{
@@ -104,14 +110,17 @@ function ProductCard({ product, onBuyNow, onAddToCart, onOpenDetails, loadingId 
                 fontSize: 12,
                 fontWeight: 700,
                 color: t.textPrimary,
-                cursor: "pointer",
+                cursor: STORE_ACTIVE ? "pointer" : "not-allowed",
+                opacity: STORE_ACTIVE ? 1 : 0.6
               }}
             >
-              Add to Cart
+              {STORE_ACTIVE ? "Add to Cart" : "Coming Soon"}
             </button>
             <button
+              disabled={!STORE_ACTIVE}
               onClick={(event) => {
                 event.stopPropagation();
+                if (!STORE_ACTIVE) return;
                 onBuyNow(product);
               }}
               style={{
@@ -124,11 +133,11 @@ function ProductCard({ product, onBuyNow, onAddToCart, onOpenDetails, loadingId 
                 fontSize: 12,
                 fontWeight: 700,
                 color: "#fff",
-                cursor: "pointer",
-                opacity: loadingId === product._id ? 0.75 : 1,
+                cursor: STORE_ACTIVE ? "pointer" : "not-allowed",
+                opacity: !STORE_ACTIVE ? 0.6 : (loadingId === product._id ? 0.75 : 1),
               }}
             >
-              {loadingId === product._id ? "Processing..." : "Buy Now"}
+              {STORE_ACTIVE ? (loadingId === product._id ? "Processing..." : "Buy Now") : "Coming Soon"}
             </button>
           </div>
         </div>
@@ -375,6 +384,22 @@ export default function StorePage() {
       </div>
 
       <div style={{ maxWidth: 1260, margin: "0 auto", padding: "0 24px 100px" }}>
+        {!STORE_ACTIVE && (
+          <div style={{
+            marginBottom: 24,
+            padding: "14px 20px",
+            borderRadius: 14,
+            background: "rgba(197,98,11,0.08)",
+            border: "1px solid rgba(197,98,11,0.2)",
+            color: "#C5620B",
+            fontSize: 14,
+            fontWeight: 600,
+            textAlign: "center"
+          }}>
+            ⚠️ The store is currently under maintenance. Online purchases are temporarily disabled.
+          </div>
+        )}
+
         {error && (
           <div style={{ marginBottom: 18, color: fallbackUsed ? "#C5620B" : "#c0392b", fontSize: 14 }}>
             {fallbackUsed ? `Live API unavailable, showing safe fallback data. ${error}` : error}

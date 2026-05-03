@@ -8,8 +8,8 @@ export default function GraphicsDashboard({ role, token, user }) {
 
   const cards = useMemo(() => [
     { label: "Catalog Assets", value: String((products || []).length), subtitle: "Products available for content use", change: 0, icon: <StatIcon type="media" /> },
-    { label: "Branded Images", value: String((products || []).filter((product) => Boolean(product.image)).length), subtitle: "Products with image coverage", change: 0, icon: <StatIcon type="shield" /> },
-    { label: "Content Queue", value: String((products || []).filter((product) => !product.image).length), subtitle: "Products still needing media support", change: 0, icon: <StatIcon type="orders" /> },
+    { label: "Branded Images", value: String((products || []).filter((product) => Boolean(product.images?.[0])).length), subtitle: "Products with image coverage", change: 0, icon: <StatIcon type="shield" /> },
+    { label: "Content Queue", value: String((products || []).filter((product) => !product.images?.[0]).length), subtitle: "Products still needing media support", change: 0, icon: <StatIcon type="orders" /> },
   ], [products]);
 
   const sections = {
