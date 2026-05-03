@@ -22,6 +22,7 @@ const buildAuthPayload = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  isAdmin: user.isAdmin,
   mustChangePassword: user.mustChangePassword,
   firebaseId: user.firebaseId || "",
   profilePicture: user.profilePicture || "",
@@ -74,6 +75,11 @@ const login = async (req, res, next) => {
     const user = await User.findOne({ email }).select("+password");
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // If this is an admin-specific login or needs validation
+    if (req.originalUrl.includes("/admin") && !user.isAdmin) {
+      return res.status(403).json({ message: "Access denied: Not an authorized admin account" });
     }
 
     res.json(buildAuthPayload(user));

@@ -12,6 +12,10 @@ const ADMIN_ROLE_VALUES = [
 
 const ADMIN_ROLES = ["admin", "ceo", "administrator", "finance", "cyber_it", "secretary", "graphics_media"];
 
+const IS_ADMIN_ROLE = (role, adminRole) => {
+  return ADMIN_ROLES.includes(String(role || "").toLowerCase()) || ADMIN_ROLE_VALUES.includes(String(adminRole || "").toUpperCase());
+};
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -72,6 +76,11 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Virtual for Admin check
+userSchema.virtual("isAdmin").get(function() {
+  return IS_ADMIN_ROLE(this.role, this.adminRole);
+});
 
 // Validate adminRole is only set for admin users
 userSchema.pre("save", function (next) {

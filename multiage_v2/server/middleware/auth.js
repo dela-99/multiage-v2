@@ -34,7 +34,7 @@ const protect = async (req, res, next) => {
 
 // ── Admin only ─────────────────────────────────────────────────────
 const adminOnly = (req, res, next) => {
-  if (req.user && ADMIN_ROLES.has(String(req.user.role || "").toLowerCase())) {
+  if (req.user && (req.user.isAdmin || ADMIN_ROLES.has(String(req.user.role || "").toLowerCase()))) {
     return next();
   }
   return res.status(403).json({ message: "Access denied — admins only" });
