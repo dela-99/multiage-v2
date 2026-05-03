@@ -77,6 +77,8 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    console.log(`[Login] User: ${email}, adminRole (DB): ${user.adminRole}`);
+
     // If this is an admin-specific login or needs validation
     if (req.originalUrl.includes("/admin") && !user.isAdmin) {
       return res.status(403).json({ message: "Access denied: Not an authorized admin account" });

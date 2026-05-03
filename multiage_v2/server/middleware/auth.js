@@ -2,7 +2,14 @@ const jwt  = require("jsonwebtoken");
 const User = require("../models/User");
 const rolesConfig = require("../config/roles");
 
-const ADMIN_ROLES = new Set(["admin", "ceo", "cyber_it", "administrator", "finance", "secretary", "graphics_media"]);
+const ADMIN_ROLES = [
+  "CEO",
+  "CYBER_IT",
+  "FINANCE",
+  "ADMINISTRATOR",
+  "SECRETARY",
+  "GRAPHICS"
+];
 
 // ── Protect: any logged-in user ───────────────────────────────────
 const protect = async (req, res, next) => {
@@ -34,7 +41,10 @@ const protect = async (req, res, next) => {
 
 // ── Admin only ─────────────────────────────────────────────────────
 const adminOnly = (req, res, next) => {
-  if (req.user && (req.user.isAdmin || ADMIN_ROLES.has(String(req.user.role || "").toLowerCase()))) {
+  const userAdminRole = String(req.user?.adminRole || "").toUpperCase();
+  console.log(`[Auth] req.user.adminRole (JWT/DB): ${userAdminRole}`);
+
+  if (req.user && (req.user.isAdmin || ADMIN_ROLES.includes(userAdminRole))) {
     return next();
   }
   return res.status(403).json({ message: "Access denied — admins only" });

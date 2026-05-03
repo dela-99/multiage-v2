@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "../router";
 import { useAuth } from "../context/AuthContext";
 
-const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance", "secretary", "graphics_media"]);
+const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance", "secretary", "graphics"]);
 
 export default function ProtectedRoute({ children, adminOnly = false }) {
   const navigate = useNavigate();

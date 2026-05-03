@@ -20,7 +20,7 @@ const roles = {
     "finance:write",
     "orders:read"
   ],
-  graphics_media: [
+  graphics: [
     "media:read",
     "media:write",
     "design:read",
