@@ -10,6 +10,8 @@ const ADMIN_ROLE_VALUES = [
   "GRAPHICS/MEDIA",
 ];
 
+const ADMIN_ROLES = ["admin", "ceo", "administrator", "finance", "cyber_it", "secretary", "media", "graphics"];
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -41,7 +43,6 @@ const userSchema = new mongoose.Schema(
     adminRole: {
       type: String,
       enum: ADMIN_ROLE_VALUES,
-      default: "ADMINISTRATOR",
       trim: true,
     },
     mustChangePassword: {
@@ -71,6 +72,14 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Validate adminRole is only set for admin users
+userSchema.pre("save", function (next) {
+  if (this.adminRole && !ADMIN_ROLES.includes(this.role)) {
+    this.adminRole = undefined;
+  }
+  next();
+});
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {

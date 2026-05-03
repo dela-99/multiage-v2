@@ -57,10 +57,12 @@ export function CartProvider({ children }) {
   const clearCart = () => setItems([]);
 
   const totalItems = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-  const totalPrice = items.reduce(
-    (sum, item) => sum + (Number(item.price || 0) * Number(item.quantity || 0)),
-    0
-  );
+  const totalPrice = Math.round(
+    items.reduce(
+      (sum, item) => sum + (Number(item.price || 0) * Number(item.quantity || 0)),
+      0
+    ) * 100
+  ) / 100;
 
   const value = useMemo(() => ({
     items,

@@ -15,9 +15,14 @@ const ROLE_ASSIGNMENTS = [
   { name: "Wellingtina", adminRole: "GRAPHICS/MEDIA" },
 ];
 
+async function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 async function updateUserRole({ name, adminRole }) {
-  const exactMatch = await User.findOne({ name: new RegExp(`^${name}$`, "i") });
-  const user = exactMatch || await User.findOne({ name: new RegExp(name, "i") });
+  const user = await User.findOne({ 
+    name: new RegExp(`^${escapeRegex(name)}$`, "i") 
+  });
 
   if (!user) {
     console.warn(`No user found for "${name}"`);

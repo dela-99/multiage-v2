@@ -1,16 +1,35 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import PageLayout from "../PageLayout";
 import Sidebar from "./Sidebar";
 import { useTheme } from "../../context/ThemeContext";
 import { getSidebarItems, normalizeAdminRole } from "../../config/adminSidebar";
 
 function useViewport() {
-  const [width, setWidth] = useState(() => window.innerWidth);
+  const [width, setWidth] = useState(() => 
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
+  const debounceTimerRef = useRef(null);
 
   useEffect(() => {
-    const onResize = () => setWidth(window.innerWidth);
+    if (typeof window === "undefined") return;
+
+    const onResize = () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        setWidth(window.innerWidth);
+      }, 150);
+    };
+
     window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    
+    return () => {
+      window.removeEventListener("resize", onResize);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, []);
 
   return width;
@@ -133,6 +152,7 @@ export default function RoleDashboardLayout({
                 {isMobile && (
                   <button
                     onClick={() => setSidebarOpen(true)}
+                    aria-label="Open sidebar menu"
                     style={{
                       width: 44,
                       height: 44,

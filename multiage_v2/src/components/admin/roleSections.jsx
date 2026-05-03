@@ -61,9 +61,20 @@ export function ProductManagerSection({ products, token, onCreateProduct, creati
     if (!file) return;
 
     const reader = new FileReader();
+    
     reader.onload = () => {
       setForm((current) => ({ ...current, image: String(reader.result || "") }));
     };
+    
+    reader.onerror = () => {
+      console.error("Failed to read image file");
+      alert("Failed to load image. Please try again.");
+    };
+    
+    reader.onabort = () => {
+      console.warn("Image read was aborted");
+    };
+    
     reader.readAsDataURL(file);
   };
 
@@ -118,6 +129,7 @@ export function ProductManagerSection({ products, token, onCreateProduct, creati
           <input type="file" accept="image/*" onChange={handleImage} style={fieldStyle(t)} />
           <button
             type="submit"
+            disabled={creating}
             style={{
               padding: "14px 18px",
               borderRadius: 14,

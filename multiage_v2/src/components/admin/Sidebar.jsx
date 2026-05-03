@@ -61,8 +61,7 @@ export default function Sidebar({ items, active, onSelect, isMobile, isOpen, onC
       <aside style={{
         width: isMobile ? 280 : "100%",
         background: t.cardBg,
-        borderRight: isMobile ? `1px solid ${t.border}` : "none",
-        border: isMobile ? "none" : `1px solid ${t.cardBorder}`,
+        border: isMobile ? `1px solid ${t.border}` : `1px solid ${t.cardBorder}`,
         borderRadius: isMobile ? 0 : 28,
         padding: 22,
         backdropFilter: "blur(16px)",
@@ -138,4 +137,15 @@ export default function Sidebar({ items, active, onSelect, isMobile, isOpen, onC
                   }}>
                     <MenuIcon path={ICONS[item.key] || ICONS.Dashboard} />
                   </span>
-                  <span style={{ fo
+                  <span style={{ fontWeight: 600, fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {item.label}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+    </>
+  );
+}

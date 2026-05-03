@@ -414,18 +414,23 @@ export default function StorePage() {
       </div>
 
       {toast && (
-        <div style={{
-          position: "fixed",
-          right: 20,
-          bottom: 20,
-          zIndex: 2500,
-          padding: "12px 16px",
-          borderRadius: 14,
-          background: "rgba(30,132,73,0.94)",
-          color: "#fff",
-          fontWeight: 700,
-          boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
-        }}>
+        <div 
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          tabIndex="-1"
+          style={{
+            position: "fixed",
+            right: 20,
+            bottom: 20,
+            zIndex: 2500,
+            padding: "12px 16px",
+            borderRadius: 14,
+            background: "rgba(30,132,73,0.94)",
+            color: "#fff",
+            fontWeight: 700,
+            boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
+          }}>
           {toast}
         </div>
       )}

@@ -14,7 +14,7 @@ export default function SecretaryDashboard({ role, token, user }) {
   const cards = [
     { label: "Open Orders", value: String(filteredOrders.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
     { label: "Communications", value: String(filteredMessages.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(messages, () => 1, rangeDays), icon: <StatIcon type="media" /> },
-    { label: "Pending Follow-ups", value: String(filteredMessages.filter((message) => message.kind !== "used-device-inquiry").length), subtitle: "Current message load", change: 0, icon: <StatIcon type="shield" /> },
+    { label: "Pending Follow-ups", value: String(filteredMessages.filter((message) => message.status === "pending" || message.isPending === true).length), subtitle: "Current message load", change: 0, icon: <StatIcon type="shield" /> },
   ];
 
   const sections = {

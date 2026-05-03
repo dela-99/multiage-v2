@@ -150,11 +150,12 @@ const cancelOrder = async (req, res, next) => {
       return res.status(400).json({ message: "Only pending orders can be cancelled" });
     }
 
-    order.status = "cancelled";
-
-    if (!order.isPaid) {
-      order.paymentStatus = "cancelled";
+    if (order.isPaid === true) {
+      return res.status(400).json({ message: "Cannot cancel paid orders. Please contact support for refund requests." });
     }
+
+    order.status = "cancelled";
+    order.paymentStatus = "cancelled";
 
     const updated = await order.save();
     res.json(updated);

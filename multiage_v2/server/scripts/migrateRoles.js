@@ -18,13 +18,16 @@ async function run() {
     
     for (const update of updates) {
       const res = await User.updateMany(
-        { name: new RegExp(update.name, 'i') },
+        { name: update.name },
         { $set: { role: update.role } }
-      );
+      ).collation({ locale: 'en', strength: 2 });
       console.log(`Updated users matching "${update.name}" to role "${update.role}": ${res.modifiedCount} modified.`);
     }
     console.log("Migration complete.");
-  } catch (err) { console.error(err); }
-  process.exit();
+    process.exit(0);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
 }
 run();

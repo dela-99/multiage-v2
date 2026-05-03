@@ -13,17 +13,34 @@ import { comparePeriods, inRange } from "../../components/admin/dashboardUtils";
 import { useAdminResources } from "../../hooks/useAdminResources";
 import { api } from "../../lib/api";
 
+function useWindowSize() {
+  const [width, setWidth] = useState(() => 
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const onResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return width;
+}
+
 export default function AdministratorDashboard({ role, token, user }) {
   const [rangeDays, setRangeDays] = useState(30);
   const [creating, setCreating] = useState(false);
+  const viewportWidth = useWindowSize();
   const { products, orders, loading, error } = useAdminResources(token, { products: true, orders: true });
   const [productList, setProductList] = useState([]);
 
   useEffect(() => {
-    setProductList(products);
+    setProductList(products || []);
   }, [products]);
 
-  const filteredOrders = useMemo(() => orders.filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
+  const filteredOrders = useMemo(() => (orders ?? []).filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
 
   const cards = [
     { label: "Catalog Size", value: String(productList.length), subtitle: "Live backend products", change: 0, icon: <StatIcon type="shield" /> },
@@ -38,13 +55,17 @@ export default function AdministratorDashboard({ role, token, user }) {
         products={productList}
         token={token}
         creating={creating}
-        viewportWidth={window.innerWidth}
+        viewportWidth={viewportWidth}
         onCreateProduct={async (payload) => {
           try {
             setCreating(true);
             const created = await api.createProduct(payload, token);
             setProductList((current) => [created, ...current]);
             return created;
+          } catch (err) {
+            console.error("Error creating product:", err);
+            alert("Failed to create product. Please try again.");
+            throw err;
           } finally {
             setCreating(false);
           }
