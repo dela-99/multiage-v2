@@ -12,7 +12,7 @@ const firebaseConfig = {
 };
 
 // Only initialize Firebase when the required config values are present.
-// If VITE_FIREBASE_API_KEY is not set (e.g. the env var is missing in Vercel),
+// If VITE_FIREBASE_API_KEY is not set (e.g. the env var is missing in your hosting platform),
 // getAuth() would throw "auth/invalid-api-key" at module load time and crash
 // the entire React app, showing a blank white screen.
 const isFirebaseConfigured = Boolean(
@@ -33,7 +33,7 @@ export async function signInWithGooglePopup() {
   if (!isFirebaseConfigured || !auth || !googleProvider) {
     throw new Error(
       "Google sign-in is not available because Firebase is not configured. " +
-      "Please add the VITE_FIREBASE_* environment variables to your Vercel project settings."
+      "Please add the VITE_FIREBASE_* environment variables to your hosting platform's settings."
     );
   }
 
