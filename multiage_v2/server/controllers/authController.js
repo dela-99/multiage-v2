@@ -77,7 +77,7 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    console.log(`[Login Success] User: ${email}, Role: ${user.role}, AdminRole: ${user.adminRole}, IsAdmin: ${user.isAdmin}`);
+    console.log(`[Login Success] UserID: ${user._id}, Role: ${user.role}, IsAdmin: ${user.isAdmin}`);
 
     // If this is an admin-specific login or needs validation
     if (req.originalUrl.includes("/admin") && !user.isAdmin) {

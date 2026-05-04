@@ -1,8 +1,12 @@
 const Message = require("../models/Message");
 const { sendUserRequestEmail, sendAutoReplyEmail } = require("../services/emailService");
 
+// Escape regex metacharacters for safe RegExp construction
+const regexEscape = (s) => String(s || "").replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+
 const normalizePhone = (phone) => {
-  let cleaned = phone.replace(/\s+/g, "").replace(/-/g, "");
+  // Strip any non-digit characters except a leading +
+  let cleaned = String(phone).replace(/(?!^\+)[^\d]/g, "");
 
   if (cleaned.startsWith("0")) {
     return "233" + cleaned.slice(1);
@@ -90,10 +94,12 @@ const getMessages = async (req, res, next) => {
     }
 
     if (search) {
+      const escaped = regexEscape(search);
+      const r = new RegExp(escaped, "i");
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-        { message: { $regex: search, $options: "i" } }
+        { name: { $regex: r } },
+        { email: { $regex: r } },
+        { message: { $regex: r } }
       ];
     }
 

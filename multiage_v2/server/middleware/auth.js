@@ -43,7 +43,9 @@ const protect = async (req, res, next) => {
 // ── Admin only ─────────────────────────────────────────────────────
 const adminOnly = (req, res, next) => {
   const userAdminRole = String(req.user?.adminRole || "").toUpperCase();
-  console.log(`[Auth Check] Email: ${req.user?.email}, Role: ${req.user?.role}, AdminRole: ${userAdminRole}`);
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[Auth Check] Role: ${req.user?.role}, AdminRole: ${userAdminRole}`);
+  }
 
   if (req.user && (req.user.isAdmin || ADMIN_ROLES.includes(userAdminRole))) {
     return next();

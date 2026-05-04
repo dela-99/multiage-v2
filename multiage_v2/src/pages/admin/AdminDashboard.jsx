@@ -105,7 +105,7 @@ export default function AdministratorDashboard({ role, token, user }) {
   }
 
   if (canManageMessages) {
-    sections.Communications = <MessagesSection messages={messages} />;
+    sections.Communications = <MessagesSection messages={messages} unreadCount={unreadCount} />;
   }
 
   sections.Settings = <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />;

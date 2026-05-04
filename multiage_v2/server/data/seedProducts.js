@@ -1,4 +1,6 @@
-module.exports = [
+const DEFAULT_PRODUCT_PLACEHOLDER = "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vvujmssqgtoddscpp34m.png";
+
+const _seed = [
   {
     "name": "Apple iPhone 11",
     "price": 0,
@@ -166,7 +168,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [DEFAULT_PRODUCT_PLACEHOLDER],
     "description": "Compact 4.7-inch with A15 Bionic.",
     "stock": 100,
     "brand": "Apple",
@@ -178,7 +180,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [DEFAULT_PRODUCT_PLACEHOLDER],
     "description": "6.1-inch Super Retina XDR, Crash Detection.",
     "stock": 100,
     "brand": "Apple",
@@ -190,7 +192,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [DEFAULT_PRODUCT_PLACEHOLDER],
     "description": "6.7-inch Super Retina XDR.",
     "stock": 100,
     "brand": "Apple",
@@ -248,7 +250,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [DEFAULT_PRODUCT_PLACEHOLDER],
     "description": "6.7-inch Super Retina XDR.",
     "stock": 100,
     "brand": "Apple",
@@ -308,7 +310,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [DEFAULT_PRODUCT_PLACEHOLDER],
     "description": "6.7-inch Super Retina XDR.",
     "stock": 100,
     "brand": "Apple",
@@ -367,7 +369,7 @@ module.exports = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [DEFAULT_PRODUCT_PLACEHOLDER],
     "description": "Affordable 2026 entry-level model.",
     "stock": 100,
     "brand": "Apple",
@@ -1498,3 +1500,8 @@ module.exports = [
     "isFeatured": false
   }
 ];
+
+module.exports = _seed.map((p) => ({
+  ...p,
+  images: Array.isArray(p.images) && p.images.length > 0 ? p.images : [DEFAULT_PRODUCT_PLACEHOLDER],
+}));

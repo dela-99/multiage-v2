@@ -41,7 +41,10 @@ const productSchema = new mongoose.Schema(
     images: {
       type: [String],
       required: [true, "At least one product image is required"],
-      validate: [(arr) => arr.length <= 4, "Max 4 images allowed per product"],
+      validate: {
+        validator: (arr) => Array.isArray(arr) && arr.length >= 1 && arr.length <= 4,
+        message: "Provide 1 to 4 images per product",
+      },
       default: [],
     },
     imagePublicId: {

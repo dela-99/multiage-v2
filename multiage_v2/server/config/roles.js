@@ -9,6 +9,7 @@ const roles = {
     "users:manage",
     "dashboard:read",
     "orders:manage",
+    "orders:read",
     "messages:read",
     "messages:manage"
   ],

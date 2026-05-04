@@ -98,7 +98,7 @@ const createOrder = async (req, res, next) => {
 const getMyOrders = async (req, res, next) => {
   try {
     const orders = await Order.find({ user: req.user._id })
-      .populate("items.product", "name image category")
+      .populate("items.product", "name images category")
       .sort("-createdAt");
     res.json(orders);
   } catch (err) {
@@ -112,7 +112,7 @@ const getOrder = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate("user",          "name email")
-      .populate("items.product", "name image category");
+      .populate("items.product", "name images category");
 
     if (!order) return res.status(404).json({ message: "Order not found" });
 

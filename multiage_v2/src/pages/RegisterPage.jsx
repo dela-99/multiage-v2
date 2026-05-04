@@ -69,6 +69,8 @@ function FormInput({ type, placeholder, value, onChange, IconCmp, t, visible, on
         <button
           type="button"
           onClick={onToggle}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           aria-label={visible ? "Hide password" : "Show password"}
           style={{
             position: "absolute",
@@ -83,6 +85,9 @@ function FormInput({ type, placeholder, value, onChange, IconCmp, t, visible, on
             alignItems: "center",
             justifyContent: "center",
             padding: 4,
+            outline: "none",
+            boxShadow: focused ? "0 0 0 4px rgba(197,98,11,0.18)" : "none",
+            borderRadius: 8,
           }}
         >
           <EyeIcon visible={visible} />
