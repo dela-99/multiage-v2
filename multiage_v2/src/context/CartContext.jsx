@@ -3,6 +3,10 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 const STORAGE_KEY = "multiage_cart";
 const CartContext = createContext(null);
 
+function getCartItemKey(item) {
+  return item.cartKey || `${item._id}${item.storage ? `:${item.storage}` : ""}`;
+}
+
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
 
@@ -25,24 +29,31 @@ export function CartProvider({ children }) {
 
   const addItem = (product) => {
     setItems((current) => {
-      const existing = current.find((item) => item._id === product._id);
+      const normalizedItem = {
+        ...product,
+        image: product.image || product.images?.[0] || "",
+        cartKey: getCartItemKey(product),
+      };
+      const existing = current.find((item) => getCartItemKey(item) === normalizedItem.cartKey);
       if (existing) {
         return current.map((item) =>
-          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
+          getCartItemKey(item) === normalizedItem.cartKey
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         );
       }
 
-      return [...current, { ...product, quantity: 1 }];
+      return [...current, { ...normalizedItem, quantity: 1 }];
     });
   };
 
-  const removeItem = (productId) => {
-    setItems((current) => current.filter((item) => item._id !== productId));
+  const removeItem = (itemKey) => {
+    setItems((current) => current.filter((item) => getCartItemKey(item) !== itemKey));
   };
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (itemKey, quantity) => {
     setItems((current) => current.flatMap((item) => {
-      if (item._id !== productId) {
+      if (getCartItemKey(item) !== itemKey) {
         return [item];
       }
 

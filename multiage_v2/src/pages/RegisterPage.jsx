@@ -18,8 +18,25 @@ const LockIcon = () => (
   </svg>
 );
 
-function FormInput({ type, placeholder, value, onChange, IconCmp, t }) {
+const EyeIcon = ({ visible }) => (
+  visible ? (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3l18 18" />
+      <path d="M10.58 10.58A2 2 0 0 0 13.42 13.42" />
+      <path d="M9.88 5.09A9.77 9.77 0 0 1 12 4.91c5 0 9.27 3.11 11 7.09a11.82 11.82 0 0 1-4.18 5.23" />
+      <path d="M6.61 6.61A11.81 11.81 0 0 0 1 12c1.73 3.98 6 7.09 11 7.09a9.77 9.77 0 0 0 4.09-.88" />
+    </svg>
+  ) : (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+);
+
+function FormInput({ type, placeholder, value, onChange, IconCmp, t, visible, onToggle }) {
   const [focused, setFocused] = useState(false);
+  const resolvedType = type === "password" && visible ? "text" : type;
   return (
     <div style={{ position: "relative" }}>
       <div style={{
@@ -31,7 +48,7 @@ function FormInput({ type, placeholder, value, onChange, IconCmp, t }) {
         <IconCmp />
       </div>
       <input
-        type={type}
+        type={resolvedType}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
@@ -39,7 +56,7 @@ function FormInput({ type, placeholder, value, onChange, IconCmp, t }) {
         onBlur={() => setFocused(false)}
         required
         style={{
-          width: "100%", padding: "13px 16px 13px 42px",
+          width: "100%", padding: `13px ${type === "password" ? "46px" : "16px"} 13px 42px`,
           background: t.inputBg,
           border: `1px solid ${focused ? "#C5620B" : t.inputBorder}`,
           borderRadius: 12, color: t.textPrimary,
@@ -48,6 +65,29 @@ function FormInput({ type, placeholder, value, onChange, IconCmp, t }) {
           boxSizing: "border-box",
         }}
       />
+      {type === "password" && onToggle && (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={visible ? "Hide password" : "Show password"}
+          style={{
+            position: "absolute",
+            right: 12,
+            top: "50%",
+            transform: "translateY(-50%)",
+            border: "none",
+            background: "transparent",
+            color: focused ? "#C5620B" : t.textMuted,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 4,
+          }}
+        >
+          <EyeIcon visible={visible} />
+        </button>
+      )}
     </div>
   );
 }
@@ -63,6 +103,8 @@ export default function RegisterPage() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -194,11 +236,15 @@ export default function RegisterPage() {
               type="password" placeholder="Password (min. 6 characters)"
               value={password} onChange={(e) => setPassword(e.target.value)}
               IconCmp={LockIcon} t={t}
+              visible={showPassword}
+              onToggle={() => setShowPassword((value) => !value)}
             />
             <FormInput
               type="password" placeholder="Confirm password"
               value={confirm} onChange={(e) => setConfirm(e.target.value)}
               IconCmp={LockIcon} t={t}
+              visible={showConfirmPassword}
+              onToggle={() => setShowConfirmPassword((value) => !value)}
             />
 
             <button

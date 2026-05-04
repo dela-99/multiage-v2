@@ -3,6 +3,7 @@ import ChangePasswordForm from "../../components/ChangePasswordForm";
 import RoleDashboardLayout, { StatIcon } from "../../components/admin/RoleDashboardLayout";
 import {
   InventorySection,
+  MessagesSection,
   MetricOverview,
   OrdersSection,
   ProductManagerSection,
@@ -33,19 +34,21 @@ export default function AdministratorDashboard({ role, token, user }) {
   const [rangeDays, setRangeDays] = useState(30);
   const [creating, setCreating] = useState(false);
   const viewportWidth = useWindowSize();
-  const { products, orders, loading, error } = useAdminResources(token, { products: true, orders: true });
+  const { products, orders, messages, loading, error } = useAdminResources(token, { products: true, orders: true, messages: true });
   const [productList, setProductList] = useState([]);
 
   // RBAC logic for UI visibility
   const isFullAdmin = ["ceo", "cyber_it", "administrator"].includes(role?.toLowerCase());
-  const isGraphicsMedia = role?.toLowerCase() === "graphics_media";
+  const isGraphicsMedia = role?.toLowerCase() === "graphics" || role?.toLowerCase() === "graphics_media";
   const canManageOrders = isFullAdmin || ["secretary", "finance"].includes(role?.toLowerCase());
+  const canManageMessages = isFullAdmin || role?.toLowerCase() === "secretary";
 
   useEffect(() => {
     setProductList(products || []);
   }, [products]);
 
   const filteredOrders = useMemo(() => (orders ?? []).filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
+  const unreadCount = useMemo(() => (messages ?? []).filter(m => m.status === "pending").length, [messages]);
 
   const cards = useMemo(() => {
     const baseCards = [
@@ -99,6 +102,10 @@ export default function AdministratorDashboard({ role, token, user }) {
 
   if (canManageOrders) {
     sections.Orders = <OrdersSection orders={filteredOrders} title="Managed Orders" description="Orders currently visible to the administrative operations team." />;
+  }
+
+  if (canManageMessages) {
+    sections.Communications = <MessagesSection messages={messages} />;
   }
 
   sections.Settings = <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />;

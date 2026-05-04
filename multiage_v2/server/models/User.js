@@ -102,14 +102,16 @@ userSchema.pre("save", async function (next) {
 userSchema.pre("validate", function (next) {
   if (this.role) {
     this.role = String(this.role).toLowerCase();
-    if (this.role === "graphics" || this.role === "media") {
+    const r = this.role;
+    if (r === "graphics" || r === "media" || r === "graphics_media") {
       this.role = "graphics";
     }
   }
 
   if (this.adminRole) {
     const normalizedAdminRole = String(this.adminRole).trim().toUpperCase().replace(/\s*\/\s*/g, "_");
-    this.adminRole = (normalizedAdminRole === "GRAPHICS" || normalizedAdminRole === "MEDIA") ? "GRAPHICS" : normalizedAdminRole;
+    const nr = normalizedAdminRole;
+    this.adminRole = (nr === "GRAPHICS" || nr === "MEDIA" || nr === "GRAPHICS_MEDIA") ? "GRAPHICS" : nr;
   }
 
   next();

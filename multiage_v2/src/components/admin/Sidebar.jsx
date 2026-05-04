@@ -140,6 +140,11 @@ export default function Sidebar({ items, active, onSelect, isMobile, isOpen, onC
                   <span style={{ fontWeight: 600, fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {item.label}
                   </span>
+                  {item.key === "Communications" && item.unreadCount > 0 && (
+                    <span style={{ marginLeft: "auto", background: "#C5620B", color: "#fff", fontSize: 10, padding: "2px 6px", borderRadius: 6, fontWeight: 800 }}>
+                      {item.unreadCount}
+                    </span>
+                  )}
                 </span>
               </button>
             );

@@ -4,6 +4,7 @@ const { uploadToCloudinary } = require("../utils/cloudinary");
 const seedProducts = require("../data/seedProducts");
 
 let catalogBootstrapPromise = null;
+let normalizedSeedProductsPromise = null;
 
 const normalizeProductPayload = async (payload = {}) => {
   const nextPayload = { ...payload };
@@ -12,19 +13,17 @@ const normalizeProductPayload = async (payload = {}) => {
     nextPayload.type = nextPayload.type.toLowerCase();
   }
 
-  if (nextPayload.image && typeof nextPayload.image === "string") {
-    const isCloudinaryHosted = nextPayload.image.includes("res.cloudinary.com");
-    if (!isCloudinaryHosted) {
-      const uploaded = await uploadToCloudinary(nextPayload.image);
-      nextPayload.image = uploaded.url || nextPayload.image;
-      nextPayload.imagePublicId = uploaded.publicId || "";
-    }
+  // Task 4: Migrate Old Data (Convert image -> images[0])
+  if (nextPayload.image && (!nextPayload.images || nextPayload.images.length === 0)) {
+    nextPayload.images = [nextPayload.image];
   }
+  delete nextPayload.image;
 
   if (Array.isArray(nextPayload.images)) {
     const uploadedImages = [];
+    const imagesToProcess = nextPayload.images.slice(0, 4); // Max 4 images
 
-    for (const image of nextPayload.images) {
+    for (const image of imagesToProcess) {
       if (!image || typeof image !== "string") {
         continue;
       }
@@ -42,14 +41,6 @@ const normalizeProductPayload = async (payload = {}) => {
     }
 
     nextPayload.images = uploadedImages;
-  }
-
-  if ((!Array.isArray(nextPayload.images) || nextPayload.images.length === 0) && nextPayload.image) {
-    nextPayload.images = [nextPayload.image];
-  }
-
-  if (!nextPayload.image && Array.isArray(nextPayload.images) && nextPayload.images.length > 0) {
-    nextPayload.image = nextPayload.images[0];
   }
 
   if (nextPayload.type !== "used") {
@@ -85,8 +76,15 @@ const ensureCatalogAvailable = async () => {
     return;
   }
 
+  if (!normalizedSeedProductsPromise) {
+    normalizedSeedProductsPromise = Promise.all(
+      seedProducts.map((product) => normalizeProductPayload(product))
+    );
+  }
+
   if (!catalogBootstrapPromise) {
-    catalogBootstrapPromise = Product.insertMany(seedProducts, { ordered: false })
+    catalogBootstrapPromise = normalizedSeedProductsPromise
+      .then((normalizedSeedProducts) => Product.insertMany(normalizedSeedProducts, { ordered: false }))
       .catch(async (error) => {
         const countAfterAttempt = await Product.countDocuments();
         if (countAfterAttempt > 0) {
@@ -242,10 +240,10 @@ const seedProductCatalog = async (req, res, next) => {
       });
     }
 
-    // Optional: Normalize each product from the seed file to ensure 
+    // Optional: Normalize each product from the seed file to ensure
     // consistency with manually created products.
     const normalizedSeeds = await Promise.all(
-      seedProducts.map(p => normalizeProductPayload(p))
+      seedProducts.map((p) => normalizeProductPayload(p))
     );
 
     const inserted = await Product.insertMany(normalizedSeeds, { ordered: false });

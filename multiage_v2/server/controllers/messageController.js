@@ -1,5 +1,19 @@
 const Message = require("../models/Message");
-const { sendUserRequestEmail } = require("../services/emailService");
+const { sendUserRequestEmail, sendAutoReplyEmail } = require("../services/emailService");
+
+const normalizePhone = (phone) => {
+  let cleaned = phone.replace(/\s+/g, "").replace(/-/g, "");
+
+  if (cleaned.startsWith("0")) {
+    return "233" + cleaned.slice(1);
+  }
+
+  if (cleaned.startsWith("+233")) {
+    return cleaned.replace("+", "");
+  }
+
+  return cleaned;
+};
 
 // ── @route  POST /api/messages ────────────────────────────────────
 // ── @access Public (contact form)
@@ -16,8 +30,13 @@ const createMessage = async (req, res, next) => {
       source,
     } = req.body;
 
-    if (!name || !email || !message) {
-      return res.status(400).json({ message: "Name, email, and message are required" });
+    if (!name || !email || !message || !phone) {
+      return res.status(400).json({ message: "Name, email, phone, and message are required" });
+    }
+
+    const phoneRegex = /^\+?[0-9\s\-()]+$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ message: "Invalid phone number format" });
     }
 
     if (kind === "used-device-inquiry" && !deviceRequested) {
@@ -27,11 +46,12 @@ const createMessage = async (req, res, next) => {
     const msg = await Message.create({
       name,
       email,
-      phone,
+      phone: normalizePhone(phone),
       service,
       message,
       kind: kind || "contact",
       deviceRequested: deviceRequested || "",
+      status: "pending",
       source: source || "website",
     });
 
@@ -40,6 +60,7 @@ const createMessage = async (req, res, next) => {
 
     try {
       await sendUserRequestEmail(msg);
+      await sendAutoReplyEmail(msg); // Auto-reply to customer
       emailSent = true;
     } catch (error) {
       emailError = error.message || "Failed to send service request email";
@@ -61,7 +82,22 @@ const createMessage = async (req, res, next) => {
 // ── @access Admin
 const getMessages = async (req, res, next) => {
   try {
-    const messages = await Message.find().sort("-createdAt");
+    const { search, status } = req.query;
+    let query = {};
+
+    if (status && status !== "all") {
+      query.status = status;
+    }
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { message: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    const messages = await Message.find(query).sort("-createdAt");
     res.json(messages);
   } catch (err) {
     next(err);
@@ -75,12 +111,28 @@ const getMessage = async (req, res, next) => {
     const msg = await Message.findById(req.params.id);
     if (!msg) return res.status(404).json({ message: "Message not found" });
 
-    // Mark as read
-    if (!msg.isRead) {
-      msg.isRead = true;
+    // Auto-mark as contacted if opening for the first time
+    if (msg.status === "pending") {
+      msg.status = "contacted";
       await msg.save();
     }
 
+    res.json(msg);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ── @route  PATCH /api/messages/:id/status ───────────────────────
+// ── @access Admin
+const updateMessageStatus = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    if (!["pending", "contacted", "closed"].includes(status)) {
+      return res.status(400).json({ message: "Invalid lead status" });
+    }
+    const msg = await Message.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!msg) return res.status(404).json({ message: "Message not found" });
     res.json(msg);
   } catch (err) {
     next(err);
@@ -100,4 +152,4 @@ const deleteMessage = async (req, res, next) => {
   }
 };
 
-module.exports = { createMessage, getMessages, getMessage, deleteMessage };
+module.exports = { createMessage, getMessages, getMessage, updateMessageStatus, deleteMessage };

@@ -21,6 +21,21 @@ const FALLBACK_IMAGE = "https://res.cloudinary.com/delaridge/image/upload/v17764
 
 const STORE_ACTIVE = false;
 
+function normalizeVariants(product) {
+  if (!Array.isArray(product?.variants)) {
+    return [];
+  }
+
+  return product.variants
+    .map((variant, index) => ({
+      storage: String(variant?.storage || "").trim(),
+      price: Number(variant?.price ?? product?.price ?? 0),
+      available: variant?.available !== false,
+      key: `${String(variant?.storage || "variant").trim() || "variant"}-${index}`,
+    }))
+    .filter((variant) => variant.storage && Number.isFinite(variant.price));
+}
+
 export default function ProductDetails() {
   const { t } = useTheme();
   const { token } = useAuth();
@@ -32,6 +47,7 @@ export default function ProductDetails() {
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
   const [toast, setToast] = useState("");
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const sliderRef = useRef(null);
 
   useEffect(() => {
@@ -52,6 +68,8 @@ export default function ProductDetails() {
             ? [data.image]
             : [];
         setSelectedImage(productImages[0] || "");
+        const normalizedVariants = normalizeVariants(data);
+        setSelectedVariant(normalizedVariants[0] || null);
         setError("");
       } catch (err) {
         if (active) {
@@ -102,6 +120,11 @@ export default function ProductDetails() {
     return Object.entries(product.specs).filter(([, value]) => value !== "" && value !== null && value !== undefined);
   }, [product]);
 
+  const variants = useMemo(() => normalizeVariants(product), [product]);
+  const activePrice = selectedVariant?.price ?? Number(product?.price || 0);
+  const activeImage = selectedImage || images[0] || FALLBACK_IMAGE;
+  const canSelectVariants = variants.length > 0;
+
   const handleBuyNow = async () => {
     if (!product) {
       return;
@@ -115,7 +138,7 @@ export default function ProductDetails() {
     try {
       const order = await api.createOrder({
         items: [{ product: product._id, quantity: 1 }],
-        note: `Quick order for ${product.name}`,
+        note: `Quick order for ${product.name}${selectedVariant?.storage ? ` (${selectedVariant.storage})` : ""}`,
       }, token);
 
       const payment = await api.initializePayment({ orderId: order._id }, token);
@@ -138,9 +161,15 @@ export default function ProductDetails() {
       return;
     }
 
-    addItem(product);
+    addItem({
+      ...product,
+      image: activeImage,
+      price: activePrice,
+      storage: selectedVariant?.storage || "",
+      cartKey: `${product._id}${selectedVariant?.storage ? `:${selectedVariant.storage}` : ""}`,
+    });
     setError("");
-    setToast("Item added to cart");
+    setToast(selectedVariant?.storage ? `${selectedVariant.storage} added to cart` : "Item added to cart");
   };
 
   useEffect(() => {
@@ -198,6 +227,7 @@ export default function ProductDetails() {
                   scrollSnapType: "x mandatory",
                   scrollbarWidth: "none", // Firefox
                   msOverflowStyle: "none", // IE/Edge
+                  touchAction: "pan-x",
                 }}>
                   <style>{`.slider-container::-webkit-scrollbar { display: none; }`}</style>
                   
@@ -210,7 +240,7 @@ export default function ProductDetails() {
                     >
                       {images.map((img, idx) => (
                         <div key={idx} style={{ minWidth: "100%", height: "100%", scrollSnapAlign: "start" }}>
-                          <img src={img} alt={`${product.name} ${idx}`} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "10px" }} />
+                          <img src={img} alt={`${product.name} ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "10px" }} />
                         </div>
                       ))}
                     </div>
@@ -223,26 +253,50 @@ export default function ProductDetails() {
 
                 {/* Thumbnails */}
                 {images.length > 1 && (
-                  <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 10 }}>
-                    {images.map((image, index) => (
-                      <button
-                        key={`${image}-${index}`}
-                        onClick={() => scrollToImage(index)}
-                        style={{
-                          width: 80,
-                          height: 80,
-                          flexShrink: 0,
-                          borderRadius: 16,
-                          overflow: "hidden",
-                          border: selectedImage === image ? "2px solid #C5620B" : `1px solid ${t.border}`,
-                          padding: 0,
-                          background: t.surface,
-                          cursor: "pointer",
-                        }}
-                      >
-                        <img src={image} alt={`${product.name} thumbnail`} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} />
-                      </button>
-                    ))}
+                  <div style={{ display: "grid", gap: 12 }}>
+                    <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4 }}>
+                      {images.map((image, index) => (
+                        <button
+                          key={`${image}-${index}`}
+                          onClick={() => scrollToImage(index)}
+                          style={{
+                            width: 80,
+                            height: 80,
+                            flexShrink: 0,
+                            borderRadius: 16,
+                            overflow: "hidden",
+                            border: activeImage === image ? "2px solid #C5620B" : `1px solid ${t.border}`,
+                            padding: 0,
+                            background: t.surface,
+                            cursor: "pointer",
+                            transition: "transform 0.2s ease, border-color 0.2s ease",
+                            transform: activeImage === image ? "translateY(-2px)" : "none",
+                          }}
+                        >
+                          <img src={image} alt={`${product.name} thumbnail`} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} />
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+                      {images.map((image, index) => (
+                        <button
+                          key={`dot-${index}`}
+                          type="button"
+                          aria-label={`View image ${index + 1}`}
+                          onClick={() => scrollToImage(index)}
+                          style={{
+                            width: activeImage === image ? 22 : 8,
+                            height: 8,
+                            borderRadius: 999,
+                            border: "none",
+                            background: activeImage === image ? "#C5620B" : t.border,
+                            transition: "all 0.2s ease",
+                            cursor: "pointer",
+                            padding: 0,
+                          }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -253,7 +307,7 @@ export default function ProductDetails() {
                     {product.name}
                   </PageHeroHeading>
                   <div style={{ fontSize: 28, fontWeight: 800, color: "#C5620B", marginBottom: 14 }}>
-                    GHS {Number(product.price || 0).toLocaleString()}
+                    GHS {Number(activePrice || 0).toLocaleString()}
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                     <Badge>{product.category}</Badge>
@@ -267,6 +321,45 @@ export default function ProductDetails() {
                     {product.description || "No description available yet."}
                   </p>
                 </Panel>
+
+                {canSelectVariants && (
+                  <Panel title="Storage Options">
+                    <div style={{ display: "grid", gap: 12 }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                        {variants.map((variant) => {
+                          const selected = selectedVariant?.key === variant.key;
+                          const disabled = variant.available === false;
+                          return (
+                            <button
+                              key={variant.key}
+                              type="button"
+                              disabled={disabled}
+                              onClick={() => setSelectedVariant(variant)}
+                              style={{
+                                padding: "11px 16px",
+                                borderRadius: 999,
+                                border: selected ? "1px solid rgba(197,98,11,0.7)" : `1px solid ${t.border}`,
+                                background: selected ? "rgba(197,98,11,0.14)" : t.surface,
+                                color: selected ? "#C5620B" : t.textPrimary,
+                                cursor: disabled ? "not-allowed" : "pointer",
+                                opacity: disabled ? 0.45 : 1,
+                                fontWeight: 700,
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              {variant.storage}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {selectedVariant && (
+                        <div style={{ fontSize: 13, color: t.textSecondary }}>
+                          Selected option: <strong style={{ color: t.textPrimary }}>{selectedVariant.storage}</strong>
+                        </div>
+                      )}
+                    </div>
+                  </Panel>
+                )}
 
                 {specsEntries.length > 0 && (
                   <Panel title="Specifications">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "../router";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { signInWithGooglePopup } from "../lib/firebase";
  
 
 const PersonIcon = () => (
@@ -20,8 +21,34 @@ const LockIcon = () => (
   </svg>
 );
 
-function FormInput({ type, placeholder, value, onChange, IconCmp, theme }) {
+const GoogleIcon = () => (
+  <svg width={18} height={18} viewBox="0 0 24 24" aria-hidden="true">
+    <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.2-.9 2.3-1.9 3.1l3 2.3c1.8-1.7 2.9-4.2 2.9-7.1 0-.7-.1-1.5-.2-2.2H12Z" />
+    <path fill="#34A853" d="M12 21c2.6 0 4.8-.9 6.4-2.5l-3-2.3c-.8.5-1.9.9-3.4.9-2.6 0-4.8-1.8-5.6-4.1l-3.1 2.4C4.9 18.8 8.2 21 12 21Z" />
+    <path fill="#4A90E2" d="M6.4 13c-.2-.5-.3-1-.3-1.6s.1-1.1.3-1.6L3.3 7.4C2.5 8.9 2 10.4 2 12s.5 3.1 1.3 4.6L6.4 13Z" />
+    <path fill="#FBBC05" d="M12 6.8c1.4 0 2.6.5 3.6 1.4l2.7-2.7C16.8 4 14.6 3 12 3 8.2 3 4.9 5.2 3.3 8.4l3.1 2.4c.8-2.3 3-4 5.6-4Z" />
+  </svg>
+);
+
+const EyeIcon = ({ visible }) => (
+  visible ? (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3l18 18" />
+      <path d="M10.58 10.58A2 2 0 0 0 13.42 13.42" />
+      <path d="M9.88 5.09A9.77 9.77 0 0 1 12 4.91c5 0 9.27 3.11 11 7.09a11.82 11.82 0 0 1-4.18 5.23" />
+      <path d="M6.61 6.61A11.81 11.81 0 0 0 1 12c1.73 3.98 6 7.09 11 7.09a9.77 9.77 0 0 0 4.09-.88" />
+    </svg>
+  ) : (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+);
+
+function FormInput({ type, placeholder, value, onChange, IconCmp, theme, visible, onToggle }) {
   const [focused, setFocused] = useState(false);
+  const resolvedType = type === "password" && visible ? "text" : type;
 
   return (
     <div style={{ position: "relative" }}>
@@ -37,7 +64,7 @@ function FormInput({ type, placeholder, value, onChange, IconCmp, theme }) {
         <IconCmp />
       </div>
       <input
-        type={type}
+        type={resolvedType}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
@@ -46,10 +73,10 @@ function FormInput({ type, placeholder, value, onChange, IconCmp, theme }) {
         required
         style={{
           width: "100%",
-          padding: "14px 16px 14px 46px",
+          padding: `14px ${type === "password" ? "46px" : "16px"} 14px 46px`,
           borderRadius: 14,
           border: `1px solid ${focused ? "rgba(197,98,11,0.7)" : theme.inputBorder}`,
-          background: focused ? "rgba(255,255,255,0.12)" : theme.inputBg,
+          background: theme.inputBg,
           color: theme.textPrimary,
           outline: "none",
           fontSize: 14,
@@ -59,6 +86,29 @@ function FormInput({ type, placeholder, value, onChange, IconCmp, theme }) {
           transition: "all 0.2s ease",
         }}
       />
+      {type === "password" && onToggle && (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={visible ? "Hide password" : "Show password"}
+          style={{
+            position: "absolute",
+            right: 12,
+            top: "50%",
+            transform: "translateY(-50%)",
+            border: "none",
+            background: "transparent",
+            color: focused ? "#C5620B" : theme.textMuted,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 4,
+          }}
+        >
+          <EyeIcon visible={visible} />
+        </button>
+      )}
     </div>
   );
 }
@@ -66,11 +116,13 @@ function FormInput({ type, placeholder, value, onChange, IconCmp, theme }) {
 export default function LoginPage() {
   const { t, bgGradient } = useTheme();
   const navigate = useNavigate();
-  const { login, logout } = useAuth();
+  const { login, loginWithGoogle, logout } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -89,6 +141,28 @@ export default function LoginPage() {
       setError(err.message || "Cannot connect to server. Ensure backend is running.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setGoogleLoading(true);
+
+    try {
+      const firebaseUser = await signInWithGooglePopup();
+      const user = await loginWithGoogle(firebaseUser);
+
+      if (user.role !== "user") {
+        logout();
+        setError("This Google account is reserved for an administrator account.");
+        return;
+      }
+
+      navigate("/");
+    } catch (err) {
+      setError(err.message || "Google sign-in could not be completed.");
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -215,6 +289,38 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={googleLoading || loading}
+              style={{
+                width: "100%",
+                padding: "13px 18px",
+                borderRadius: 14,
+                border: `1px solid ${t.inputBorder}`,
+                background: t.cardBg,
+                color: t.textPrimary,
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: googleLoading || loading ? "not-allowed" : "pointer",
+                opacity: googleLoading || loading ? 0.72 : 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                fontFamily: "inherit",
+              }}
+            >
+              <GoogleIcon />
+              {googleLoading ? "Connecting Google..." : "Sign in with Google"}
+            </button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ flex: 1, height: 1, background: t.border }} />
+              <span style={{ fontSize: 12, color: t.textMuted }}>or</span>
+              <div style={{ flex: 1, height: 1, background: t.border }} />
+            </div>
+
             <FormInput
               type="email"
               placeholder="Email address"
@@ -231,6 +337,8 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               IconCmp={LockIcon}
               theme={t}
+              visible={showPassword}
+              onToggle={() => setShowPassword((value) => !value)}
             />
 
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -2 }}>

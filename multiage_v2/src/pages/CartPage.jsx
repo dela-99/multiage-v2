@@ -59,7 +59,7 @@ export default function CartPage() {
             <div style={{ display: "grid", gap: 16 }}>
               {items.map((item) => (
                 <div
-                  key={item._id}
+                  key={item.cartKey || `${item._id}${item.storage ? `:${item.storage}` : ""}`}
                   style={{
                     display: "grid",
                     gridTemplateColumns: "100px minmax(0,1fr)",
@@ -95,6 +95,11 @@ export default function CartPage() {
                         <div style={{ fontSize: 13, color: t.textMuted }}>
                           {item.brand || "Multiage"}{item.category ? ` · ${item.category}` : ""}
                         </div>
+                        {item.storage && (
+                          <div style={{ fontSize: 12, color: "#C5620B", fontWeight: 700, marginTop: 4 }}>
+                            Storage: {item.storage}
+                          </div>
+                        )}
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 800, color: "#C5620B" }}>
                         GHS {(Number(item.price || 0) * Number(item.quantity || 0)).toLocaleString()}
@@ -104,7 +109,7 @@ export default function CartPage() {
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
                       <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
                         <QuantityButton
-                          onClick={() => updateQuantity(item._id, Number(item.quantity || 0) - 1)}
+                          onClick={() => updateQuantity(item.cartKey || `${item._id}${item.storage ? `:${item.storage}` : ""}`, Number(item.quantity || 0) - 1)}
                           disabled={Number(item.quantity || 0) <= 1}
                           theme={t}
                         >
@@ -114,7 +119,7 @@ export default function CartPage() {
                           {item.quantity}
                         </span>
                         <QuantityButton
-                          onClick={() => updateQuantity(item._id, Number(item.quantity || 0) + 1)}
+                          onClick={() => updateQuantity(item.cartKey || `${item._id}${item.storage ? `:${item.storage}` : ""}`, Number(item.quantity || 0) + 1)}
                           theme={t}
                         >
                           +
@@ -123,7 +128,7 @@ export default function CartPage() {
 
                       <button
                         type="button"
-                        onClick={() => removeItem(item._id)}
+                        onClick={() => removeItem(item.cartKey || `${item._id}${item.storage ? `:${item.storage}` : ""}`)}
                         style={{
                           border: "none",
                           background: "transparent",

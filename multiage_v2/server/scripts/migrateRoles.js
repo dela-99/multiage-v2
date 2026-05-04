@@ -8,7 +8,7 @@ const updates = [
   { name: 'Rutherford', role: 'finance' },
   { name: 'Samuel', role: 'administrator' },
   { name: 'Renders', role: 'secretary' },
-  { name: 'Wellingtina', role: 'graphics_media' }
+  { name: 'Wellingtina', role: 'graphics' }
 ];
 
 async function run() {

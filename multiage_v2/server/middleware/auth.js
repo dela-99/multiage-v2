@@ -3,6 +3,7 @@ const User = require("../models/User");
 const rolesConfig = require("../config/roles");
 
 const ADMIN_ROLES = [
+  "ADMIN",
   "CEO",
   "CYBER_IT",
   "FINANCE",
@@ -42,7 +43,7 @@ const protect = async (req, res, next) => {
 // ── Admin only ─────────────────────────────────────────────────────
 const adminOnly = (req, res, next) => {
   const userAdminRole = String(req.user?.adminRole || "").toUpperCase();
-  console.log(`[Auth] req.user.adminRole (JWT/DB): ${userAdminRole}`);
+  console.log(`[Auth Check] Email: ${req.user?.email}, Role: ${req.user?.role}, AdminRole: ${userAdminRole}`);
 
   if (req.user && (req.user.isAdmin || ADMIN_ROLES.includes(userAdminRole))) {
     return next();

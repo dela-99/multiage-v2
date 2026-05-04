@@ -23,7 +23,7 @@ const ProductGrid = ({ products = [], onAddToCart }) => {
             */}
             <div className="relative aspect-square w-full bg-gray-50 overflow-hidden p-4">
               <img
-                src={product.image || '/placeholder-product.png'}
+                src={product.images?.[0] || product.image || '/placeholder-product.png'}
                 alt={product.name}
                 className="w-full h-full object-contain mix-blend-multiply transition-transform duration-300 hover:scale-105"
               />

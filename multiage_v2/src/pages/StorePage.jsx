@@ -19,6 +19,24 @@ const FALLBACK_PRODUCTS = [
   { _id: "fallback-4", category: "Accessories", name: "AirPods Pro 2", price: 3299, type: "new", brand: "Apple", description: "ANC, Adaptive Audio, USB-C charging", image: "" },
 ];
 
+const normalizePhone = (phone) => {
+  let cleaned = phone.replace(/\s+/g, "").replace(/-/g, "");
+
+  if (cleaned.startsWith("0")) {
+    return "233" + cleaned.slice(1);
+  }
+
+  if (cleaned.startsWith("+233")) {
+    return cleaned.replace("+", "");
+  }
+
+  if (cleaned.startsWith("233")) {
+    return cleaned;
+  }
+
+  return cleaned;
+};
+
 const EMOJI_BY_CATEGORY = {
   Phones: "📱",
   Laptops: "💻",
@@ -269,6 +287,7 @@ export default function StorePage() {
       setInquiryState({ loading: true, success: "", error: "" });
       await api.sendMessage({
         ...inquiry,
+        phone: normalizePhone(inquiry.phone),
         service: "Used Device Inquiry",
         kind: "used-device-inquiry",
         source: "store-banner",

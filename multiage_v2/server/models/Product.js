@@ -38,12 +38,10 @@ const productSchema = new mongoose.Schema(
         message: "Condition is required for used products",
       },
     },
-    image: {
-      type:    String,
-      default: "",
-    },
     images: {
-      type:    [String],
+      type: [String],
+      required: [true, "At least one product image is required"],
+      validate: [(arr) => arr.length <= 4, "Max 4 images allowed per product"],
       default: [],
     },
     imagePublicId: {
@@ -80,10 +78,6 @@ const productSchema = new mongoose.Schema(
 productSchema.pre("validate", function (next) {
   if (this.type !== "used") {
     this.condition = "";
-  }
-
-  if ((!this.images || this.images.length === 0) && this.image) {
-    this.images = [this.image];
   }
 
   next();

@@ -13,7 +13,7 @@ const NAV_LINKS = [
   { label: "Networking", href: "/networking" },
   { label: "Software",   href: "/software-development" },
   { label: "Hardware",   href: "/hardware" },
-  { label: "Studios",   href: "/services" },
+  { label: "Studios",   href: "/studio" },
   { label: "Contact",    href: "/contact" },
 ];
 

@@ -8,6 +8,11 @@ const ADMIN_OVERRIDE_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it
 // ── @access Private (logged-in user)
 const createOrder = async (req, res, next) => {
   try {
+    // Production Guard: Check if store is active (usually via process.env)
+    if (process.env.STORE_ACTIVE === "false") {
+      return res.status(503).json({ message: "Store is currently under maintenance. Orders are disabled." });
+    }
+
     const { items, shippingAddress, note } = req.body;
 
     if (!items || items.length === 0) {
@@ -39,7 +44,7 @@ const createOrder = async (req, res, next) => {
         name:     product.name,
         price:    product.price,
         quantity: item.quantity,
-        image:    product.image,
+        image:    product.images?.[0] || "",
       });
 
       totalPrice += product.price * item.quantity;

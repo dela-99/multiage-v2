@@ -16,6 +16,62 @@ function fieldStyle(theme) {
   };
 }
 
+function EyeIcon({ visible }) {
+  return visible ? (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3l18 18" />
+      <path d="M10.58 10.58A2 2 0 0 0 13.42 13.42" />
+      <path d="M9.88 5.09A9.77 9.77 0 0 1 12 4.91c5 0 9.27 3.11 11 7.09a11.82 11.82 0 0 1-4.18 5.23" />
+      <path d="M6.61 6.61A11.81 11.81 0 0 0 1 12c1.73 3.98 6 7.09 11 7.09a9.77 9.77 0 0 0 4.09-.88" />
+    </svg>
+  ) : (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function PasswordField({ label, autoComplete, value, onChange, visible, onToggle, theme }) {
+  return (
+    <label style={{ display: "grid", gap: 6 }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: theme.textSecondary }}>{label}</span>
+      <div style={{ position: "relative" }}>
+        <input
+          type={visible ? "text" : "password"}
+          autoComplete={autoComplete}
+          value={value}
+          onChange={onChange}
+          style={{ ...fieldStyle(theme), paddingRight: 44 }}
+          required
+          minLength={autoComplete === "current-password" ? undefined : 6}
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={visible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+          style={{
+            position: "absolute",
+            right: 12,
+            top: "50%",
+            transform: "translateY(-50%)",
+            border: "none",
+            background: "transparent",
+            color: theme.textMuted,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 4,
+          }}
+        >
+          <EyeIcon visible={visible} />
+        </button>
+      </div>
+    </label>
+  );
+}
+
 /**
  * Logged-in password change (users and admins). Requires current password.
  */
@@ -27,6 +83,9 @@ export default function ChangePasswordForm({ token, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const resetFields = () => {
     setCurrentPassword("");
@@ -83,41 +142,33 @@ export default function ChangePasswordForm({ token, onSuccess }) {
           {success}
         </div>
       )}
-      <label style={{ display: "grid", gap: 6 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: t.textSecondary }}>Current password</span>
-        <input
-          type="password"
-          autoComplete="current-password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          style={fieldStyle(t)}
-          required
-        />
-      </label>
-      <label style={{ display: "grid", gap: 6 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: t.textSecondary }}>New password</span>
-        <input
-          type="password"
-          autoComplete="new-password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          style={fieldStyle(t)}
-          required
-          minLength={6}
-        />
-      </label>
-      <label style={{ display: "grid", gap: 6 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: t.textSecondary }}>Confirm new password</span>
-        <input
-          type="password"
-          autoComplete="new-password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          style={fieldStyle(t)}
-          required
-          minLength={6}
-        />
-      </label>
+      <PasswordField
+        label="Current password"
+        autoComplete="current-password"
+        value={currentPassword}
+        onChange={(e) => setCurrentPassword(e.target.value)}
+        visible={showCurrentPassword}
+        onToggle={() => setShowCurrentPassword((value) => !value)}
+        theme={t}
+      />
+      <PasswordField
+        label="New password"
+        autoComplete="new-password"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        visible={showNewPassword}
+        onToggle={() => setShowNewPassword((value) => !value)}
+        theme={t}
+      />
+      <PasswordField
+        label="Confirm new password"
+        autoComplete="new-password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        visible={showConfirmPassword}
+        onToggle={() => setShowConfirmPassword((value) => !value)}
+        theme={t}
+      />
       <button
         type="submit"
         disabled={loading}
