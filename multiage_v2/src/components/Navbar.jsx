@@ -17,7 +17,7 @@ const NAV_LINKS = [
   { label: "Contact",    href: "/contact" },
 ];
 
-const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance", "secretary", "graphics_media"]);
+const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance", "secretary", "graphics"]);
 
 function HamburgerIcon({ open }) {
   const bar = {

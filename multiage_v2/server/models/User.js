@@ -42,6 +42,7 @@ const userSchema = new mongoose.Schema(
       type:    String,
       enum:    ["user", "admin", "ceo", "administrator", "finance", "graphics", "cyber_it", "secretary"],
       lowercase: true,
+      trim:    true,
       default: "user",
     },
     adminRole: {
@@ -84,8 +85,13 @@ userSchema.virtual("isAdmin").get(function() {
 
 // Validate adminRole is only set for admin users
 userSchema.pre("save", function (next) {
-  if (this.adminRole && !ADMIN_ROLES.includes(this.role)) {
-    this.adminRole = undefined;
+  // Promotion Logic: If user has an adminRole but primary role is 'user', promote them.
+  const r = String(this.role || "user").toLowerCase();
+  const ar = String(this.adminRole || "").toUpperCase();
+  const hasAdminRole = Boolean(ar && ADMIN_ROLE_VALUES.includes(ar));
+  
+  if (hasAdminRole && !ADMIN_ROLES.includes(r)) {
+    this.role = String(this.adminRole).toLowerCase();
   }
   next();
 });

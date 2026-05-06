@@ -42,19 +42,22 @@ const protect = async (req, res, next) => {
 
 // ── Admin only ─────────────────────────────────────────────────────
 const adminOnly = (req, res, next) => {
-  const userAdminRole = String(req.user?.adminRole || "").toUpperCase();
+  const ar = String(req.user?.adminRole || "").toUpperCase();
+  const r = String(req.user?.role || "").toUpperCase();
+  const effectiveRole = ar || r;
+
   if (process.env.NODE_ENV !== "production") {
-    console.log(`[Auth Check] Role: ${req.user?.role}, AdminRole: ${userAdminRole}`);
+    console.log(`[Auth Check] Email: ${req.user?.email}, Role: ${r}, AdminRole: ${ar}`);
   }
 
-  if (req.user && (req.user.isAdmin || ADMIN_ROLES.includes(userAdminRole))) {
+  if (req.user && (req.user.isAdmin || ADMIN_ROLES.includes(effectiveRole))) {
     return next();
   }
   return res.status(403).json({ message: "Access denied — admins only" });
 };
 
 const emailReplyRolesOnly = (req, res, next) => {
-  const allowedRoles = new Set(["ceo", "administrator", "cyber_it"]);
+  const allowedRoles = new Set(["ceo", "administrator", "cyber_it", "secretary"]);
 
   if (req.user && allowedRoles.has(req.user.role)) {
     return next();
