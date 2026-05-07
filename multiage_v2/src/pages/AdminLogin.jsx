@@ -100,7 +100,7 @@ export default function AdminLogin() {
       <div style={{
         position: "absolute",
         inset: 0,
-        backgroundImage: "url('/assets/multiage-admin-logo.jpeg')",
+        backgroundImage: "url('/assets/logo-transparent.png')",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         backgroundSize: "min(64vw, 760px)",
@@ -131,9 +131,10 @@ export default function AdminLogin() {
           <a href="/" onClick={e => { e.preventDefault(); navigate("/"); }}
             style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <img
-              src="/assets/logo.png" alt="Multiage"
+              src="/assets/logo-transparent.png" alt="Multiage"
+              className="object-contain"
               onError={e => { e.currentTarget.style.display = "none"; e.currentTarget.nextSibling.style.display = "flex"; }}
-              style={{ width: 32, height: 32, borderRadius: 8, objectFit: "contain",
+              style={{ width: 32, height: 32, borderRadius: 8,
                 filter: "drop-shadow(0 0 4px rgba(197,98,11,0.35))" }}
             />
             <div style={{ display: "none", width: 32, height: 32, borderRadius: 8,

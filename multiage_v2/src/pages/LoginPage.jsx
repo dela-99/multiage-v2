@@ -205,10 +205,11 @@ export default function LoginPage() {
           <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }}
             style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <img
-              src="/assets/logo.png"
+              src="/assets/logo-transparent.png"
               alt="Multiage"
+              className="object-contain"
               onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.nextSibling.style.display = "flex"; }}
-              style={{ width: 38, height: 38, borderRadius: 10, objectFit: "contain", filter: "drop-shadow(0 0 6px rgba(197,98,11,0.35))" }}
+              style={{ width: 38, height: 38, borderRadius: 10, filter: "drop-shadow(0 0 6px rgba(197,98,11,0.35))" }}
             />
             <div style={{
               display: "none",
