@@ -76,7 +76,7 @@ export default function Sidebar({ items, active, onSelect, isMobile, isOpen, onC
       }}>
         <div style={{ display: isMobile ? "none" : "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
           <img
-            src="/logo.png"
+            src="/assets/logo.png"
             alt="Admin Logo"
             className="h-14 w-14 rounded-xl object-contain"
             style={{ flexShrink: 0 }}
