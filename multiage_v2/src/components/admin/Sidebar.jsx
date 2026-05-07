@@ -75,22 +75,12 @@ export default function Sidebar({ items, active, onSelect, isMobile, isOpen, onC
         overflowY: "auto",
       }}>
         <div style={{ display: isMobile ? "none" : "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
-          <div style={{
-            width: 46,
-            height: 46,
-            borderRadius: 16,
-            background: "linear-gradient(135deg,#C5620B,#6A2B09)",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 800,
-            fontSize: 18,
-            boxShadow: "0 14px 24px rgba(197,98,11,0.24)",
-            flexShrink: 0,
-          }}>
-            M
-          </div>
+          <img
+            src="/logo.png"
+            alt="Admin Logo"
+            className="h-14 w-14 rounded-xl object-contain"
+            style={{ flexShrink: 0 }}
+          />
           <div>
             <div style={{ color: t.textPrimary, fontWeight: 800, fontSize: 17 }}>Multiage</div>
             <div style={{ color: t.textMuted, fontSize: 12 }}>Admin Console</div>
