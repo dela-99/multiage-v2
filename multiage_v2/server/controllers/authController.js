@@ -11,7 +11,7 @@ const { verifyFirebaseIdToken } = require("../services/firebaseAdmin");
 
 const DEFAULT_TEMP_PASSWORD = process.env.DEFAULT_TEMP_PASSWORD;
 const RESET_TOKEN_TTL_MINUTES = 15;
-const DUMMY_PASSWORD_HASH = "$2b$12$C6UzMDM.H6dfI/f/IKcEe.4QJfA3e4M6P36M8A6Pw0fG8t8xA8M5W";
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync("multiage-login-dummy", 12);
 
 // ── Generate JWT ──────────────────────────────────────────────────
 const generateToken = (id) =>
