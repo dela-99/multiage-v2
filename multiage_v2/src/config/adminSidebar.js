@@ -76,12 +76,12 @@ export const SIDEBAR_ITEMS = [
 ];
 
 export const normalizeAdminRole = (role) => {
-  const rawRole = String(role || "").trim();
+  const rawRole = String(role || "").trim().toUpperCase();
   if (!rawRole) {
     return "";
   }
 
-  return ROLE_ALIASES[rawRole.toLowerCase()] || rawRole.toUpperCase();
+  return ROLE_ALIASES[rawRole.toLowerCase()] || rawRole;
 };
 
 export const getSidebarItems = (role) => {
