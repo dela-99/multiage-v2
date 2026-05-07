@@ -3,7 +3,7 @@ import { useNavigate } from "../router";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 
-const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance"]);
+const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance", "secretary", "graphics"]);
 
 const PersonIcon = () => (
   <svg width={16} height={16} viewBox="0 0 24 24" fill="none"

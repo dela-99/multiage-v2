@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const jwt  = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const {
   sendWelcomeNotification,
@@ -10,6 +11,7 @@ const { verifyFirebaseIdToken } = require("../services/firebaseAdmin");
 
 const DEFAULT_TEMP_PASSWORD = process.env.DEFAULT_TEMP_PASSWORD;
 const RESET_TOKEN_TTL_MINUTES = 15;
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync("multiage-login-dummy", 12);
 
 // ── Generate JWT ──────────────────────────────────────────────────
 const generateToken = (id) =>
@@ -76,14 +78,20 @@ const login = async (req, res, next) => {
       return res.status(400).json({ message: "Please provide email and password" });
     }
 
-    // 1. Find user by email ONLY (Fix for promoted accounts)
-    const user = await User.findOne({ email }).select("+password");
+    const normalizedEmail = String(email).toLowerCase().trim();
+
+    // 1. Find user by email ONLY
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
 
     // Temporary Debug
-    const isMatch = user ? await user.matchPassword(password) : false;
-    console.log("USER FOUND:", user?.email || "NOT_FOUND");
-    console.log("ROLE:", user?.role || "NONE");
-    console.log("PASSWORD MATCH:", isMatch);
+    if (process.env.NODE_ENV !== "production") {
+      console.log("LOGIN EMAIL:", normalizedEmail);
+      console.log("USER FOUND:", user?.email);
+      console.log("ROLE:", user?.role);
+    }
+
+    const passwordHashToCheck = user?.password || DUMMY_PASSWORD_HASH;
+    const isMatch = await bcrypt.compare(password, passwordHashToCheck);
 
     // 2. Verify bcrypt password
     if (!user || !isMatch) {

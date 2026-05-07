@@ -128,7 +128,8 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const user = await register({ name, email, password });
-      if (user.role !== "user") {
+      const normalizedRole = String(user.role || "").toLowerCase();
+      if (normalizedRole !== "user") {
         logout();
         setError("This email is reserved for an administrator account. Contact support.");
         return;
