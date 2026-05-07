@@ -111,7 +111,7 @@ function Logo({ navigate, t }) {
       style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", flexShrink: 0 }}>
       <img
         src="/logo.png" alt="Multiage Technologies"
-        style={{ height: 40, width: "auto", objectFit: "contain", flexShrink: 0,
+        style={{ flexShrink: 0,
           filter: "drop-shadow(0 0 4px rgba(197,98,11,0.35))" }}
         className="h-10 w-auto object-contain"
       />
