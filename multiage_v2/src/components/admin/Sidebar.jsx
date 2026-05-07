@@ -78,8 +78,14 @@ export default function Sidebar({ items, active, onSelect, isMobile, isOpen, onC
           <img
             src="/assets/logo.png"
             alt="Admin Logo"
-            className="h-14 w-14 rounded-xl object-contain"
-            style={{ flexShrink: 0 }}
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 16,
+              objectFit: "contain",
+              boxShadow: "0 14px 24px rgba(197,98,11,0.24)",
+              flexShrink: 0,
+            }}
           />
           <div>
             <div style={{ color: t.textPrimary, fontWeight: 800, fontSize: 17 }}>Multiage</div>
