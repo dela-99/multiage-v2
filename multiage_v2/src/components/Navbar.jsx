@@ -110,15 +110,11 @@ function Logo({ navigate, t }) {
     <a href="/" onClick={e => { e.preventDefault(); navigate("/"); }}
       style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", flexShrink: 0 }}>
       <img
-        src="/assets/logo.png" alt="Multiage logo"
-        onError={e => { e.currentTarget.style.display = "none"; e.currentTarget.nextSibling.style.display = "flex"; }}
-        style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", flexShrink: 0,
+        src="/assets/logo.png" alt="Multiage Technologies Logo"
+        style={{ flexShrink: 0,
           filter: "drop-shadow(0 0 4px rgba(197,98,11,0.35))" }}
+        className="h-10 w-auto object-contain"
       />
-      <div style={{ display: "none", width: 36, height: 36, borderRadius: 10,
-        background: "linear-gradient(135deg,#C5620B,#6A2B09)",
-        alignItems: "center", justifyContent: "center",
-        fontWeight: 800, fontSize: 16, color: "#fff", flexShrink: 0 }}>M</div>
       <span style={{
         fontFamily: "'Playfair Display', Georgia, serif",
         fontWeight: 700, fontSize: 17, letterSpacing: -0.3, color: t.textPrimary, display: "block",
