@@ -76,13 +76,13 @@ export default function Sidebar({ items, active, onSelect, isMobile, isOpen, onC
       }}>
         <div style={{ display: isMobile ? "none" : "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
           <img
-            src="/assets/logo.png"
+            src="/assets/logo-transparent.png"
             alt="Admin Logo"
+            className="object-contain"
             style={{
               width: 46,
               height: 46,
               borderRadius: 16,
-              objectFit: "contain",
               boxShadow: "0 14px 24px rgba(197,98,11,0.24)",
               flexShrink: 0,
             }}

@@ -7,15 +7,16 @@ function FooterLogo({ t }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
       <img
-        src="/assets/logo.png"
+        src="/assets/logo-transparent.png"
         alt="Multiage logo"
+        className="object-contain"
         onError={e => {
           e.currentTarget.style.display = "none";
           e.currentTarget.nextSibling.style.display = "flex";
         }}
         style={{
           width: 34, height: 34, borderRadius: 8,
-          objectFit: "contain", flexShrink: 0,
+          flexShrink: 0,
           filter: "drop-shadow(0 0 4px rgba(197,98,11,0.3))",
         }}
       />
