@@ -85,6 +85,8 @@ const login = async (req, res, next) => {
     const effectiveRole = user.adminRole || user.role;
     const normalizedRole = String(effectiveRole || "").trim().toUpperCase();
 
+    console.log("LOGIN ROLE:", normalizedRole);
+
     console.log(`[Login Success] UserID: ${user._id}, Role: ${normalizedRole}, IsAdmin: ${user.isAdmin}`);
 
     // If this is an admin-specific login or needs validation

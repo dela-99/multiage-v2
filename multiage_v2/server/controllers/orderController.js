@@ -2,7 +2,7 @@ const Order   = require("../models/Order");
 const Product = require("../models/Product");
 const { sendAdminNewOrderNotification } = require("../services/emailService");
 
-const ADMIN_OVERRIDE_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance"]);
+const ADMIN_OVERRIDE_ROLES = new Set(["ADMIN", "CEO", "CYBER_IT", "FINANCE", "ADMINISTRATOR", "SECRETARY", "GRAPHICS"]);
 
 // ── @route  POST /api/orders ──────────────────────────────────────
 // ── @access Private (logged-in user)
@@ -116,10 +116,12 @@ const getOrder = async (req, res, next) => {
 
     if (!order) return res.status(404).json({ message: "Order not found" });
 
+    const effectiveRole = String(req.user?.adminRole || req.user?.role || "").trim().toUpperCase();
+
     // Users can only see their own orders; admins see all
     if (
       order.user._id.toString() !== req.user._id.toString() &&
-      !ADMIN_OVERRIDE_ROLES.has(String(req.user.role || "").toLowerCase())
+      !ADMIN_OVERRIDE_ROLES.has(effectiveRole)
     ) {
       return res.status(403).json({ message: "Access denied" });
     }
@@ -140,8 +142,9 @@ const cancelOrder = async (req, res, next) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    const effectiveRole = String(req.user?.adminRole || req.user?.role || "").trim().toUpperCase();
     const isOwner = order.user.toString() === req.user._id.toString();
-    const isAdmin = ADMIN_OVERRIDE_ROLES.has(String(req.user.role || "").toLowerCase());
+    const isAdmin = ADMIN_OVERRIDE_ROLES.has(effectiveRole);
 
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ message: "Access denied" });

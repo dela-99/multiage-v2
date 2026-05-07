@@ -10,7 +10,7 @@ const {
 } = require("../services/paystackService");
 const { sendPaidOrderConfirmation } = require("../services/emailService");
 
-const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "finance", "cyber_it", "secretary", "graphics_media"]);
+const ADMIN_ROLES = new Set(["ADMIN", "CEO", "CYBER_IT", "FINANCE", "ADMINISTRATOR", "SECRETARY", "GRAPHICS"]);
 
 function buildReference(orderId) {
   return `MAG-${orderId}-${Date.now()}`;
@@ -119,8 +119,9 @@ const initializePayment = async (req, res, next) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    const effectiveRole = String(req.user?.adminRole || req.user?.role || "").trim().toUpperCase();
     const ownsOrder = String(order.user) === String(req.user._id);
-    if (!ownsOrder && !ADMIN_ROLES.has(String(req.user.role || "").toLowerCase())) {
+    if (!ownsOrder && !ADMIN_ROLES.has(effectiveRole)) {
       return res.status(403).json({ message: "Access denied" });
     }
 
@@ -176,7 +177,8 @@ const verifyPayment = async (req, res, next) => {
       return res.status(404).json({ message: "Order not found for this payment reference" });
     }
 
-    if (order.user.toString() !== req.user._id.toString() && !ADMIN_ROLES.has(String(req.user.role || "").toLowerCase())) {
+    const effectiveRole = String(req.user?.adminRole || req.user?.role || "").trim().toUpperCase();
+    if (order.user.toString() !== req.user._id.toString() && !ADMIN_ROLES.has(effectiveRole)) {
       return res.status(403).json({ message: "Not authorized" });
     }
 

@@ -56,7 +56,7 @@ const adminOnly = (req, res, next) => {
 };
 
 const emailReplyRolesOnly = (req, res, next) => {
-  const allowedRoles = new Set(["CEO", "ADMINISTRATOR", "CYBER_IT", "SECRETARY", "ADMIN"]);
+  const allowedRoles = new Set(["CEO", "CYBER_IT", "FINANCE", "ADMINISTRATOR", "SECRETARY", "GRAPHICS", "ADMIN"]);
   const effectiveRole = String(req.user?.adminRole || req.user?.role || "").trim().toUpperCase();
 
   if (req.user && allowedRoles.has(effectiveRole)) {
