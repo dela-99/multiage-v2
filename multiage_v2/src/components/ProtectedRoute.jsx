@@ -2,12 +2,12 @@ import { useEffect } from "react";
 import { useNavigate } from "../router";
 import { useAuth } from "../context/AuthContext";
 
-const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance", "secretary", "graphics"]);
+const ADMIN_ROLES = new Set(["ADMIN", "CEO", "ADMINISTRATOR", "CYBER_IT", "FINANCE", "SECRETARY", "GRAPHICS"]);
 
 export default function ProtectedRoute({ children, adminOnly = false }) {
   const navigate = useNavigate();
   const { isReady, isAuthenticated, role } = useAuth();
-  const isAdminRole = ADMIN_ROLES.has(String(role || "").toLowerCase());
+  const isAdminRole = ADMIN_ROLES.has(String(role || "").trim().toUpperCase());
 
   useEffect(() => {
     if (!isReady) {

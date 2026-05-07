@@ -17,17 +17,22 @@ const generateToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
 
-const buildAuthPayload = (user) => ({
-  _id: user._id,
-  name: user.name,
-  email: user.email,
-  role: user.role,
-  isAdmin: user.isAdmin,
-  mustChangePassword: user.mustChangePassword,
-  firebaseId: user.firebaseId || "",
-  profilePicture: user.profilePicture || "",
-  token: generateToken(user._id),
-});
+const buildAuthPayload = (user) => {
+  const effectiveRole = user.adminRole || user.role;
+  const normalizedRole = String(effectiveRole || "").trim().toUpperCase();
+
+  return {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: normalizedRole,
+    isAdmin: user.isAdmin,
+    mustChangePassword: user.mustChangePassword,
+    firebaseId: user.firebaseId || "",
+    profilePicture: user.profilePicture || "",
+    token: generateToken(user._id),
+  };
+};
 
 const buildResetLink = (token) => {
   const base = (process.env.CLIENT_URL || "https://multiage-v2-updated-1.vercel.app").replace(/\/+$/, "");
@@ -77,10 +82,13 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    console.log(`[Login Success] UserID: ${user._id}, Role: ${user.role}, IsAdmin: ${user.isAdmin}`);
+    const effectiveRole = user.adminRole || user.role;
+    const normalizedRole = String(effectiveRole || "").trim().toUpperCase();
+
+    console.log(`[Login Success] UserID: ${user._id}, Role: ${normalizedRole}, IsAdmin: ${user.isAdmin}`);
 
     // If this is an admin-specific login or needs validation
-    if (req.originalUrl.includes("/admin") && !user.isAdmin) {
+    if (req.originalUrl.includes("/admin") && !user.isAdmin && normalizedRole !== "ADMIN") {
       return res.status(403).json({ message: "Access denied: Not an authorized admin account" });
     }
 
@@ -153,11 +161,14 @@ const googleLogin = async (req, res, next) => {
 // ── @route  GET /api/auth/me ──────────────────────────────────────
 // ── @access Private
 const getMe = async (req, res) => {
+  const effectiveRole = req.user.adminRole || req.user.role;
+  const normalizedRole = String(effectiveRole || "").trim().toUpperCase();
+
   res.json({
     _id:       req.user._id,
     name:      req.user.name,
     email:     req.user.email,
-    role:      req.user.role,
+    role:      normalizedRole,
     firebaseId: req.user.firebaseId || "",
     profilePicture: req.user.profilePicture || "",
     createdAt: req.user.createdAt,

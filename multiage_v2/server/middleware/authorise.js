@@ -19,8 +19,8 @@ const authorise = (permission) => {
     }
 
     // Check adminRole first, fallback to role
-    const effectiveRole = (req.user.adminRole || req.user.role || "").toLowerCase();
-    const userPermissions = roles[effectiveRole] || [];
+    const effectiveRole = String(req.user.adminRole || req.user.role || "").trim().toUpperCase();
+    const userPermissions = roles[effectiveRole] || roles[effectiveRole.toLowerCase()] || [];
 
     // 1. Check for Wildcard access (CEO / CYBER_IT)
     if (userPermissions.includes("*")) {

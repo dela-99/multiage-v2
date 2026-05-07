@@ -10,10 +10,14 @@ const ADMIN_ROLE_VALUES = [
   "GRAPHICS",
 ];
 
-const ADMIN_ROLES = ["admin", "ceo", "administrator", "finance", "cyber_it", "secretary", "graphics"];
+const ADMIN_ROLES = [
+  "ADMIN", "CEO", "ADMINISTRATOR", "FINANCE", "CYBER_IT", "SECRETARY", "GRAPHICS"
+];
 
 const IS_ADMIN_ROLE = (role, adminRole) => {
-  return ADMIN_ROLES.includes(String(role || "").toLowerCase()) || ADMIN_ROLE_VALUES.includes(String(adminRole || "").toUpperCase());
+  const r = String(role || "").trim().toUpperCase();
+  const ar = String(adminRole || "").trim().toUpperCase();
+  return ADMIN_ROLES.includes(r) || ADMIN_ROLES.includes(ar);
 };
 
 const userSchema = new mongoose.Schema(
@@ -85,9 +89,9 @@ userSchema.virtual("isAdmin").get(function() {
 
 // Validate adminRole is only set for admin users
 userSchema.pre("save", function (next) {
-  // Promotion Logic: If user has an adminRole but primary role is 'user', promote them.
-  const r = String(this.role || "user").toLowerCase();
-  const ar = String(this.adminRole || "").toUpperCase();
+  // Promotion Logic: If user has a valid adminRole but primary role is 'user', promote them.
+  const r = String(this.role || "user").trim().toUpperCase();
+  const ar = String(this.adminRole || "").trim().toUpperCase();
   const hasAdminRole = Boolean(ar && ADMIN_ROLE_VALUES.includes(ar));
   
   if (hasAdminRole && !ADMIN_ROLES.includes(r)) {
