@@ -76,14 +76,17 @@ const login = async (req, res, next) => {
       return res.status(400).json({ message: "Please provide email and password" });
     }
 
-    // 1. Find user by email ONLY (Fix for promoted accounts)
-    const user = await User.findOne({ email }).select("+password");
+    const normalizedEmail = String(email).toLowerCase().trim();
+
+    // 1. Find user by email ONLY
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
 
     // Temporary Debug
+    console.log("LOGIN EMAIL:", normalizedEmail);
+    console.log("USER FOUND:", user?.email);
+    console.log("ROLE:", user?.role);
+
     const isMatch = user ? await user.matchPassword(password) : false;
-    console.log("USER FOUND:", user?.email || "NOT_FOUND");
-    console.log("ROLE:", user?.role || "NONE");
-    console.log("PASSWORD MATCH:", isMatch);
 
     // 2. Verify bcrypt password
     if (!user || !isMatch) {
