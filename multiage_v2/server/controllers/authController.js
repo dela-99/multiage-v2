@@ -76,9 +76,17 @@ const login = async (req, res, next) => {
       return res.status(400).json({ message: "Please provide email and password" });
     }
 
-    // Include password for comparison
+    // 1. Find user by email ONLY (Fix for promoted accounts)
     const user = await User.findOne({ email }).select("+password");
-    if (!user || !(await user.matchPassword(password))) {
+
+    // Temporary Debug
+    const isMatch = user ? await user.matchPassword(password) : false;
+    console.log("USER FOUND:", user?.email || "NOT_FOUND");
+    console.log("ROLE:", user?.role || "NONE");
+    console.log("PASSWORD MATCH:", isMatch);
+
+    // 2. Verify bcrypt password
+    if (!user || !isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
@@ -194,7 +202,7 @@ const deleteUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
-    if (user.role === "admin") {
+    if (user.isAdmin) {
       return res.status(400).json({ message: "Cannot delete an admin account" });
     }
     await user.deleteOne();

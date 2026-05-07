@@ -111,7 +111,7 @@ userSchema.pre("save", async function (next) {
 
 userSchema.pre("validate", function (next) {
   if (this.role) {
-    this.role = String(this.role).toLowerCase();
+    this.role = String(this.role).trim().toLowerCase();
     const r = this.role;
     if (r === "graphics" || r === "media" || r === "graphics_media") {
       this.role = "graphics";
