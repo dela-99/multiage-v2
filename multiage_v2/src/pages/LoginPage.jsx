@@ -131,7 +131,8 @@ export default function LoginPage() {
 
     try {
       const user = await login({ email, password });
-      if (user.role !== "user") {
+      const normalizedRole = String(user.role || "").toLowerCase();
+      if (normalizedRole !== "user") {
         logout();
         setError("This account is not a user account.");
         return;
@@ -152,7 +153,8 @@ export default function LoginPage() {
       const firebaseUser = await signInWithGooglePopup();
       const user = await loginWithGoogle(firebaseUser);
 
-      if (user.role !== "user") {
+      const normalizedRole = String(user.role || "").toLowerCase();
+      if (normalizedRole !== "user") {
         logout();
         setError("This Google account is reserved for an administrator account.");
         return;
