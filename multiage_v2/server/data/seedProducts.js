@@ -8,10 +8,11 @@ const _seed = [
     "type": "new",
     "condition": "",
     "images": [
-      "https://res.cloudinary.com/delaridge/image/upload/v1776476086/ylcq0pzmaz3hseevetnn.png",
-      "https://res.cloudinary.com/delaridge/image/upload/v1776476117/yvfz6fucjcbtwvsaqyqy.png",
-      "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vvujmssqgtoddscpp34m.png"
-    ],
+      "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vvujmssqgtoddscpp34m.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777051002/vswtngapwmqfwc7tpf3c.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777051002/jxnfroq6zqxzwrivul0h.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777051005/kc5p5zbigzpeecnwynbi.png"
+  ],
     "description": "6.1-inch Liquid Retina HD display, dual-camera system, A13 Bionic chip.",
     "stock": 100,
     "brand": "Apple",
@@ -24,8 +25,11 @@ const _seed = [
     "type": "new",
     "condition": "",
     "images": [
-      "https://res.cloudinary.com/delaridge/image/upload/v1776476121/eg4zzruki63hc0pp050u.jpg"
-    ],
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050832/mth5qvj3gt5nl1bo7sad.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050964/yozrqipcavqpuemugdrs.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050990/szvjbssruavwrcm4zeof.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050993/szeoshekv7ogtwyzqy4x.jpg"
+  ],
     "description": "5.8-inch Super Retina XDR display, triple-camera system.",
     "stock": 100,
     "brand": "Apple",
@@ -38,8 +42,11 @@ const _seed = [
     "type": "new",
     "condition": "",
     "images": [
-      "https://res.cloudinary.com/delaridge/image/upload/v1776476124/wvi0flgro7bihulxkewc.png"
-    ],
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050832/mth5qvj3gt5nl1bo7sad.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050964/yozrqipcavqpuemugdrs.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1776476120/xaszem4cyofqzavciboy.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050833/tuox5xrj9prxxamttovh.png"
+  ],
     "description": "6.5-inch Super Retina XDR display, triple-camera system.",
     "stock": 100,
     "brand": "Apple",
@@ -52,9 +59,11 @@ const _seed = [
     "type": "new",
     "condition": "",
     "images": [
-      "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vvujmssqgtoddscpp34m.png",
-      "https://res.cloudinary.com/delaridge/image/upload/v1776476099/kfulpbblcakdxiedhmiq.png"
-    ],
+    "https://res.cloudinary.com/delaridge/image/upload/v1777051002/jxnfroq6zqxzwrivul0h.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1776476086/ylcq0pzmaz3hseevetnn.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1776476111/wiudhdfuts7jw4xkgv59.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1776476117/yvfz6fucjcbtwvsaqyqy.png"
+  ],
     "description": "6.1-inch Super Retina XDR, 5G capable.",
     "stock": 100,
     "brand": "Apple",
@@ -294,11 +303,11 @@ const _seed = [
     "type": "new",
     "condition": "",
     "images": [
-      "https://res.cloudinary.com/delaridge/image/upload/v1777051009/ajb6klclawbwmcoshtah.png",
-      "https://res.cloudinary.com/delaridge/image/upload/v1777050992/s4hd6pdls85si1rmgsu5.png",
-      "https://res.cloudinary.com/delaridge/image/upload/v1777057356/ryj9t6ckszzv0kyhvp99.png",
-      "https://res.cloudinary.com/delaridge/image/upload/v1777050944/rfoq66abzcdz7b0ql7zb.png"
-    ],
+    "https://res.cloudinary.com/delaridge/image/upload/v1776476120/zw1igymgvier5ay4kvfh.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050944/rfoq66abzcdz7b0ql7zb.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777051009/ajb6klclawbwmcoshtah.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777057356/ryj9t6ckszzv0kyhvp99.png"
+  ],
     "description": "6.1-inch Super Retina XDR, Apple Intelligence.",
     "stock": 100,
     "brand": "Apple",
@@ -310,7 +319,13 @@ const _seed = [
     "category": "Phones",
     "type": "new",
     "condition": "",
-    "images": [DEFAULT_PRODUCT_PLACEHOLDER],
+    "images": [
+    "https://res.cloudinary.com/delaridge/image/upload/v1777051009/ajb6klclawbwmcoshtah.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777057356/ryj9t6ckszzv0kyhvp99.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777057356/ryj9t6ckszzv0kyhvp99.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1776476120/zw1igymgvier5ay4kvfh.png"
+  
+    ],
     "description": "6.7-inch Super Retina XDR.",
     "stock": 100,
     "brand": "Apple",
@@ -323,8 +338,10 @@ const _seed = [
     "type": "new",
     "condition": "",
     "images": [
-      "https://res.cloudinary.com/delaridge/image/upload/v1777050984/pml2e2iau4llfupmdrtg.jpg",
-      "https://res.cloudinary.com/delaridge/image/upload/v1777050989/vadpqt4aatjskiodauxm.jpg"
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050997/nujhfnqmtsg2oftzqcad.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777051005/gmdjyhws8xxnk4cebfze.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777051007/kkoo6d1wxgnmm62b9ozp.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777057832/n4xfgd6wrk3kj4y7i8o4.png"
     ],
     "description": "6.3-inch Super Retina XDR, Pro camera system.",
     "stock": 100,
@@ -338,8 +355,10 @@ const _seed = [
     "type": "new",
     "condition": "",
     "images": [
-      "https://res.cloudinary.com/delaridge/image/upload/v1777050999/voczxunlmzfwmtfnlvcv.png",
-      "https://res.cloudinary.com/delaridge/image/upload/v1777050989/vadpqt4aatjskiodauxm.jpg"
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050996/ldevnp7vivjlifl8lhkd.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777051007/kkoo6d1wxgnmm62b9ozp.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777057832/n4xfgd6wrk3kj4y7i8o4.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777050996/ldevnp7vivjlifl8lhkd.jpg"  
     ],
     "description": "6.9-inch Super Retina XDR, largest Pro.",
     "stock": 100,
@@ -353,10 +372,10 @@ const _seed = [
     "type": "new",
     "condition": "",
     "images": [
-      "https://res.cloudinary.com/delaridge/image/upload/v1776476153/qnhqm8quolpxl8bstfof.png",
-      "https://res.cloudinary.com/delaridge/image/upload/v1777050994/lm0ao2drjssjipxddg7k.png",
-      "https://res.cloudinary.com/delaridge/image/upload/v1777050995/rwsgijfotrf2sl0u4qfu.jpg",
-      "https://res.cloudinary.com/delaridge/image/upload/v1777050988/i8whfzbitaux7xj3f5ih.jpg"
+    "https://res.cloudinary.com/delaridge/image/upload/v1778124416/rjqx7fvvtlrnyljcloqb.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778124416/auh1mprrnkhvwd7utbct.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778124416/bonahgo1vlteqxipijja.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778124417/ubtjj7r9fsgqiqvlmdmd.png"
     ],
     "description": "2025 base model with 120Hz display.",
     "stock": 100,
@@ -1325,7 +1344,12 @@ const _seed = [
     "category": "Audio",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473744/oyzijw9jgmh9cjztd2zp.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473745/h38gzafwd2dgkrxswjyf.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473743/yee35gjtdtrufvv7cubd.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473743/ooownsea2rmblsextux9.jpg"
+  ],
     "description": "Premium Pro with advanced ANC.",
     "stock": 100,
     "brand": "Apple",
@@ -1373,7 +1397,12 @@ const _seed = [
     "category": "Audio",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [
+    "https://res.cloudinary.com/delaridge/image/upload/v1778472448/hodedcqftihjhe5gljah.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778472448/unmvxlrdogf6yertsxlj.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778472448/bpe0sqbi0rbkjmtlzxes.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778472448/hodedcqftihjhe5gljah.jpg"
+  ],
     "description": "Classic AirPods with spatial audio.",
     "stock": 100,
     "brand": "Apple",
@@ -1397,7 +1426,12 @@ const _seed = [
     "category": "Audio",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [
+    "https://res.cloudinary.com/delaridge/image/upload/v1778472939/fkywjgovt9c81pwdmvvr.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778472939/s6zbstgrz1to4orsj1uy.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778472938/k0lxcxeuld3nsiusqf6e.webp",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778472939/fkywjgovt9c81pwdmvvr.jpg"
+  ],
     "description": "2026 flagship Galaxy Buds with Hi-Res Audio and Adaptive ANC 2.0.",
     "stock": 100,
     "brand": "Samsung",
@@ -1409,7 +1443,12 @@ const _seed = [
     "category": "Audio",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473191/jtq6gqzfcabnxtnl6esc.avif",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473190/rnsb8rhdddjjk3dhsbmo.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473190/ehdm6wozsoyylyiizxyc.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473191/jtq6gqzfcabnxtnl6esc.avif"
+    ],
     "description": "2026 open-fit Galaxy Buds with Adaptive ANC.",
     "stock": 100,
     "brand": "Samsung",
@@ -1481,7 +1520,12 @@ const _seed = [
     "category": "Audio",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [
+    "https://res.cloudinary.com/delaridge/image/upload/v1777681910/ybryn1zjtzenyaja5ke1.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777681912/pvpxh83dlku7es5jokdj.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777681914/hnvliqkb4zrfcfhq1nqb.png",
+    "https://res.cloudinary.com/delaridge/image/upload/v1777681917/iarfjkqklps2wxauspkp.png"
+    ],
     "description": "Iconic bean-shaped Galaxy Buds Live.",
     "stock": 100,
     "brand": "Samsung",
@@ -1493,7 +1537,13 @@ const _seed = [
     "category": "Audio",
     "type": "new",
     "condition": "",
-    "images": [],
+    "images": [
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473503/e1jcvaxwi7ockcco7wnp.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473502/z50lmmxu6ulidrmo6bix.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473502/buofspbybhthcrnpia9e.jpg",
+    "https://res.cloudinary.com/delaridge/image/upload/v1778473503/e1jcvaxwi7ockcco7wnp.jpg"
+  
+    ],
     "description": "Early premium Galaxy Buds Pro with intelligent ANC.",
     "stock": 100,
     "brand": "Samsung",
