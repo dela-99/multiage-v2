@@ -64,8 +64,8 @@ export const SIDEBAR_ITEMS = [
   {
     key: "Communications",
     label: "Communications",
-    path: "/admin/communications",
-    roles: [ROLES.CEO, ROLES.CYBER_IT, ROLES.SECRETARY],
+    path: "/admin/messages",
+    roles: [ROLES.ADMINISTRATOR, ROLES.SECRETARY],
   },
   {
     key: "Settings",

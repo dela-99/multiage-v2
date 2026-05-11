@@ -3,6 +3,7 @@ import PageLayout from "../PageLayout";
 import Sidebar from "./Sidebar";
 import { useTheme } from "../../context/ThemeContext";
 import { getSidebarItems, normalizeAdminRole } from "../../config/adminSidebar";
+import { useLocation, useNavigate } from "../../router";
 
 function useViewport() {
   const [width, setWidth] = useState(() => 
@@ -96,12 +97,18 @@ export default function RoleDashboardLayout({
   error,
   sections,
   renderSection,
+  sidebarItems: sidebarItemsOverride,
 }) {
   const { t } = useTheme();
   const viewportWidth = useViewport();
   const isMobile = viewportWidth < 980;
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarItems = useMemo(() => getSidebarItems(normalizeAdminRole(role)), [role]);
+  const sidebarItems = useMemo(
+    () => sidebarItemsOverride || getSidebarItems(normalizeAdminRole(role)),
+    [role, sidebarItemsOverride]
+  );
   const [sectionKey, setSectionKey] = useState("");
 
   useEffect(() => {
@@ -116,9 +123,19 @@ export default function RoleDashboardLayout({
       return;
     }
 
+    const matchedItem = sidebarItems.find((item) => item.path === pathname);
+    if (pathname === "/admin/messages" && !matchedItem) {
+      navigate("/admin/dashboard");
+      return;
+    }
     const visibleKeys = new Set(sidebarItems.map((item) => item.key));
-    setSectionKey((current) => (visibleKeys.has(current) ? current : sidebarItems[0].key));
-  }, [sidebarItems]);
+    setSectionKey((current) => {
+      if (matchedItem) {
+        return matchedItem.key;
+      }
+      return visibleKeys.has(current) ? current : sidebarItems[0].key;
+    });
+  }, [navigate, pathname, sidebarItems]);
 
   const selectedItem = sidebarItems.find((item) => item.key === sectionKey) || sidebarItems[0];
 
@@ -129,7 +146,15 @@ export default function RoleDashboardLayout({
           <Sidebar
             items={sidebarItems}
             active={sectionKey}
-            onSelect={setSectionKey}
+            onSelect={(key) => {
+              setSectionKey(key);
+              const selected = sidebarItems.find((item) => item.key === key);
+              if (selected?.path === "/admin/messages") {
+                navigate("/admin/messages");
+              } else if (pathname === "/admin/messages") {
+                navigate("/admin/dashboard");
+              }
+            }}
             isMobile={isMobile}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}

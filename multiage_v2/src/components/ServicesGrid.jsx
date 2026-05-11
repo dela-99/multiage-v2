@@ -1,4 +1,4 @@
-import { Link } from "../router";
+import { useNavigate } from "../router";
 import { SectionLabel, SectionHeading } from "./ui";
 import { useTheme } from "../context/ThemeContext";
 
@@ -27,14 +27,21 @@ const STUDIO_IMAGES = [
 
 function StudioTile({ image }) {
   const { t } = useTheme();
+  const navigate = useNavigate();
 
   return (
-    <Link
-      to="/studio"
+    <button
+      type="button"
+      onClick={() => navigate("/studio")}
       aria-label="Open Multiage Studios"
       style={{
         display: "block",
         textDecoration: "none",
+        width: "100%",
+        padding: 0,
+        background: "transparent",
+        border: "none",
+        cursor: "pointer",
       }}
     >
       <div
@@ -76,7 +83,7 @@ function StudioTile({ image }) {
           }}
         />
       </div>
-    </Link>
+    </button>
   );
 }
 
@@ -92,8 +99,8 @@ export default function ServicesGrid() {
           gap: 18px;
         }
 
-        .studio-gallery-grid a:hover .studio-gallery-image,
-        .studio-gallery-grid a:focus-visible .studio-gallery-image {
+        .studio-gallery-grid button:hover .studio-gallery-image,
+        .studio-gallery-grid button:focus-visible .studio-gallery-image {
           transform: scale(1.05);
         }
 

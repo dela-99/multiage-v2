@@ -4,6 +4,20 @@ const { sendUserRequestEmail, sendAutoReplyEmail } = require("../services/emailS
 // Escape regex metacharacters for safe RegExp construction
 const regexEscape = (s) => String(s || "").replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
 
+const normalizeStatus = (status, isRead = false) => {
+  const raw = String(status || "").trim().toLowerCase();
+
+  if (raw === "read" || raw === "contacted" || raw === "closed") {
+    return "read";
+  }
+
+  if (isRead) {
+    return "read";
+  }
+
+  return "unread";
+};
+
 const normalizePhone = (phone) => {
   // Strip any non-digit characters except a leading +
   let cleaned = String(phone).replace(/(?!^\+)[^\d]/g, "");
@@ -55,7 +69,7 @@ const createMessage = async (req, res, next) => {
       message,
       kind: kind || "contact",
       deviceRequested: deviceRequested || "",
-      status: "pending",
+      status: "unread",
       source: source || "website",
     });
 
@@ -90,7 +104,7 @@ const getMessages = async (req, res, next) => {
     let query = {};
 
     if (status && status !== "all") {
-      query.status = status;
+      query.status = normalizeStatus(status);
     }
 
     if (search) {
@@ -99,11 +113,21 @@ const getMessages = async (req, res, next) => {
       query.$or = [
         { name: { $regex: r } },
         { email: { $regex: r } },
+        { phone: { $regex: r } },
+        { service: { $regex: r } },
         { message: { $regex: r } }
       ];
     }
 
     const messages = await Message.find(query).sort("-createdAt");
+    for (const message of messages) {
+      const nextStatus = normalizeStatus(message.status, message.isRead);
+      if (message.status !== nextStatus || message.isRead !== (nextStatus === "read")) {
+        message.status = nextStatus;
+        message.isRead = nextStatus === "read";
+        await message.save();
+      }
+    }
     res.json(messages);
   } catch (err) {
     next(err);
@@ -117,9 +141,15 @@ const getMessage = async (req, res, next) => {
     const msg = await Message.findById(req.params.id);
     if (!msg) return res.status(404).json({ message: "Message not found" });
 
-    // Auto-mark as contacted if opening for the first time
-    if (msg.status === "pending") {
-      msg.status = "contacted";
+    const currentStatus = normalizeStatus(msg.status, msg.isRead);
+
+    if (currentStatus !== "read") {
+      msg.status = "read";
+      msg.isRead = true;
+      await msg.save();
+    } else if (msg.status !== currentStatus || msg.isRead !== true) {
+      msg.status = currentStatus;
+      msg.isRead = true;
       await msg.save();
     }
 
@@ -134,10 +164,15 @@ const getMessage = async (req, res, next) => {
 const updateMessageStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
-    if (!["pending", "contacted", "closed"].includes(status)) {
-      return res.status(400).json({ message: "Invalid lead status" });
+    if (!["unread", "read"].includes(String(status || "").trim().toLowerCase())) {
+      return res.status(400).json({ message: "Invalid message status" });
     }
-    const msg = await Message.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const normalizedStatus = normalizeStatus(status);
+    const msg = await Message.findByIdAndUpdate(
+      req.params.id,
+      { status: normalizedStatus, isRead: normalizedStatus === "read" },
+      { new: true }
+    );
     if (!msg) return res.status(404).json({ message: "Message not found" });
     res.json(msg);
   } catch (err) {

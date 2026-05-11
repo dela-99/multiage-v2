@@ -2,6 +2,7 @@ import { useState } from "react";
 import { icons } from "../constants";
 import { Icon, SectionLabel, SectionHeading } from "./ui";
 import { useTheme } from "../context/ThemeContext";
+import { api } from "../lib/api";
 
 const SERVICES_OPTIONS = [
   "Electronics / Device Purchase","Website Development","Mobile App Development",
@@ -15,10 +16,13 @@ const QUICK_ACTIONS = [
 ];
 
 export default function ContactSection() {
-  const { t, isLight } = useTheme();
-  const [form, setForm] = useState({ name: "", email: "", service: "", message: "" });
+  const { t } = useTheme();
+  const [form, setForm] = useState({ name: "", email: "", phone: "", service: "", message: "" });
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const upd = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
+  const phoneRegex = /^\+?[0-9\s\-()]+$/;
 
   const inputStyle = {
     width: "100%", padding: "12px 16px",
@@ -27,10 +31,29 @@ export default function ContactSection() {
     outline: "none", boxSizing: "border-box",
   };
 
-  const submit = () => {
-    if (!form.name || !form.email) return;
-    setSent(true); setTimeout(() => setSent(false), 4000);
-    setForm({ name: "", email: "", service: "", message: "" });
+  const submit = async () => {
+    if (!form.name || !form.email || !form.phone || !form.message) {
+      setError("Name, email, phone number, and message are required.");
+      return;
+    }
+
+    if (!phoneRegex.test(form.phone)) {
+      setError("Enter a valid phone number.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      await api.sendMessage({ ...form, kind: "contact", source: "home-contact-section" });
+      setSent(true);
+      setTimeout(() => setSent(false), 4000);
+      setForm({ name: "", email: "", phone: "", service: "", message: "" });
+    } catch (err) {
+      setError(err.message || "Failed to send message.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,22 +100,36 @@ export default function ContactSection() {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <h3 style={{ fontSize: 20, fontWeight: 700, color: t.textPrimary, marginBottom: 8 }}>Send us a message</h3>
+                {error && (
+                  <div style={{
+                    padding: "12px 14px",
+                    borderRadius: 12,
+                    background: "rgba(192,57,43,0.12)",
+                    color: "#c0392b",
+                    border: "1px solid rgba(192,57,43,0.24)",
+                    fontSize: 13,
+                  }}>
+                    {error}
+                  </div>
+                )}
                 <input placeholder="Your Name" style={inputStyle} value={form.name} onChange={upd("name")} />
                 <input placeholder="Email Address" type="email" style={inputStyle} value={form.email} onChange={upd("email")} />
+                <input placeholder="Phone Number" type="tel" style={inputStyle} value={form.phone} onChange={upd("phone")} />
                 <select style={{ ...inputStyle, appearance: "none" }} value={form.service} onChange={upd("service")}>
                   <option value="">Service Needed</option>
                   {SERVICES_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
                 <textarea placeholder="Your message..." rows={4} style={{ ...inputStyle, resize: "vertical" }} value={form.message} onChange={upd("message")} />
-                <button onClick={submit} style={{
+                <button onClick={submit} disabled={loading} style={{
                   padding: "14px 24px", background: "linear-gradient(135deg,#C5620B,#6A2B09)",
                   border: "none", borderRadius: 12, color: "#fff", fontSize: 15, fontWeight: 700,
                   cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                   gap: 8, boxShadow: "0 8px 24px rgba(197,98,11,0.35)", transition: "transform 0.2s",
+                  opacity: loading ? 0.72 : 1,
                 }}
                   onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
                   onMouseLeave={e => e.currentTarget.style.transform = "none"}>
-                  <Icon d={icons.send} size={16} /> Send Message
+                  <Icon d={icons.send} size={16} /> {loading ? "Sending..." : "Send Message"}
                 </button>
               </div>
             )}

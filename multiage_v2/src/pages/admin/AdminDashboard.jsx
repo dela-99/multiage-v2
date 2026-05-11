@@ -13,6 +13,7 @@ import {
 import { comparePeriods, inRange } from "../../components/admin/dashboardUtils";
 import { useAdminResources } from "../../hooks/useAdminResources";
 import { api } from "../../lib/api";
+import { getSidebarItems } from "../../config/adminSidebar";
 
 function useWindowSize() {
   const [width, setWidth] = useState(() => 
@@ -41,14 +42,19 @@ export default function AdministratorDashboard({ role, token, user }) {
   const isFullAdmin = ["ceo", "cyber_it", "administrator"].includes(role?.toLowerCase());
   const isGraphicsMedia = role?.toLowerCase() === "graphics" || role?.toLowerCase() === "graphics_media";
   const canManageOrders = isFullAdmin || ["secretary", "finance"].includes(role?.toLowerCase());
-  const canManageMessages = isFullAdmin || role?.toLowerCase() === "secretary";
+  const canManageMessages = role?.toLowerCase() === "administrator" || role?.toLowerCase() === "secretary";
 
   useEffect(() => {
     setProductList(products || []);
   }, [products]);
 
   const filteredOrders = useMemo(() => (orders ?? []).filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
-  const unreadCount = useMemo(() => (messages ?? []).filter(m => m.status === "pending").length, [messages]);
+  const unreadCount = useMemo(() => (messages ?? []).filter((message) => message.status === "unread").length, [messages]);
+  const sidebarItems = useMemo(() => {
+    return getSidebarItems(role).map((item) => (
+      item.key === "Communications" ? { ...item, unreadCount } : item
+    ));
+  }, [role, unreadCount]);
 
   const cards = useMemo(() => {
     const baseCards = [
@@ -105,7 +111,7 @@ export default function AdministratorDashboard({ role, token, user }) {
   }
 
   if (canManageMessages) {
-    sections.Communications = <MessagesSection messages={messages} unreadCount={unreadCount} />;
+    sections.Communications = <MessagesSection messages={messages} token={token} loading={loading} unreadCount={unreadCount} />;
   }
 
   sections.Settings = <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />;
@@ -120,6 +126,7 @@ export default function AdministratorDashboard({ role, token, user }) {
       loading={loading}
       error={error}
       sections={sections}
+      sidebarItems={sidebarItems}
       renderSection={(key, map) => map[key] || map.Dashboard}
     />
   );

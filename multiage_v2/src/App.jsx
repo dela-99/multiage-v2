@@ -38,6 +38,7 @@ export default function App() {
                 <Route path="/networking"           element={<NetworkingPage />} />
                 <Route path="/software-development" element={<SoftwarePage />} />
                 <Route path="/services"             element={<ServicesPage />} />
+                <Route path="/studio"               element={<ServicesPage />} />
                 <Route path="/hardware"             element={<HardwarePage />} />
                 <Route path="/contact"              element={<ContactPage />} />
                 <Route path="/product/:id"          element={<ProductDetails />} />
@@ -58,6 +59,14 @@ export default function App() {
                 />
                 <Route
                   path="/admin/dashboard"
+                  element={(
+                    <ProtectedRoute adminOnly>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  )}
+                />
+                <Route
+                  path="/admin/messages"
                   element={(
                     <ProtectedRoute adminOnly>
                       <AdminDashboard />

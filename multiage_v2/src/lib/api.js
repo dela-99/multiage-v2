@@ -97,5 +97,7 @@ export const api = {
   verifyPayment: (reference, token) =>
     apiRequest(`/payment/verify?reference=${encodeURIComponent(reference)}`, { token }),
   getMessages: (token) => apiRequest("/messages", { token }),
+  getMessage: (id, token) => apiRequest(`/messages/${id}`, { token }),
+  updateMessageStatus: (id, body, token) => apiRequest(`/messages/${id}/status`, { method: "PATCH", body, token }),
   createProduct: (body, token) => apiRequest("/products", { method: "POST", body, token }),
 };

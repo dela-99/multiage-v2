@@ -3,7 +3,6 @@ import ChangePasswordForm from "../../components/ChangePasswordForm";
 import RoleDashboardLayout, { StatIcon } from "../../components/admin/RoleDashboardLayout";
 import {
   InventorySection,
-  MessagesSection,
   MetricOverview,
   OrdersSection,
   ProductListSection,
@@ -16,10 +15,9 @@ import { api } from "../../lib/api";
 
 export default function CEODashboard({ role, token, user }) {
   const [rangeDays, setRangeDays] = useState(30);
-  const { products, orders, messages, loading, error } = useAdminResources(token, { products: true, orders: true, messages: true });
+  const { products, orders, loading, error } = useAdminResources(token, { products: true, orders: true });
 
   const filteredOrders = useMemo(() => orders.filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
-  const filteredMessages = useMemo(() => messages.filter((message) => inRange(message.createdAt, rangeDays)), [messages, rangeDays]);
   const revenue = filteredOrders.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0);
   const expenses = revenue * 0.35;
   const income = revenue - expenses;
@@ -77,7 +75,6 @@ export default function CEODashboard({ role, token, user }) {
     ),
     Users: <SimpleInfoSection title="Users" description="Executive visibility only." body="User governance remains backend-protected. This CEO workspace is reserved for high-level user administration and audit decisions." />,
     "Media / Content": <SimpleInfoSection title="Media / Content" description="Brand and campaign oversight." body="Use this workspace to review content direction and approve media priorities. Dedicated publishing tools can plug in here without changing the dashboard switch logic." iconType="media" />,
-    Communications: <MessagesSection messages={filteredMessages} />,
     Settings: <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />,
   };
 
@@ -85,7 +82,7 @@ export default function CEODashboard({ role, token, user }) {
     <RoleDashboardLayout
       role={role}
       title="CEO Dashboard"
-      subtitle={`Welcome back, ${user?.name || "CEO"}. This executive workspace surfaces commercial performance, oversight, and communications.`}
+      subtitle={`Welcome back, ${user?.name || "CEO"}. This executive workspace surfaces commercial performance, oversight, and strategic visibility.`}
       loading={loading}
       error={error}
       sections={sections}

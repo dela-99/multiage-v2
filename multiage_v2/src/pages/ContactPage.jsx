@@ -34,8 +34,17 @@ export default function ContactPage() {
   const [error, setError] = useState("");
 
   const upd = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
+  const phoneRegex = /^\+?[0-9\s\-()]+$/;
   const submit = async () => {
-    if (!form.name || !form.email || !form.message) return;
+    if (!form.name || !form.email || !form.phone || !form.message) {
+      setError("Name, email, phone number, and message are required.");
+      return;
+    }
+
+    if (!phoneRegex.test(form.phone)) {
+      setError("Enter a valid phone number.");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -146,7 +155,7 @@ export default function ContactPage() {
                     <input placeholder="Email Address *" type="email" style={inputStyle} value={form.email} onChange={upd("email")}
                       onFocus={e => e.target.style.borderColor = "#C5620B"} onBlur={e => e.target.style.borderColor = t.inputBorder} />
                   </div>
-                  <input placeholder="Phone Number" style={inputStyle} value={form.phone} onChange={upd("phone")}
+                  <input placeholder="Phone Number *" type="tel" style={inputStyle} value={form.phone} onChange={upd("phone")}
                     onFocus={e => e.target.style.borderColor = "#C5620B"} onBlur={e => e.target.style.borderColor = t.inputBorder} />
                   <select style={{ ...inputStyle, appearance: "none" }} value={form.service} onChange={upd("service")}
                     onFocus={e => e.target.style.borderColor = "#C5620B"} onBlur={e => e.target.style.borderColor = t.inputBorder}>

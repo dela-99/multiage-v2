@@ -1,5 +1,19 @@
 const mongoose = require("mongoose");
 
+function normalizeMessageStatus(status, isRead) {
+  const raw = String(status || "").trim().toLowerCase();
+
+  if (raw === "read" || raw === "contacted" || raw === "closed") {
+    return "read";
+  }
+
+  if (isRead === true) {
+    return "read";
+  }
+
+  return "unread";
+}
+
 const messageSchema = new mongoose.Schema(
   {
     name: {
@@ -39,8 +53,8 @@ const messageSchema = new mongoose.Schema(
     },
     status: {
       type:    String,
-      enum:    ["new", "contacted", "closed"],
-      default: "new",
+      enum:    ["unread", "read"],
+      default: "unread",
     },
     message: {
       type:     String,
@@ -54,5 +68,11 @@ const messageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+messageSchema.pre("validate", function normalizeStatus(next) {
+  this.status = normalizeMessageStatus(this.status, this.isRead);
+  this.isRead = this.status === "read";
+  next();
+});
 
 module.exports = mongoose.model("Message", messageSchema);

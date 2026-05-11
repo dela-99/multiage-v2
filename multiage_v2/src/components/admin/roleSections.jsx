@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DashboardCard from "./DashboardCard";
 import AnalyticsChart from "./AnalyticsChart";
 import TopProducts from "./TopProducts";
 import { SectionShell, fieldStyle, StatIcon } from "./RoleDashboardLayout";
 import { useTheme } from "../../context/ThemeContext";
+import { api } from "../../lib/api";
 
 export function MetricOverview({ cards, analytics, topProducts }) {
   return (
@@ -272,42 +273,321 @@ export function OrdersSection({ orders, title = "Orders", description = "Recent 
   );
 }
 
-export function MessagesSection({ messages, title = "Communications", description = "Live customer and service communication records." }) {
+function normalizePhoneForActions(phone) {
+  const raw = String(phone || "").trim();
+  if (!raw) {
+    return "";
+  }
+
+  if (raw.startsWith("+")) {
+    return raw.replace(/[^\d]/g, "");
+  }
+
+  return raw.replace(/[^\d]/g, "");
+}
+
+export function MessagesSection({
+  messages,
+  token,
+  loading = false,
+  title = "Communications",
+  description = "Live customer and service communication records.",
+}) {
   const { t } = useTheme();
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [localMessages, setLocalMessages] = useState(messages || []);
+  const [detailLoadingId, setDetailLoadingId] = useState("");
+
+  useEffect(() => {
+    setLocalMessages(messages || []);
+    setSelectedMessage((current) => {
+      if (!current) {
+        return null;
+      }
+      return (messages || []).find((message) => message._id === current._id) || current;
+    });
+  }, [messages]);
+
+  const filteredMessages = useMemo(() => {
+    return (localMessages || []).filter((message) => {
+      const matchesSearch = !query || [message.name, message.email, message.phone, message.service]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(query.toLowerCase()));
+      const matchesFilter = filter === "all" ? true : message.status === filter;
+      return matchesSearch && matchesFilter;
+    });
+  }, [filter, localMessages, query]);
+
+  const openMessage = async (message) => {
+    if (!token || !message?._id) {
+      setSelectedMessage(message || null);
+      return;
+    }
+
+    try {
+      setDetailLoadingId(message._id);
+      const fullMessage = await api.getMessage(message._id, token);
+      setSelectedMessage(fullMessage);
+      setLocalMessages((current) => current.map((item) => (
+        item._id === fullMessage._id ? fullMessage : item
+      )));
+    } catch (error) {
+      setSelectedMessage(message);
+    } finally {
+      setDetailLoadingId("");
+    }
+  };
+
+  const copyValue = async (value) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      window.prompt("Copy this value:", value);
+    }
+  };
+
+  const selectedPhone = normalizePhoneForActions(selectedMessage?.phone);
 
   return (
     <SectionShell title={title} description={description}>
-      {messages.length === 0 ? (
-        <div style={{ color: t.textMuted }}>No communication records in the selected range.</div>
-      ) : (
-        <div style={{ display: "grid", gap: 14 }}>
-          {messages.map((message) => (
-            <div key={message._id} style={{
+      <div style={{ display: "grid", gap: 18 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 12 }} className="messages-toolbar">
+          <input
+            placeholder="Search by name, email, or phone"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            style={fieldStyle(t)}
+          />
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {[
+              { key: "all", label: "All" },
+              { key: "unread", label: "Unread" },
+              { key: "read", label: "Read" },
+            ].map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setFilter(item.key)}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: 12,
+                  border: filter === item.key ? "1px solid rgba(197,98,11,0.6)" : `1px solid ${t.border}`,
+                  background: filter === item.key ? "rgba(197,98,11,0.14)" : t.surface,
+                  color: filter === item.key ? "#C5620B" : t.textPrimary,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {loading ? (
+          <div style={{
+            padding: "32px 18px",
+            borderRadius: 18,
+            background: t.surface,
+            border: `1px solid ${t.border}`,
+            color: t.textMuted,
+            textAlign: "center",
+          }}>
+            Loading messages...
+          </div>
+        ) : filteredMessages.length === 0 ? (
+          <div style={{ color: t.textMuted, padding: "18px 4px" }}>No messages yet</div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.05fr) minmax(320px,0.95fr)", gap: 18 }} className="messages-grid">
+            <div style={{ display: "grid", gap: 12, maxHeight: 620, overflowY: "auto", paddingRight: 4 }}>
+              {filteredMessages.map((message) => {
+                const isActive = selectedMessage?._id === message._id;
+                const isUnread = message.status === "unread";
+                return (
+                  <button
+                    key={message._id}
+                    type="button"
+                    onClick={() => openMessage(message)}
+                    style={{
+                      display: "grid",
+                      gap: 8,
+                      textAlign: "left",
+                      width: "100%",
+                      padding: "16px 18px",
+                      borderRadius: 18,
+                      border: isActive ? "1px solid rgba(197,98,11,0.55)" : `1px solid ${t.border}`,
+                      background: isActive ? "rgba(197,98,11,0.12)" : (isUnread ? "rgba(197,98,11,0.08)" : t.surface),
+                      cursor: "pointer",
+                      boxShadow: isUnread ? "inset 3px 0 0 #C5620B" : "none",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                      <div>
+                        <div style={{ color: t.textPrimary, fontWeight: 800 }}>{message.name}</div>
+                        <div style={{ color: t.textMuted, fontSize: 13 }}>{message.email}</div>
+                      </div>
+                      <span style={{
+                        padding: "5px 10px",
+                        borderRadius: 999,
+                        background: isUnread ? "rgba(197,98,11,0.16)" : "rgba(30,132,73,0.14)",
+                        color: isUnread ? "#C5620B" : "#1e8449",
+                        fontWeight: 800,
+                        fontSize: 11,
+                        textTransform: "uppercase",
+                        letterSpacing: 0.8,
+                      }}>
+                        {detailLoadingId === message._id ? "Opening..." : message.status}
+                      </span>
+                    </div>
+                    <div style={{ color: t.textSecondary, fontSize: 13 }}>
+                      {message.service || "General inquiry"}{message.phone ? ` · ${message.phone}` : ""}
+                    </div>
+                    <div style={{ color: t.textMuted, fontSize: 13, lineHeight: 1.6 }}>
+                      {String(message.message || "").slice(0, 110)}{String(message.message || "").length > 110 ? "..." : ""}
+                    </div>
+                    <div style={{ color: t.textMuted, fontSize: 12 }}>
+                      {new Date(message.createdAt).toLocaleString()}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{
+              borderRadius: 22,
+              border: `1px solid ${t.cardBorder}`,
+              background: t.cardBg,
+              padding: 22,
+              minHeight: 360,
               display: "grid",
-              gap: 8,
-              padding: "16px 0",
-              borderBottom: `1px solid ${t.border}`,
+              gap: 16,
+              alignContent: "start",
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-                <div>
-                  <div style={{ color: t.textPrimary, fontWeight: 700 }}>{message.name}</div>
-                  <div style={{ color: t.textMuted, fontSize: 13 }}>{message.email}</div>
-                </div>
-                <div style={{ color: "#C5620B", fontSize: 12, fontWeight: 700 }}>
-                  {message.kind === "used-device-inquiry" ? "Sales lead" : "Contact"}
-                </div>
-              </div>
-              {message.deviceRequested && (
-                <div style={{ color: t.textSecondary, fontSize: 13 }}>
-                  Requested device: {message.deviceRequested}
+              {selectedMessage ? (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "start", flexWrap: "wrap" }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: 22, color: t.textPrimary, fontWeight: 800 }}>{selectedMessage.name}</h3>
+                      <div style={{ color: t.textMuted, fontSize: 13, marginTop: 6 }}>
+                        {new Date(selectedMessage.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+                    <span style={{
+                      padding: "6px 10px",
+                      borderRadius: 999,
+                      background: selectedMessage.status === "unread" ? "rgba(197,98,11,0.16)" : "rgba(30,132,73,0.14)",
+                      color: selectedMessage.status === "unread" ? "#C5620B" : "#1e8449",
+                      fontWeight: 800,
+                      fontSize: 11,
+                      textTransform: "uppercase",
+                    }}>
+                      {selectedMessage.status}
+                    </span>
+                  </div>
+
+                  <div style={{ display: "grid", gap: 10 }}>
+                    <DetailRow label="Email" value={selectedMessage.email} />
+                    <DetailRow label="Phone" value={selectedMessage.phone || "N/A"} />
+                    <DetailRow label="Service requested" value={selectedMessage.service || "General inquiry"} />
+                  </div>
+
+                  <div>
+                    <div style={{ color: t.textMuted, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+                      Message
+                    </div>
+                    <div style={{ color: t.textSecondary, lineHeight: 1.8, whiteSpace: "pre-wrap" }}>
+                      {selectedMessage.message}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <ActionButton label="Copy Email" onClick={() => copyValue(selectedMessage.email)} />
+                    <ActionButton label="Copy Phone" onClick={() => copyValue(selectedMessage.phone)} />
+                    <ActionButton label="Reply via Email" onClick={() => { window.location.href = `mailto:${selectedMessage.email}`; }} />
+                    <ActionButton
+                      label="Reply via WhatsApp"
+                      onClick={() => {
+                        if (selectedPhone) {
+                          window.open(`https://wa.me/${selectedPhone}`, "_blank", "noopener,noreferrer");
+                        }
+                      }}
+                      disabled={!selectedPhone}
+                    />
+                    <ActionButton
+                      label="Reply via SMS"
+                      onClick={() => {
+                        if (selectedPhone) {
+                          window.location.href = `sms:${selectedPhone}`;
+                        }
+                      }}
+                      disabled={!selectedPhone}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div style={{ color: t.textMuted, lineHeight: 1.7 }}>
+                  Select a message to view full details and quick reply actions.
                 </div>
               )}
-              <div style={{ color: t.textSecondary, fontSize: 14, lineHeight: 1.7 }}>{message.message}</div>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        )}
+
+        <style>{`
+          @media (max-width: 980px) {
+            .messages-grid {
+              grid-template-columns: 1fr !important;
+            }
+
+            .messages-toolbar {
+              grid-template-columns: 1fr !important;
+            }
+          }
+        `}</style>
+      </div>
     </SectionShell>
+  );
+}
+
+function DetailRow({ label, value }) {
+  const { t } = useTheme();
+
+  return (
+    <div style={{ display: "grid", gap: 4 }}>
+      <div style={{ color: t.textMuted, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
+        {label}
+      </div>
+      <div style={{ color: t.textPrimary, fontWeight: 600, lineHeight: 1.6 }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function ActionButton({ label, onClick, disabled = false }) {
+  const { t } = useTheme();
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        padding: "10px 14px",
+        borderRadius: 12,
+        border: `1px solid ${t.border}`,
+        background: disabled ? t.surface : "rgba(197,98,11,0.12)",
+        color: disabled ? t.textMuted : t.textPrimary,
+        fontWeight: 700,
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.6 : 1,
+      }}
+    >
+      {label}
+    </button>
   );
 }
 
