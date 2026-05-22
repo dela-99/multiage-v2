@@ -1,4 +1,4 @@
-mport { useState } from "react";
+import { useState } from "react";
 import { icons } from "../constants";
 import { Icon, SectionLabel, SectionHeading } from "./ui";
 import { useTheme } from "../context/ThemeContext";

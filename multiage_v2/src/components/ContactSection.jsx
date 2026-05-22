@@ -5,7 +5,7 @@ import { useTheme } from "../context/ThemeContext";
 import { api } from "../lib/api";
 
 const SERVICES_OPTIONS = [
-  "Website Development","Mobile App Development",
+  "Electronics / Device Purchase","Website Development","Mobile App Development",
   "Networking Setup","Creative Studio Services","IT Consulting",
 ];
 
