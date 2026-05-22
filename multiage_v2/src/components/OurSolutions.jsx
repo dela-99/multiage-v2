@@ -1,17 +1,9 @@
-import { useState } from "react";
+mport { useState } from "react";
 import { icons } from "../constants";
 import { Icon, SectionLabel, SectionHeading } from "./ui";
 import { useTheme } from "../context/ThemeContext";
 
 const SOLUTIONS = [
-  {
-    icon: "phone",
-    color: "#C5620B",
-    title: "Device Sales",
-    desc: "Authentic iPhones, Samsung, laptops, tablets, smartwatches and accessories — sourced directly at competitive Ghanaian market prices.",
-    href: "/store",
-    cta: "Browse Store",
-  },
   {
     icon: "network",
     color: "#2c5f8a",

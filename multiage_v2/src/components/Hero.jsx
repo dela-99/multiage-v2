@@ -611,14 +611,11 @@ export default function Hero() {
 
         {/* CTA buttons — unchanged */}
         <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginBottom: 48 }}>
-          <BtnPrimary href="/store">
-            Explore Devices <Icon d={icons.arrow} size={16} />
+          <BtnPrimary href="#solutions">
+            Explore Solutions <Icon d={icons.arrow} size={16} />
           </BtnPrimary>
           <BtnGhost href="/contact">Work With Us</BtnGhost>
         </div>
-
-        {/* ── Device Slider — replaces old device carousel ── */}
-        <DeviceSlider />
 
       </div>
     </section>

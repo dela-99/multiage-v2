@@ -3,13 +3,11 @@ import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "../router";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
-import { useCart } from "../context/CartContext";
 import ChangePasswordForm from "./ChangePasswordForm";
 
 /* ── Hardware added; Login handled via separate button ───────────── */
 const NAV_LINKS = [
   { label: "Home",       href: "/" },
-  { label: "Store",      href: "/store" },
   { label: "Networking", href: "/networking" },
   { label: "Software",   href: "/software-development" },
   { label: "Hardware",   href: "/hardware" },
@@ -49,17 +47,6 @@ function ThemeIconAnim({ isLight }) {
         }
       </svg>
     </span>
-  );
-}
-
-function CartIcon() {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="9" cy="20" r="1.5" />
-      <circle cx="18" cy="20" r="1.5" />
-      <path d="M3 4h2l2.4 10.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.76L20 7H7.2" />
-    </svg>
   );
 }
 
@@ -237,8 +224,7 @@ function PersonIcon() {
    ════════════════════════════════════════════════════════════════════ */
 export default function Navbar() {
   const { isLight, toggleTheme, t } = useTheme();
-  const { user, token, logout, isAuthenticated } = useAuth();
-  const { totalItems } = useCart();
+  const { user, token, logout, isAuthenticated } = useAuth(); 
   const navigate     = useNavigate();
   const { pathname } = useLocation();
   const [scrolled,  setScrolled]  = useState(false);
@@ -351,44 +337,6 @@ export default function Navbar() {
 
           {/* Right actions */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8, flexShrink: 0 }}>
-            <button
-              type="button"
-              onClick={() => navigate("/cart")}
-              aria-label="Open cart"
-              style={{
-                ...iconBtn,
-                position: "relative",
-                color: pathname === "/cart" ? "#C5620B" : t.textPrimary,
-                border: `1px solid ${pathname === "/cart" ? "rgba(197,98,11,0.35)" : t.border}`,
-                background: pathname === "/cart" ? "rgba(197,98,11,0.14)" : t.surface,
-              }}
-              onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
-              onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-            >
-              <CartIcon />
-              {totalItems > 0 && (
-                <span style={{
-                  position: "absolute",
-                  top: -5,
-                  right: -5,
-                  minWidth: 18,
-                  height: 18,
-                  padding: "0 4px",
-                  borderRadius: 999,
-                  background: "#C5620B",
-                  color: "#fff",
-                  fontSize: 11,
-                  fontWeight: 800,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 8px 18px rgba(197,98,11,0.35)",
-                }}>
-                  {totalItems}
-                </span>
-              )}
-            </button>
-
             {isAuthenticated ? (
               <div className="nav-desktop" style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 {isAdminUser && (
@@ -482,28 +430,6 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => navigate("/my-orders")}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    padding: "7px 16px",
-                    background: pathname === "/my-orders" ? "rgba(197,98,11,0.14)" : t.surface,
-                    border: `1px solid ${pathname === "/my-orders" ? "rgba(197,98,11,0.35)" : t.border}`,
-                    borderRadius: 100,
-                    fontSize: 13, fontWeight: 600, color: pathname === "/my-orders" ? "#C5620B" : t.textSecondary,
-                    cursor: "pointer", fontFamily: "inherit",
-                    transition: "all 0.25s ease",
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; e.currentTarget.style.color = t.textPrimary; e.currentTarget.style.borderColor = "rgba(197,98,11,0.35)"; }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = pathname === "/my-orders" ? "rgba(197,98,11,0.14)" : t.surface;
-                    e.currentTarget.style.color = pathname === "/my-orders" ? "#C5620B" : t.textSecondary;
-                    e.currentTarget.style.borderColor = pathname === "/my-orders" ? "rgba(197,98,11,0.35)" : t.border;
-                  }}
-                >
-                  My orders
-                </button>
               </div>
             ) : (
               <a
@@ -590,40 +516,6 @@ export default function Navbar() {
               )}
               <button
                 type="button"
-                onClick={() => { navigate("/cart"); setMenuOpen(false); }}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  width: "100%",
-                  padding: "13px 16px", borderRadius: 12,
-                  fontSize: 14, fontWeight: 600,
-                  color: t.textPrimary, background: t.surface, border: `1px solid ${t.border}`,
-                  transition: "background 0.2s",
-                  cursor: "pointer", fontFamily: "inherit",
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; }}
-                onMouseLeave={e => { e.currentTarget.style.background = t.surface; }}
-              >
-                <CartIcon /> Cart {totalItems > 0 ? `(${totalItems})` : ""}
-              </button>
-              <button
-                type="button"
-                onClick={() => { navigate("/my-orders"); setMenuOpen(false); }}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  width: "100%",
-                  padding: "13px 16px", borderRadius: 12,
-                  fontSize: 14, fontWeight: 600,
-                  color: t.textPrimary, background: t.surface, border: `1px solid ${t.border}`,
-                  transition: "background 0.2s",
-                  cursor: "pointer", fontFamily: "inherit",
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = t.surfaceHover; }}
-                onMouseLeave={e => { e.currentTarget.style.background = t.surface; }}
-              >
-                My orders
-              </button>
-              <button
-                type="button"
                 onClick={() => { setPwdOpen(true); setMenuOpen(false); }}
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -659,23 +551,6 @@ export default function Navbar() {
           ) : (
             !onLoginPage && (
               <>
-                <button
-                  type="button"
-                  onClick={() => { navigate("/cart"); setMenuOpen(false); }}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                    width: "100%",
-                    padding: "13px 16px", borderRadius: 12,
-                    fontSize: 14, fontWeight: 600,
-                    color: t.textPrimary, background: t.surface, border: `1px solid ${t.border}`,
-                    transition: "background 0.2s",
-                    cursor: "pointer", fontFamily: "inherit",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = t.surfaceHover}
-                  onMouseLeave={e => e.currentTarget.style.background = t.surface}
-                >
-                  <CartIcon /> Cart {totalItems > 0 ? `(${totalItems})` : ""}
-                </button>
                 <a
                   href="/login"
                   onClick={e => { e.preventDefault(); navigate("/login"); setMenuOpen(false); }}

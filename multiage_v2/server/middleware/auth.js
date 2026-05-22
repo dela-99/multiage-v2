@@ -23,6 +23,11 @@ const protect = async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1];
   }
 
+  if (process.env.NODE_ENV !== "production") {
+    console.log("DEBUG: Auth Header:", req.headers.authorization);
+    console.log("DEBUG: Extracted Token:", token ? `${token.substring(0, 10)}...` : "NONE");
+  }
+
   if (!token) {
     return res.status(401).json({ message: "Not authorised — no token" });
   }
@@ -35,8 +40,12 @@ const protect = async (req, res, next) => {
       return res.status(401).json({ message: "User no longer exists" });
     }
     next();
-  } catch {
-    return res.status(401).json({ message: "Not authorised — invalid token" });
+  } catch (err) {
+    console.error("JWT Verification Error:", err.message);
+    const message = err.name === "TokenExpiredError" 
+      ? "Session expired. Please login again." 
+      : "Not authorised — invalid token";
+    return res.status(401).json({ message });
   }
 };
 

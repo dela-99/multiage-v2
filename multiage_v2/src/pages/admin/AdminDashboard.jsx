@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import ChangePasswordForm from "../../components/ChangePasswordForm";
 import RoleDashboardLayout, { StatIcon } from "../../components/admin/RoleDashboardLayout";
 import {
@@ -31,7 +32,8 @@ function useWindowSize() {
   return width;
 }
 
-export default function AdministratorDashboard({ role, token, user }) {
+export default function AdministratorDashboard() {
+  const { role, token, user } = useAuth();
   const [rangeDays, setRangeDays] = useState(30);
   const [creating, setCreating] = useState(false);
   const viewportWidth = useWindowSize();

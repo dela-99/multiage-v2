@@ -172,10 +172,10 @@ export default function ServicesPage() {
         }}>
           <div>
             <h4 style={{ fontSize: 15, fontWeight: 700, color: t.textPrimary, marginBottom: 4 }}>
-              Looking for IT Consulting or Device Repairs?
+              Looking for IT Consulting?
             </h4>
             <p style={{ fontSize: 13, color: t.textMuted }}>
-              IT Consulting and Repair &amp; Maintenance are now on our Hardware page.
+              IT Consulting and systems integration are now on our Hardware page.
             </p>
           </div>
           <a href="/hardware"

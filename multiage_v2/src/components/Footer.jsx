@@ -49,7 +49,7 @@ const COMPANY_SOCIALS = [
 
 const FOOTER_COLS = [
   { heading: "Company",  links: [["About Us","#"],["Careers","#"],["Blog","#"],["Press","#"]] },
-  { heading: "Services", links: [["Electronics Store","/store"],["Software Dev","/software-development"],["Networking","/networking"],["Creative Studio","/services"]] },
+  { heading: "Services", links: [["Software Dev","/software-development"],["Networking","/networking"],["Creative Studio","/services"],["IT Consulting","/hardware"]] },
   { heading: "Contact",  links: [["WhatsApp","#"],["Email Us","#"],["Book a Call","/contact"],["Accra, Ghana","#"]] },
 ];
 

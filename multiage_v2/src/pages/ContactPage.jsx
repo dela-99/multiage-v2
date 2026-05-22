@@ -13,9 +13,9 @@ const CONTACT_OPTIONS = [
 ];
 
 const SERVICES_OPTIONS = [
-  "Electronics / Device Purchase","Website Development","Mobile App Development",
+  "Website Development","Mobile App Development",
   "Networking Setup","Cloud Infrastructure","Creative Studio Services",
-  "IT Consulting","Device Repair","Other",
+  "IT Consulting","Other",
 ];
 
 const FAQ = [
