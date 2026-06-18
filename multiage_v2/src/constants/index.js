@@ -32,48 +32,23 @@ export const icons = {
   check:     "M20 6 9 17l-5-5",
 };
 
-// ── Device Colour → Background Glow Map ───────────────────────────────────────
-// Extend this object when new device colour options are added.
+// ── Brand accent colours for hero glow effects ────────────────────────────────
 export const DEVICE_COLORS = {
   midnight:  { label: "Midnight",    hex: "#1a1a2e", glow: "rgba(26,26,46,0.9)" },
   starlight: { label: "Starlight",   hex: "#f5f0e8", glow: "rgba(245,240,232,0.4)" },
   blue:      { label: "Blue",        hex: "#2c5f8a", glow: "rgba(44,95,138,0.7)" },
-  red:       { label: "Product Red", hex: "#c0392b", glow: "rgba(192,57,43,0.7)" },
+  red:       { label: "Accent Red",  hex: "#c0392b", glow: "rgba(192,57,43,0.7)" },
   purple:    { label: "Deep Purple", hex: "#6c3483", glow: "rgba(108,52,131,0.7)" },
   gold:      { label: "Gold",        hex: "#d4a800", glow: "rgba(212,168,0,0.6)" },
 };
 
-// ── Navigation ─────────────────────────────────────────────────────────────────
-export const NAV_LINKS = ["Home", "Devices", "Services", "Studio", "Contact"];
-
-// ── Device Category Filters ───────────────────────────────────────────────────
-export const DEVICE_CATS = ["All", "iPhone", "Samsung", "Laptop", "Watch", "Headset"];
-
-// ── Catalogue ─────────────────────────────────────────────────────────────────
-// Replace `emoji` with an `image` path (e.g. "/assets/devices/iphone-15-pro.png")
-// once real product photography is available.
-// Set `price` to null to hide price until connected to a pricing API.
-export const DEVICES = [
-  { id: 1,  cat: "iPhone",  name: "iPhone 15 Pro",          price: "GHS 9,999",  badge: "New",  image: null, emoji: "📱" },
-  { id: 2,  cat: "iPhone",  name: "iPhone 15",              price: "GHS 7,499",  badge: "",     image: null, emoji: "📱" },
-  { id: 3,  cat: "Samsung", name: "Galaxy S24 Ultra",       price: "GHS 9,499",  badge: "Hot",  image: null, emoji: "📱" },
-  { id: 4,  cat: "Samsung", name: "Galaxy S24+",            price: "GHS 7,299",  badge: "",     image: null, emoji: "📱" },
-  { id: 5,  cat: "Laptop",  name: 'MacBook Pro 14"',        price: "GHS 18,999", badge: "Pro",  image: null, emoji: "💻" },
-  { id: 6,  cat: "Laptop",  name: "MacBook Air M3",         price: "GHS 14,499", badge: "",     image: null, emoji: "💻" },
-  { id: 7,  cat: "Laptop",  name: "Dell XPS 15",            price: "GHS 13,999", badge: "",     image: null, emoji: "💻" },
-  { id: 8,  cat: "Watch",   name: "Apple Watch Series 9",   price: "GHS 4,299",  badge: "",     image: null, emoji: "⌚" },
-  { id: 9,  cat: "Watch",   name: "Samsung Galaxy Watch 6", price: "GHS 3,499",  badge: "",     image: null, emoji: "⌚" },
-  { id: 10, cat: "Headset", name: "AirPods Pro 2",          price: "GHS 3,299",  badge: "Sale", image: null, emoji: "🎧" },
-  { id: 11, cat: "Headset", name: "Galaxy Buds2 Pro",       price: "GHS 2,499",  badge: "",     image: null, emoji: "🎧" },
-];
-
 // ── Services Grid Cards ────────────────────────────────────────────────────────
 export const SERVICES_GRID = [
-  { icon: "phone",   title: "Electronics Store",        desc: "Latest smartphones, laptops, and accessories from top global brands." },
   { icon: "code",    title: "Software Development",     desc: "Full-stack web and mobile applications built to scale." },
   { icon: "camera",  title: "Graphics & Video Editing", desc: "Visual identity, brand design and professional media production." },
   { icon: "network", title: "Networking",               desc: "Enterprise and home network infrastructure and managed IT." },
   { icon: "globe",   title: "Studio Services",          desc: "Recording, digital media production and creative content." },
+  { icon: "users",   title: "IT Consulting",            desc: "Technology strategy, support, and digital transformation." },
 ];
 
 // ── Auto-Scrolling Slider Cards ───────────────────────────────────────────────
@@ -81,12 +56,20 @@ export const SERVICES_GRID = [
 // seamless infinite scroll effect. Add real cards here; duplication is handled
 // inside the component.
 export const SLIDER_CARDS = [
-  { icon: "phone",   title: "Electronics Store",    sub: "Smartphones, laptops & accessories",  color: "#C5620B" },
-  { icon: "code",    title: "Software Development", sub: "Web & mobile applications",           color: "#6A2B09" },
-  { icon: "network", title: "Networking Solutions", sub: "Professional network infrastructure",  color: "#8B3A1A" },
-  { icon: "camera",  title: "Creative Studio",      sub: "Media production & digital content",  color: "#C5620B" },
-  { icon: "users",   title: "IT Consulting",        sub: "Technology strategy & support",       color: "#4A1E07" },
-  { icon: "zap",     title: "Cloud Services",       sub: "Managed cloud & deployment",          color: "#D4750E" },
+  { icon: "code",    title: "Software Development", sub: "Web & mobile applications",          color: "#6A2B09" },
+  { icon: "network", title: "Networking Solutions", sub: "Professional network infrastructure", color: "#8B3A1A" },
+  { icon: "camera",  title: "Creative Studio",      sub: "Media production & digital content", color: "#C5620B" },
+  { icon: "users",   title: "IT Consulting",        sub: "Technology strategy & support",      color: "#4A1E07" },
+  { icon: "zap",     title: "Cloud Services",       sub: "Managed cloud & deployment",         color: "#D4750E" },
+  { icon: "monitor", title: "Managed IT Support",   sub: "Proactive systems & helpdesk",       color: "#2c5f8a" },
+];
+
+// ── Hero Service Highlights ───────────────────────────────────────────────────
+export const HERO_SERVICES = [
+  { label: "Software Development", emoji: "💻", sub: "Web apps · Mobile · Custom platforms", image: null },
+  { label: "Networking Solutions", emoji: "🌐", sub: "Infrastructure · Security · Support",  image: null },
+  { label: "Creative Studio",      emoji: "🎬", sub: "Video · Design · Brand identity",    image: null },
+  { label: "IT Consulting",        emoji: "🤝", sub: "Strategy · Support · Transformation", image: null },
 ];
 
 // ── Footer Social Links ────────────────────────────────────────────────────────
@@ -95,13 +78,4 @@ export const SOCIALS = [
   { icon: "youtube",   label: "YouTube",   color: "#FF0000", href: "https://youtube.com/@multiage_studios_01?si=t6WYq4yswmoOfFka" },
   { icon: "tiktok",    label: "TikTok",    color: "#69C9D0", href: "https://www.tiktok.com/@multiage.technolog?_r=1&_t=ZS-94JF03BcXGD" },
   { icon: "instagram", label: "Instagram", color: "#E1306C", href: "https://www.instagram.com/multiage_technologies?igsh=MXVxeHJ0b2ZxNHg3ZA==" },
-];
-
-// ── Hero Device Carousel Items ────────────────────────────────────────────────
-// Replace `emoji` with `image` once photography is available.
-export const HERO_DEVICES = [
-  { label: "iPhone 15 Pro",     emoji: "📱", sub: "Titanium · 48MP · A17 Pro",          image: null },
-  { label: "Galaxy S24 Ultra",  emoji: "📱", sub: "AI-Powered · 200MP · S Pen",         image: null },
-  { label: 'MacBook Pro 14"',   emoji: "💻", sub: "M3 Pro · 18-hour battery",           image: null },
-  { label: "Apple Watch S9",    emoji: "⌚", sub: "Carbon Neutral · Health Suite",      image: null },
 ];

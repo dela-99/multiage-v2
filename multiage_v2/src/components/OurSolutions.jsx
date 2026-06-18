@@ -16,7 +16,7 @@ const SOLUTIONS = [
     icon: "code",
     color: "#6c3483",
     title: "Web & Software Development",
-    desc: "Custom websites, e-commerce platforms, mobile apps, and enterprise software built with modern stacks and delivered on time.",
+    desc: "Custom websites, business platforms, mobile apps, and enterprise software built with modern stacks and delivered on time.",
     href: "/software-development",
     cta: "Learn More",
   },
@@ -98,7 +98,7 @@ export default function OurSolutions() {
           <SectionLabel>Our Solutions</SectionLabel>
           <SectionHeading>Technology that works for you</SectionHeading>
           <p style={{ fontSize: 16, color: t.textSecondary, marginTop: 16, maxWidth: 520, margin: "16px auto 0" }}>
-            We combine hardware, software, and services into integrated solutions that help businesses grow and individuals stay connected.
+            We combine software, networking, and creative services into integrated solutions that help businesses grow and teams stay productive.
           </p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 24 }}>
