@@ -77,8 +77,8 @@ export default function Footer() {
             <FooterLogo t={t} />
 
             <p style={{ fontSize: 13, color: t.textMuted, lineHeight: 1.8, maxWidth: 300 }}>
-              Integrated IT &amp; electronics solutions for individuals and businesses.
-              Premium devices, digital products, and technology services.
+              Integrated IT and digital services for individuals and businesses.
+              Software, networking, creative studio, and technology consulting.
             </p>
 
             {/* Social icons — each wrapped in real anchor with target="_blank" */}

@@ -38,7 +38,7 @@ export default function CtaBanner() {
             Let's build something great together
           </h2>
           <p style={{ fontSize: 16, color: t.textSecondary, maxWidth: 480, lineHeight: 1.7 }}>
-            Whether you need premium devices, a custom website, or a full network setup — our team is ready.
+            Whether you need a custom website, a full network setup, or creative studio support — our team is ready.
           </p>
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
             <BtnPrimary href="/contact">
