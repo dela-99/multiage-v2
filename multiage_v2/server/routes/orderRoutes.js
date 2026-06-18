@@ -1,3 +1,7 @@
+/**
+ * @deprecated E-commerce order management — store removed from application.
+ * Collection preserved in MongoDB for recovery. Routes unmounted in server/index.js.
+ */
 const express = require("express");
 const router  = express.Router();
 const {

@@ -13,7 +13,10 @@ const uiSecurityMap = {
   DesignStudio: "design:write",
   UserManagement: "users:manage",
   SystemLogs: "security:read",
-  OrdersPage: "orders:manage",
+  LeadsPage: "leads:read",
+  ProjectsPage: "projects:read",
+  ReportsPage: "reports:read",
+  CommunicationsPage: "messages:read",
 };
 
 module.exports = uiSecurityMap;

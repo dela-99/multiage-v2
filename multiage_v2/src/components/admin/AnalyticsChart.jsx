@@ -44,10 +44,10 @@ export default function AnalyticsChart({ rangeDays, onRangeChange, income, expen
       <div style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
         <div>
           <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: t.textPrimary, letterSpacing: -0.6 }}>
-            Sales Analytics
+            Service Analytics
           </h2>
           <div style={{ marginTop: 8, fontSize: 13, color: t.textMuted }}>
-            Revenue performance overview for the selected window
+            Service pipeline overview for the selected window
           </div>
         </div>
 
@@ -73,12 +73,12 @@ export default function AnalyticsChart({ rangeDays, onRangeChange, income, expen
       </div>
 
       <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-        <SummaryMetric label="Income" value={`GHS ${income.toLocaleString()}`} change={changes.income} />
-        <SummaryMetric label="Expenses" value={`GHS ${expenses.toLocaleString()}`} change={changes.expenses} />
+        <SummaryMetric label="Service Requests" value={String(income)} change={changes.income} />
+        <SummaryMetric label="Pending Follow-ups" value={String(expenses)} change={changes.expenses} />
         <div style={{ padding: "8px 0", minWidth: 140 }}>
-          <div style={{ fontSize: 12, color: t.textMuted, marginBottom: 8 }}>Balance</div>
+          <div style={{ fontSize: 12, color: t.textMuted, marginBottom: 8 }}>Completed Engagements</div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <div style={{ fontSize: 24, fontWeight: 800, color: t.textPrimary }}>{`GHS ${balance.toLocaleString()}`}</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: t.textPrimary }}>{String(balance)}</div>
             <div style={{
               padding: "4px 8px",
               borderRadius: 999,
@@ -108,8 +108,8 @@ export default function AnalyticsChart({ rangeDays, onRangeChange, income, expen
           </div>
           <div style={{ maxWidth: 460, margin: "0 auto", fontSize: 13, lineHeight: 1.7, color: t.textMuted }}>
             {hasChartData
-              ? "Order analytics data is available and ready to plug into a chart component without changing the API layer."
-              : "No analytics series is available in the selected range yet. This container is ready for live backend data."}
+              ? "Service inquiry data is available and ready to plug into a chart component without changing the API layer."
+              : "No service activity is available in the selected range yet. This container is ready for live CRM data."}
           </div>
         </div>
       </div>

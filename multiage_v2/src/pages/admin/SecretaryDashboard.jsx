@@ -1,16 +1,16 @@
 import { useMemo, useState } from "react";
 import ChangePasswordForm from "../../components/ChangePasswordForm";
 import RoleDashboardLayout, { StatIcon } from "../../components/admin/RoleDashboardLayout";
-import { MessagesSection, MetricOverview, OrdersSection, SettingsSection } from "../../components/admin/roleSections";
-import { comparePeriods, inRange } from "../../components/admin/dashboardUtils";
+import { LeadsSection, MessagesSection, MetricOverview, SettingsSection } from "../../components/admin/roleSections";
+import { comparePeriods, computeServiceMetrics, filterByRange } from "../../components/admin/dashboardUtils";
 import { useAdminResources } from "../../hooks/useAdminResources";
 import { getSidebarItems } from "../../config/adminSidebar";
 
 export default function SecretaryDashboard({ role, token, user }) {
-  const [rangeDays, setRangeDays] = useState(30);
-  const { orders, messages, loading, error } = useAdminResources(token, { orders: true, messages: true });
-  const filteredOrders = useMemo(() => orders.filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
-  const filteredMessages = useMemo(() => messages.filter((message) => inRange(message.createdAt, rangeDays)), [messages, rangeDays]);
+  const [rangeDays] = useState(30);
+  const { messages, loading, error } = useAdminResources(token, { messages: true });
+  const scopedMessages = useMemo(() => filterByRange(messages, rangeDays), [messages, rangeDays]);
+  const metrics = useMemo(() => computeServiceMetrics(messages, rangeDays), [messages, rangeDays]);
   const unreadCount = useMemo(() => (messages || []).filter((message) => message.status === "unread").length, [messages]);
   const sidebarItems = useMemo(() => {
     return getSidebarItems(role).map((item) => (
@@ -19,15 +19,16 @@ export default function SecretaryDashboard({ role, token, user }) {
   }, [role, unreadCount]);
 
   const cards = [
-    { label: "Open Orders", value: String(filteredOrders.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
-    { label: "Communications", value: String(filteredMessages.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(messages, () => 1, rangeDays), icon: <StatIcon type="media" /> },
-    { label: "Unread Messages", value: String(filteredMessages.filter((message) => message.status === "unread").length), subtitle: "Current message load", change: 0, icon: <StatIcon type="shield" /> },
+    { label: "New Inquiries", value: String(scopedMessages.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(messages, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
+    { label: "Pending Leads", value: String(metrics.pendingLeads), subtitle: "Awaiting contact", change: comparePeriods(messages, (message) => (message.status === "unread" ? 1 : 0), rangeDays), icon: <StatIcon type="expenses" /> },
+    { label: "Contacted Leads", value: String(metrics.contactedLeads), subtitle: "In progress", change: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays), icon: <StatIcon type="income" /> },
+    { label: "Follow Ups", value: String(metrics.followUps), subtitle: "Needs attention", change: comparePeriods(messages, (message) => (message.status === "unread" ? 1 : 0), rangeDays), icon: <StatIcon type="media" /> },
   ];
 
   const sections = {
-    Dashboard: <MetricOverview cards={cards} />,
-    Orders: <OrdersSection orders={filteredOrders} title="Order Coordination" description="The secretary workspace keeps order follow-up visible without exposing broader admin tooling." />,
-    Communications: <MessagesSection messages={filteredMessages} token={token} loading={loading} title="Communications" description="Customer contacts, inquiries, and message follow-ups." />,
+    Dashboard: <MetricOverview cards={cards} messages={scopedMessages} />,
+    Leads: <LeadsSection messages={messages} />,
+    Communications: <MessagesSection messages={messages} token={token} loading={loading} title="Communications" description="Customer contacts, inquiries, and message follow-ups." />,
     Settings: <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />,
   };
 

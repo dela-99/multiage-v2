@@ -1,130 +1,51 @@
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useMemo, useState } from "react";
 import ChangePasswordForm from "../../components/ChangePasswordForm";
 import RoleDashboardLayout, { StatIcon } from "../../components/admin/RoleDashboardLayout";
 import {
-  InventorySection,
+  LeadsSection,
   MessagesSection,
   MetricOverview,
-  OrdersSection,
-  ProductManagerSection,
+  ProjectsSection,
   SettingsSection,
   SimpleInfoSection,
 } from "../../components/admin/roleSections";
-import { comparePeriods, inRange } from "../../components/admin/dashboardUtils";
+import { comparePeriods, computeServiceMetrics, countActiveStaff, filterByRange } from "../../components/admin/dashboardUtils";
 import { useAdminResources } from "../../hooks/useAdminResources";
-import { api } from "../../lib/api";
 import { getSidebarItems } from "../../config/adminSidebar";
 
-function useWindowSize() {
-  const [width, setWidth] = useState(() => 
-    typeof window !== "undefined" ? window.innerWidth : 0
-  );
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const onResize = () => setWidth(window.innerWidth);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  return width;
-}
-
-export default function AdministratorDashboard() {
-  const { role, token, user } = useAuth();
-  const [rangeDays, setRangeDays] = useState(30);
-  const [creating, setCreating] = useState(false);
-  const viewportWidth = useWindowSize();
-  const { products, orders, messages, loading, error } = useAdminResources(token, { products: true, orders: true, messages: true });
-  const [productList, setProductList] = useState([]);
-
-  // RBAC logic for UI visibility
-  const isFullAdmin = ["ceo", "cyber_it", "administrator"].includes(role?.toLowerCase());
-  const isGraphicsMedia = role?.toLowerCase() === "graphics" || role?.toLowerCase() === "graphics_media";
-  const canManageOrders = isFullAdmin || ["secretary", "finance"].includes(role?.toLowerCase());
-  const canManageMessages = role?.toLowerCase() === "administrator" || role?.toLowerCase() === "secretary";
-
-  useEffect(() => {
-    setProductList(products || []);
-  }, [products]);
-
-  const filteredOrders = useMemo(() => (orders ?? []).filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
-  const unreadCount = useMemo(() => (messages ?? []).filter((message) => message.status === "unread").length, [messages]);
+export default function AdministratorDashboard({ role, token, user }) {
+  const [rangeDays] = useState(30);
+  const { messages, users, loading, error } = useAdminResources(token, { messages: true, users: true });
+  const scopedMessages = useMemo(() => filterByRange(messages, rangeDays), [messages, rangeDays]);
+  const metrics = useMemo(() => computeServiceMetrics(messages, rangeDays), [messages, rangeDays]);
+  const unreadCount = useMemo(() => (messages || []).filter((message) => message.status === "unread").length, [messages]);
   const sidebarItems = useMemo(() => {
     return getSidebarItems(role).map((item) => (
       item.key === "Communications" ? { ...item, unreadCount } : item
     ));
   }, [role, unreadCount]);
 
-  const cards = useMemo(() => {
-    const baseCards = [
-      { label: "Catalog Size", value: String(productList.length), subtitle: "Live backend products", change: 0, icon: <StatIcon type="shield" /> },
-    ];
-
-    // Only show operational/financial stats to full admins or secretaries/finance
-    if (!isGraphicsMedia) {
-      baseCards.push(
-        { label: "Active Orders", value: String(filteredOrders.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
-        { label: "Inventory Lines", value: String(productList.filter((item) => Number(item.stock || 0) > 0).length), subtitle: "Items in stock", change: 0, icon: <StatIcon type="balance" /> }
-      );
-    }
-
-    return baseCards;
-  }, [productList, filteredOrders, orders, rangeDays, isGraphicsMedia]);
+  const cards = useMemo(() => [
+    { label: "Total Users", value: String((users || []).length), subtitle: "Registered accounts", change: 0, icon: <StatIcon type="shield" /> },
+    { label: "Active Staff", value: String(countActiveStaff(users)), subtitle: "Admin accounts", change: 0, icon: <StatIcon type="income" /> },
+    { label: "Open Requests", value: String(metrics.openRequests), subtitle: "Pending inquiries", change: comparePeriods(messages, (message) => (message.status === "unread" ? 1 : 0), rangeDays), icon: <StatIcon type="orders" /> },
+    { label: "Closed Requests", value: String(metrics.closedRequests), subtitle: "Contacted inquiries", change: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays), icon: <StatIcon type="balance" /> },
+  ], [users, metrics, messages, rangeDays]);
 
   const sections = {
-    Dashboard: <MetricOverview cards={cards} />,
+    Dashboard: <MetricOverview cards={cards} messages={scopedMessages} />,
+    Leads: <LeadsSection messages={messages} />,
+    Projects: <ProjectsSection messages={messages} />,
+    Communications: <MessagesSection messages={messages} token={token} loading={loading} />,
+    Users: <SimpleInfoSection title="Users" description="Administrative access visibility." body="This area is reserved for controlled user and role governance. Backend RBAC remains the source of truth even when the frontend workspace evolves." />,
+    Settings: <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />,
   };
-
-  if (isFullAdmin || isGraphicsMedia) {
-    sections.Products = (
-      <ProductManagerSection
-        products={productList}
-        token={token}
-        creating={creating}
-        viewportWidth={viewportWidth}
-        onCreateProduct={async (payload) => {
-          try {
-            setCreating(true);
-            const created = await api.createProduct(payload, token);
-            setProductList((current) => [created, ...current]);
-            return created;
-          } catch (err) {
-            console.error("Error creating product:", err);
-            alert("Failed to create product. Please try again.");
-            throw err;
-          } finally {
-            setCreating(false);
-          }
-        }}
-      />
-    );
-  }
-
-  if (isFullAdmin) {
-    sections.Inventory = <InventorySection products={productList} />;
-    sections.Users = <SimpleInfoSection title="Users" description="Administrative access visibility." body="This area is reserved for controlled user and role governance. Backend RBAC remains the source of truth even when the frontend workspace evolves." />;
-  }
-
-  if (canManageOrders) {
-    sections.Orders = <OrdersSection orders={filteredOrders} title="Managed Orders" description="Orders currently visible to the administrative operations team." />;
-  }
-
-  if (canManageMessages) {
-    sections.Communications = <MessagesSection messages={messages} token={token} loading={loading} unreadCount={unreadCount} />;
-  }
-
-  sections.Settings = <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />;
-
-  const dashboardTitle = isGraphicsMedia ? "Graphics & Media Workspace" : "Administrator Dashboard";
 
   return (
     <RoleDashboardLayout
       role={role}
-      title={dashboardTitle}
-      subtitle={`Welcome back, ${user?.name || "Member"}. Your workspace is tailored to your role's specific responsibilities.`}
+      title="Administrator Dashboard"
+      subtitle={`Welcome back, ${user?.name || "Administrator"}. Your workspace is tailored to service operations, communications, and user oversight.`}
       loading={loading}
       error={error}
       sections={sections}

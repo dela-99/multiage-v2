@@ -8,28 +8,30 @@ const roles = {
   administrator: [
     "users:manage",
     "dashboard:read",
-    "orders:manage",
-    "orders:read",
     "messages:read",
-    "messages:manage"
+    "messages:manage",
+    "leads:read",
+    "projects:read",
   ],
   secretary: [
     "dashboard:read",
-    "orders:read",
-    "orders:manage",
     "messages:read",
-    "messages:manage"
+    "messages:manage",
+    "leads:read",
+    "leads:manage",
   ],
   finance: [
     "finance:read",
     "finance:write",
-    "orders:read"
+    "leads:read",
+    "reports:read",
   ],
   graphics: [
     "media:read",
     "media:write",
     "design:read",
-    "design:write"
+    "design:write",
+    "projects:read",
   ],
 };
 

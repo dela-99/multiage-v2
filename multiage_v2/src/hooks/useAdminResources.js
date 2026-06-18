@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 
-export function useAdminResources(token, { products = false, orders = false, messages = false } = {}) {
+export function useAdminResources(token, { messages = false, users = false } = {}) {
   const [state, setState] = useState({
-    products: [],
-    orders: [],
     messages: [],
+    users: [],
     loading: true,
     error: "",
   });
@@ -19,35 +18,27 @@ export function useAdminResources(token, { products = false, orders = false, mes
 
         const tasks = [];
 
-        if (products) {
-          tasks.push(api.getProducts({ limit: 50 }));
-        }
-        if (orders) {
-          tasks.push(api.getOrders(token));
-        }
         if (messages) {
           tasks.push(api.getMessages(token));
+        }
+        if (users) {
+          tasks.push(api.getUsers(token));
         }
 
         const responses = await Promise.all(tasks);
         let cursor = 0;
 
         const nextState = {
-          products: [],
-          orders: [],
           messages: [],
+          users: [],
         };
 
-        if (products) {
-          nextState.products = responses[cursor]?.items || [];
-          cursor += 1;
-        }
-        if (orders) {
-          nextState.orders = responses[cursor] || [];
-          cursor += 1;
-        }
         if (messages) {
           nextState.messages = responses[cursor] || [];
+          cursor += 1;
+        }
+        if (users) {
+          nextState.users = responses[cursor] || [];
         }
 
         if (active) {
@@ -68,9 +59,19 @@ export function useAdminResources(token, { products = false, orders = false, mes
       }
     }
 
+    if (!token && (messages || users)) {
+      setState({
+        messages: [],
+        users: [],
+        loading: false,
+        error: "",
+      });
+      return undefined;
+    }
+
     load();
     return () => { active = false; };
-  }, [messages, orders, products, token]);
+  }, [messages, users, token]);
 
   return state;
 }

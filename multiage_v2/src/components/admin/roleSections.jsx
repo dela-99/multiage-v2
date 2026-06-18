@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import DashboardCard from "./DashboardCard";
 import AnalyticsChart from "./AnalyticsChart";
-import TopProducts from "./TopProducts";
+import TopServices from "./TopServices";
 import { SectionShell, fieldStyle, StatIcon } from "./RoleDashboardLayout";
 import { useTheme } from "../../context/ThemeContext";
 import { api } from "../../lib/api";
+import { buildTopServices } from "./dashboardUtils";
 
-export function MetricOverview({ cards, analytics, topProducts }) {
+export function MetricOverview({ cards, analytics, topServices, messages = [] }) {
+  const resolvedTopServices = topServices || (messages.length > 0 ? buildTopServices(messages) : []);
+
   return (
     <>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 18 }}>
@@ -34,241 +37,120 @@ export function MetricOverview({ cards, analytics, topProducts }) {
         />
       )}
 
-      {topProducts && <TopProducts items={topProducts} />}
+      {resolvedTopServices.length > 0 && <TopServices items={resolvedTopServices} />}
     </>
   );
 }
 
-export function ProductManagerSection({ products, token, onCreateProduct, creating, viewportWidth }) {
+function MessageList({ messages, emptyLabel = "No records in the selected range." }) {
   const { t } = useTheme();
-  const [form, setForm] = useState({
-    name: "",
-    price: "",
-    category: "Phones",
-    type: "new",
-    condition: "",
-    brand: "",
-    stock: "",
-    description: "",
-    image: "",
-  });
 
-  const handleField = (field) => (event) => {
-    setForm((current) => ({ ...current, [field]: event.target.value }));
-  };
-
-  const handleImage = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    
-    reader.onload = () => {
-      setForm((current) => ({ ...current, image: String(reader.result || "") }));
-    };
-    
-    reader.onerror = () => {
-      console.error("Failed to read image file");
-      alert("Failed to load image. Please try again.");
-    };
-    
-    reader.onabort = () => {
-      console.warn("Image read was aborted");
-    };
-    
-    reader.readAsDataURL(file);
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const created = await onCreateProduct({
-      ...form,
-      price: Number(form.price),
-      stock: Number(form.stock),
-    }, token);
-
-    if (created) {
-      setForm({
-        name: "",
-        price: "",
-        category: "Phones",
-        type: "new",
-        condition: "",
-        brand: "",
-        stock: "",
-        description: "",
-        image: "",
-      });
-    }
-  };
+  if (!messages.length) {
+    return <div style={{ color: t.textMuted }}>{emptyLabel}</div>;
+  }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: viewportWidth < 1200 ? "1fr" : "1.05fr 0.95fr", gap: 20 }}>
-      <SectionShell title="Products" description="Create products and keep the catalog aligned with the store.">
-        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-          <input placeholder="Name" value={form.name} onChange={handleField("name")} style={fieldStyle(t)} required />
-          <div style={{ display: "grid", gridTemplateColumns: viewportWidth < 640 ? "1fr" : "1fr 1fr", gap: 12 }}>
-            <input type="number" min="0" placeholder="Price" value={form.price} onChange={handleField("price")} style={fieldStyle(t)} required />
-            <input type="number" min="0" placeholder="Stock" value={form.stock} onChange={handleField("stock")} style={fieldStyle(t)} required />
+    <div style={{ display: "grid", gap: 12, maxHeight: 620, overflowY: "auto" }}>
+      {messages.map((message) => (
+        <article
+          key={message._id}
+          style={{
+            display: "grid",
+            gap: 6,
+            padding: "14px 0",
+            borderBottom: `1px solid ${t.border}`,
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ color: t.textPrimary, fontWeight: 700 }}>{message.name}</div>
+            <span style={{
+              padding: "4px 10px",
+              borderRadius: 999,
+              background: message.status === "unread" ? "rgba(197,98,11,0.14)" : "rgba(30,132,73,0.14)",
+              color: message.status === "unread" ? "#C5620B" : "#1e8449",
+              fontSize: 11,
+              fontWeight: 800,
+              textTransform: "uppercase",
+            }}>
+              {message.status}
+            </span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: viewportWidth < 640 ? "1fr" : "1fr 1fr", gap: 12 }}>
-            <select value={form.category} onChange={handleField("category")} style={fieldStyle(t)}>
-              {["Phones", "Laptops", "Tablets", "Accessories", "Watches", "Audio", "Other"].map((item) => (
-                <option key={item} value={item}>{item}</option>
-              ))}
-            </select>
-            <select value={form.type} onChange={handleField("type")} style={fieldStyle(t)}>
-              <option value="new">New</option>
-              <option value="used">Used</option>
-            </select>
+          <div style={{ color: t.textMuted, fontSize: 13 }}>
+            {message.service || "General inquiry"}{message.phone ? ` · ${message.phone}` : ""}
           </div>
-          {form.type === "used" && (
-            <input placeholder="Condition" value={form.condition} onChange={handleField("condition")} style={fieldStyle(t)} required />
-          )}
-          <input placeholder="Brand" value={form.brand} onChange={handleField("brand")} style={fieldStyle(t)} />
-          <textarea rows={4} placeholder="Description" value={form.description} onChange={handleField("description")} style={{ ...fieldStyle(t), resize: "vertical" }} />
-          <input type="file" accept="image/*" onChange={handleImage} style={fieldStyle(t)} />
-          <button
-            type="submit"
-            disabled={creating}
-            style={{
-              padding: "14px 18px",
-              borderRadius: 14,
-              border: "none",
-              background: "linear-gradient(135deg,#C5620B,#6A2B09)",
-              color: "#fff",
-              fontWeight: 700,
-              cursor: creating ? "not-allowed" : "pointer",
-              opacity: creating ? 0.7 : 1,
-              fontFamily: "inherit",
-            }}
-          >
-            {creating ? "Saving..." : "Save Product"}
-          </button>
-        </form>
-      </SectionShell>
-
-      <ProductListSection products={products} />
+          <div style={{ color: t.textSecondary, fontSize: 13, lineHeight: 1.6 }}>
+            {String(message.message || "").slice(0, 140)}{String(message.message || "").length > 140 ? "..." : ""}
+          </div>
+          <div style={{ color: t.textMuted, fontSize: 12 }}>
+            {new Date(message.createdAt).toLocaleString()}
+          </div>
+        </article>
+      ))}
     </div>
   );
 }
 
-export function ProductListSection({ products }) {
-  const { t } = useTheme();
-
-  return (
-    <SectionShell title="Product List" description="Live product records already stored in the backend.">
-      {products.length === 0 ? (
-        <div style={{ color: t.textMuted }}>No products loaded yet.</div>
-      ) : (
-        <div style={{ display: "grid", gap: 12, maxHeight: 620, overflowY: "auto" }}>
-          {products.map((product) => (
-            <article key={product._id} style={{
-              display: "grid",
-              gridTemplateColumns: "64px 1fr auto",
-              gap: 14,
-              alignItems: "center",
-              padding: "12px 0",
-              borderBottom: `1px solid ${t.border}`,
-            }}>
-              <div style={{
-                width: 64,
-                height: 64,
-                borderRadius: 16,
-                overflow: "hidden",
-                background: "rgba(255,255,255,0.05)",
-                border: `1px solid ${t.border}`,
-                display: "grid",
-                placeItems: "center",
-              }}>
-                {product.image ? (
-                  <img src={product.image} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  <span style={{ color: t.textMuted, fontSize: 11 }}>No image</span>
-                )}
-              </div>
-              <div>
-                <div style={{ color: t.textPrimary, fontWeight: 700, marginBottom: 4 }}>{product.name}</div>
-                <div style={{ color: t.textMuted, fontSize: 13 }}>
-                  {product.category} · {product.type}{product.condition ? ` · ${product.condition}` : ""}
-                </div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ color: "#C5620B", fontWeight: 800 }}>GHS {Number(product.price || 0).toLocaleString()}</div>
-                <div style={{ color: t.textMuted, fontSize: 13 }}>Stock {product.stock}</div>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
-    </SectionShell>
-  );
-}
-
-export function InventorySection({ products }) {
-  const { t } = useTheme();
-
-  return (
-    <SectionShell title="Inventory" description="Current stock levels across the catalog.">
-      {products.length === 0 ? (
-        <div style={{ color: t.textMuted }}>No inventory records available yet.</div>
-      ) : (
-        <div style={{ display: "grid", gap: 12 }}>
-          {products.map((product) => (
-            <div key={product._id} style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 16,
-              padding: "14px 0",
-              borderBottom: `1px solid ${t.border}`,
-              flexWrap: "wrap",
-            }}>
-              <div>
-                <div style={{ color: t.textPrimary, fontWeight: 700 }}>{product.name}</div>
-                <div style={{ color: t.textMuted, fontSize: 13 }}>{product.brand || "No brand"} · {product.category}</div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ color: "#C5620B", fontWeight: 700 }}>Stock {product.stock}</div>
-                <div style={{ color: t.textMuted, fontSize: 13 }}>{product.type}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </SectionShell>
-  );
-}
-
-export function OrdersSection({ orders, title = "Orders", description = "Recent orders from the backend, no placeholders involved." }) {
-  const { t } = useTheme();
+export function LeadsSection({ messages, title = "Leads", description = "Incoming service inquiries and contact form submissions." }) {
+  const leads = (messages || []).filter((message) => message.status === "unread");
 
   return (
     <SectionShell title={title} description={description}>
-      {orders.length === 0 ? (
-        <div style={{ color: t.textMuted }}>No orders in the selected range.</div>
-      ) : (
-        <div style={{ display: "grid", gap: 12 }}>
-          {orders.map((order) => (
-            <div key={order._id} style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 16,
-              padding: "16px 0",
-              borderBottom: `1px solid ${t.border}`,
-              flexWrap: "wrap",
-            }}>
-              <div>
-                <div style={{ color: t.textPrimary, fontWeight: 700 }}>{order.user?.name || "Customer"}</div>
-                <div style={{ color: t.textMuted, fontSize: 13 }}>{new Date(order.createdAt).toLocaleString()}</div>
+      <MessageList messages={leads} emptyLabel="No pending leads right now." />
+    </SectionShell>
+  );
+}
+
+export function ProjectsSection({ messages, title = "Projects", description = "Active and completed service engagements derived from CRM records." }) {
+  const active = (messages || []).filter((message) => message.status === "read");
+
+  return (
+    <SectionShell title={title} description={description}>
+      <MessageList messages={active} emptyLabel="No active projects yet." />
+    </SectionShell>
+  );
+}
+
+export function ReportsSection({ messages, rangeDays, title = "Reports", description = "Service activity summary for the selected period." }) {
+  const { t } = useTheme();
+  const topServices = buildTopServices(messages);
+  const unread = (messages || []).filter((message) => message.status === "unread").length;
+  const read = (messages || []).filter((message) => message.status === "read").length;
+
+  return (
+    <SectionShell title={title} description={description}>
+      <div style={{ display: "grid", gap: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 14 }}>
+          {[
+            { label: "Total Inquiries", value: String((messages || []).length) },
+            { label: "Pending Follow-up", value: String(unread) },
+            { label: "Contacted", value: String(read) },
+            { label: "Reporting Window", value: `${rangeDays} days` },
+          ].map((item) => (
+            <div
+              key={item.label}
+              style={{
+                padding: "16px 18px",
+                borderRadius: 18,
+                border: `1px solid ${t.border}`,
+                background: t.surface,
+              }}
+            >
+              <div style={{ color: t.textMuted, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                {item.label}
               </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ color: "#C5620B", fontWeight: 800 }}>GHS {Number(order.totalPrice || 0).toLocaleString()}</div>
-                <div style={{ color: t.textMuted, fontSize: 13, textTransform: "capitalize" }}>{order.status}</div>
+              <div style={{ marginTop: 8, color: t.textPrimary, fontSize: 24, fontWeight: 800 }}>
+                {item.value}
               </div>
             </div>
           ))}
         </div>
-      )}
+
+        {topServices.length > 0 ? (
+          <TopServices items={topServices} compact />
+        ) : (
+          <div style={{ color: t.textMuted }}>No service activity to report in this range.</div>
+        )}
+      </div>
     </SectionShell>
   );
 }
@@ -333,7 +215,7 @@ export function MessagesSection({
       setLocalMessages((current) => current.map((item) => (
         item._id === fullMessage._id ? fullMessage : item
       )));
-    } catch (error) {
+    } catch {
       setSelectedMessage(message);
     } finally {
       setDetailLoadingId("");

@@ -1,61 +1,56 @@
 import { useMemo, useState } from "react";
 import RoleDashboardLayout, { StatIcon } from "../../components/admin/RoleDashboardLayout";
-import { InventorySection, MetricOverview, OrdersSection, SimpleInfoSection } from "../../components/admin/roleSections";
-import { comparePeriods, inRange } from "../../components/admin/dashboardUtils";
+import { LeadsSection, MetricOverview, ReportsSection, SimpleInfoSection } from "../../components/admin/roleSections";
+import { comparePeriods, computeServiceMetrics, filterByRange } from "../../components/admin/dashboardUtils";
 import { useAdminResources } from "../../hooks/useAdminResources";
 
 export default function FinanceDashboard({ role, token, user }) {
   const [rangeDays, setRangeDays] = useState(30);
-  const { products, orders, loading, error } = useAdminResources(token, { products: true, orders: true });
-  const filteredOrders = useMemo(() => orders.filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
-  const revenue = filteredOrders.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0);
-  const expenses = revenue * 0.35;
-  const income = revenue - expenses;
-  const balance = income;
+  const { messages, loading, error } = useAdminResources(token, { messages: true });
+  const scopedMessages = useMemo(() => filterByRange(messages, rangeDays), [messages, rangeDays]);
+  const metrics = useMemo(() => computeServiceMetrics(messages, rangeDays), [messages, rangeDays]);
+  const unreadInRange = scopedMessages.filter((message) => message.status === "unread").length;
+  const readInRange = scopedMessages.filter((message) => message.status === "read").length;
 
   const cards = [
-    { label: "Revenue", value: `GHS ${revenue.toLocaleString()}`, subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, (order) => Number(order.totalPrice || 0), rangeDays), icon: <StatIcon type="revenue" /> },
-    { label: "Expenses", value: `GHS ${expenses.toLocaleString()}`, subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.35, rangeDays), icon: <StatIcon type="expenses" /> },
-    { label: "Balance", value: `GHS ${balance.toLocaleString()}`, subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, (order) => (Number(order.totalPrice || 0) * 0.65) - (Number(order.totalPrice || 0) * 0.35), rangeDays), icon: <StatIcon type="balance" /> },
+    { label: "Service Transactions", value: String(metrics.serviceTransactions), subtitle: `Last ${rangeDays} days`, change: comparePeriods(messages, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
+    { label: "Monthly Income", value: String(metrics.monthlyIncome), subtitle: "Completed engagements", change: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays), icon: <StatIcon type="income" /> },
+    { label: "Outstanding Payments", value: String(metrics.outstandingPayments), subtitle: "Pending follow-ups", change: comparePeriods(messages, (message) => (message.status === "unread" ? 1 : 0), rangeDays), icon: <StatIcon type="expenses" /> },
+    { label: "Revenue Pipeline", value: String(readInRange), subtitle: `Last ${rangeDays} days`, change: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays), icon: <StatIcon type="revenue" /> },
   ];
 
   const analyticsProps = {
     rangeDays,
     onRangeChange: setRangeDays,
-    income,
-    expenses,
-    balance,
+    income: scopedMessages.length,
+    expenses: unreadInRange,
+    balance: readInRange,
     changes: {
-      income: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.65, rangeDays),
-      expenses: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.35, rangeDays),
-      balance: comparePeriods(orders, (order) => (Number(order.totalPrice || 0) * 0.65) - (Number(order.totalPrice || 0) * 0.35), rangeDays),
+      income: comparePeriods(messages, () => 1, rangeDays),
+      expenses: comparePeriods(messages, (message) => (message.status === "unread" ? 1 : 0), rangeDays),
+      balance: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays),
     },
-    hasChartData: filteredOrders.length > 0,
+    hasChartData: scopedMessages.length > 0,
   };
 
   const sections = {
     Dashboard: (
       <MetricOverview
         cards={cards}
+        messages={scopedMessages}
         analytics={analyticsProps}
       />
     ),
-    Inventory: <InventorySection products={products} />,
-    Orders: <OrdersSection orders={filteredOrders} title="Financial Orders" description="Orders that contribute to revenue tracking and payout visibility." />,
-    Sales: (
-      <MetricOverview
-        cards={cards}
-        analytics={analyticsProps}
-      />
-    ),
-    Settings: <SimpleInfoSection title="Settings" description="Finance workspace settings." body="This dashboard keeps the finance view focused on order values, reconciliation visibility, and trend monitoring. Sensitive identity and content tools stay outside this role." />,
+    Leads: <LeadsSection messages={messages} title="Billing Leads" description="Service inquiries that may require invoicing or payment follow-up." />,
+    Reports: <ReportsSection messages={scopedMessages} rangeDays={rangeDays} title="Financial Reports" description="Service transaction and engagement summary for finance review." />,
+    Settings: <SimpleInfoSection title="Settings" description="Finance workspace settings." body="This dashboard keeps the finance view focused on service transactions, reconciliation visibility, and trend monitoring. Sensitive identity and content tools stay outside this role." />,
   };
 
   return (
     <RoleDashboardLayout
       role={role}
       title="Finance Dashboard"
-      subtitle={`Welcome back, ${user?.name || "Finance"}. This workspace is focused on revenue, expenses, and order value visibility.`}
+      subtitle={`Welcome back, ${user?.name || "Finance"}. This workspace is focused on service revenue, transactions, and payment follow-up visibility.`}
       loading={loading}
       error={error}
       sections={sections}

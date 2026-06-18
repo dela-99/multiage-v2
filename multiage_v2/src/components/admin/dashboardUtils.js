@@ -26,23 +26,47 @@ export function comparePeriods(items, getter, days) {
   return ((current - previous) / previous) * 100;
 }
 
-export function buildTopProducts(orders, products) {
+export function filterByRange(items, rangeDays) {
+  return (items || []).filter((item) => inRange(item.createdAt, rangeDays));
+}
+
+export function computeServiceMetrics(messages, rangeDays) {
+  const scoped = filterByRange(messages, rangeDays);
+  const all = messages || [];
+  const unread = all.filter((message) => message.status === "unread");
+  const read = all.filter((message) => message.status === "read");
+
+  return {
+    totalServiceRequests: scoped.length,
+    activeProjects: read.length,
+    completedProjects: read.length,
+    newLeads: unread.length,
+    pendingLeads: unread.length,
+    contactedLeads: read.length,
+    closedLeads: read.length,
+    followUps: unread.length,
+    openRequests: unread.length,
+    closedRequests: read.length,
+    serviceTransactions: scoped.length,
+    monthlyIncome: scoped.length,
+    outstandingPayments: unread.length,
+  };
+}
+
+export function buildTopServices(messages, limit = 8) {
   const counts = new Map();
 
-  orders.forEach((order) => {
-    (order.items || []).forEach((item) => {
-      counts.set(item.name, (counts.get(item.name) || 0) + Number(item.quantity || 0));
-    });
+  (messages || []).forEach((message) => {
+    const service = message.service || "General inquiry";
+    counts.set(service, (counts.get(service) || 0) + 1);
   });
 
-  const productByName = new Map(products.map((product) => [product.name, product]));
-
   return [...counts.entries()]
-    .map(([name, quantity]) => ({
-      name,
-      quantity,
-      image: productByName.get(name)?.image || "",
-    }))
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, 8);
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+export function countActiveStaff(users) {
+  return (users || []).filter((user) => user.isAdmin).length;
 }

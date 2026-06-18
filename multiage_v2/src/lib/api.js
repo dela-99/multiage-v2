@@ -63,41 +63,9 @@ export const api = {
   changePassword: (body, token) =>
     apiRequest("/auth/password", { method: "PUT", body, token }),
   sendMessage: (body) => apiRequest("/messages", { method: "POST", body }),
-  getProducts: async (params = {}) => {
-    const searchParams = new URLSearchParams();
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== "") {
-        searchParams.set(key, value);
-      }
-    });
-
-    const query = searchParams.toString();
-    const data = await apiRequest(`/products${query ? `?${query}` : ""}`);
-
-    // Support both response shapes:
-    // 1) { items: [...] } from the API
-    // 2) raw array (some proxies or older clients)
-    if (Array.isArray(data)) {
-      return { items: data, pagination: null };
-    }
-
-    if (data && Array.isArray(data.items)) {
-      return data;
-    }
-
-    return { items: [], pagination: null };
-  },
-  getProduct: (id) => apiRequest(`/products/${id}`),
-  createOrder: (body, token) => apiRequest("/orders", { method: "POST", body, token }),
-  getOrders: (token) => apiRequest("/orders", { token }),
-  getMyOrders: (token) => apiRequest("/orders/my", { token }),
-  cancelOrder: (id, token) => apiRequest(`/orders/${id}/cancel`, { method: "PATCH", token }),
-  initializePayment: (body, token) => apiRequest("/payment/initialize", { method: "POST", body, token }),
-  verifyPayment: (reference, token) =>
-    apiRequest(`/payment/verify?reference=${encodeURIComponent(reference)}`, { token }),
   getMessages: (token) => apiRequest("/messages", { token }),
   getMessage: (id, token) => apiRequest(`/messages/${id}`, { token }),
   updateMessageStatus: (id, body, token) => apiRequest(`/messages/${id}/status`, { method: "PATCH", body, token }),
-  createProduct: (body, token) => apiRequest("/products", { method: "POST", body, token }),
+  getUsers: (token) => apiRequest("/auth/users", { token }),
 };
+

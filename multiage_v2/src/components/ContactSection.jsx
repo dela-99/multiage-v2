@@ -5,7 +5,7 @@ import { useTheme } from "../context/ThemeContext";
 import { api } from "../lib/api";
 
 const SERVICES_OPTIONS = [
-  "Electronics / Device Purchase","Website Development","Mobile App Development",
+  "Website Development","Mobile App Development",
   "Networking Setup","Creative Studio Services","IT Consulting",
 ];
 
@@ -66,7 +66,7 @@ export default function ContactSection() {
               Let's build something great together
             </SectionHeading>
             <p style={{ fontSize: 15, color: t.textSecondary, lineHeight: 1.8, marginBottom: 40 }}>
-              Whether you're looking for premium devices, need a website built, or want to set up a professional network — we've got you covered.
+              Whether you need a website built, a mobile app developed, or a professional network set up — we've got you covered.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {QUICK_ACTIONS.map(btn => (

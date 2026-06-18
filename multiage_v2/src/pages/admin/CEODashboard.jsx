@@ -2,77 +2,54 @@ import { useMemo, useState } from "react";
 import ChangePasswordForm from "../../components/ChangePasswordForm";
 import RoleDashboardLayout, { StatIcon } from "../../components/admin/RoleDashboardLayout";
 import {
-  InventorySection,
+  LeadsSection,
   MetricOverview,
-  OrdersSection,
-  ProductListSection,
+  ProjectsSection,
+  ReportsSection,
   SettingsSection,
   SimpleInfoSection,
 } from "../../components/admin/roleSections";
-import { buildTopProducts, comparePeriods, inRange } from "../../components/admin/dashboardUtils";
+import { comparePeriods, computeServiceMetrics, filterByRange } from "../../components/admin/dashboardUtils";
 import { useAdminResources } from "../../hooks/useAdminResources";
-import { api } from "../../lib/api";
 
 export default function CEODashboard({ role, token, user }) {
   const [rangeDays, setRangeDays] = useState(30);
-  const { products, orders, loading, error } = useAdminResources(token, { products: true, orders: true });
-
-  const filteredOrders = useMemo(() => orders.filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
-  const revenue = filteredOrders.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0);
-  const expenses = revenue * 0.35;
-  const income = revenue - expenses;
-  const balance = income;
-  const topProducts = useMemo(() => buildTopProducts(filteredOrders, products), [filteredOrders, products]);
+  const { messages, loading, error } = useAdminResources(token, { messages: true });
+  const scopedMessages = useMemo(() => filterByRange(messages, rangeDays), [messages, rangeDays]);
+  const metrics = useMemo(() => computeServiceMetrics(messages, rangeDays), [messages, rangeDays]);
+  const unreadInRange = scopedMessages.filter((message) => message.status === "unread").length;
+  const readInRange = scopedMessages.filter((message) => message.status === "read").length;
 
   const cards = [
-    { label: "Total Revenue", value: `GHS ${revenue.toLocaleString()}`, subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, (order) => Number(order.totalPrice || 0), rangeDays), icon: <StatIcon type="revenue" /> },
-    { label: "Total Orders", value: String(filteredOrders.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
-    { label: "Income", value: `GHS ${income.toLocaleString()}`, subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.65, rangeDays), icon: <StatIcon type="income" /> },
-    { label: "Balance", value: `GHS ${balance.toLocaleString()}`, subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.65, rangeDays), icon: <StatIcon type="balance" /> },
+    { label: "Total Service Requests", value: String(metrics.totalServiceRequests), subtitle: `Last ${rangeDays} days`, change: comparePeriods(messages, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
+    { label: "Active Projects", value: String(metrics.activeProjects), subtitle: "Contacted engagements", change: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays), icon: <StatIcon type="income" /> },
+    { label: "Completed Projects", value: String(metrics.completedProjects), subtitle: "Closed engagements", change: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays), icon: <StatIcon type="balance" /> },
+    { label: "New Leads", value: String(metrics.newLeads), subtitle: "Pending follow-up", change: comparePeriods(messages, (message) => (message.status === "unread" ? 1 : 0), rangeDays), icon: <StatIcon type="revenue" /> },
   ];
 
   const sections = {
     Dashboard: (
       <MetricOverview
         cards={cards}
+        messages={scopedMessages}
         analytics={{
           rangeDays,
           onRangeChange: setRangeDays,
-          income,
-          expenses,
-          balance,
+          income: scopedMessages.length,
+          expenses: unreadInRange,
+          balance: readInRange,
           changes: {
-            income: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.65, rangeDays),
-            expenses: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.35, rangeDays),
-            balance: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.65, rangeDays),
+            income: comparePeriods(messages, () => 1, rangeDays),
+            expenses: comparePeriods(messages, (message) => (message.status === "unread" ? 1 : 0), rangeDays),
+            balance: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays),
           },
-          hasChartData: filteredOrders.length > 0,
+          hasChartData: scopedMessages.length > 0,
         }}
-        topProducts={topProducts}
       />
     ),
-    Products: <ProductListSection products={products} />,
-    Inventory: <InventorySection products={products} />,
-    Orders: <OrdersSection orders={filteredOrders} />,
-    Sales: (
-      <MetricOverview
-        cards={cards}
-        analytics={{
-          rangeDays,
-          onRangeChange: setRangeDays,
-          income,
-          expenses,
-          balance,
-          changes: {
-            income: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.65, rangeDays),
-            expenses: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.35, rangeDays),
-            balance: comparePeriods(orders, (order) => Number(order.totalPrice || 0) * 0.65, rangeDays),
-          },
-          hasChartData: filteredOrders.length > 0,
-        }}
-        topProducts={topProducts}
-      />
-    ),
+    Leads: <LeadsSection messages={messages} />,
+    Projects: <ProjectsSection messages={messages} />,
+    Reports: <ReportsSection messages={scopedMessages} rangeDays={rangeDays} />,
     Users: <SimpleInfoSection title="Users" description="Executive visibility only." body="User governance remains backend-protected. This CEO workspace is reserved for high-level user administration and audit decisions." />,
     "Media / Content": <SimpleInfoSection title="Media / Content" description="Brand and campaign oversight." body="Use this workspace to review content direction and approve media priorities. Dedicated publishing tools can plug in here without changing the dashboard switch logic." iconType="media" />,
     Settings: <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />,
@@ -82,7 +59,7 @@ export default function CEODashboard({ role, token, user }) {
     <RoleDashboardLayout
       role={role}
       title="CEO Dashboard"
-      subtitle={`Welcome back, ${user?.name || "CEO"}. This executive workspace surfaces commercial performance, oversight, and strategic visibility.`}
+      subtitle={`Welcome back, ${user?.name || "CEO"}. This executive workspace surfaces service pipeline performance, oversight, and strategic visibility.`}
       loading={loading}
       error={error}
       sections={sections}

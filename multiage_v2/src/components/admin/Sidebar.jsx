@@ -12,13 +12,10 @@ function MenuIcon({ path }) {
 
 const ICONS = {
   Dashboard: "M3 13h8V3H3v10ZM13 21h8V11h-8v10ZM13 3v6h8V3h-8ZM3 21v-6h8v6H3Z",
-  Products: "M12 2l8 4.5v11L12 22l-8-4.5v-11L12 2Z M12 22V11 M20 6.5l-8 4.5-8-4.5",
-  Inventory: "M20 7 12 3 4 7 M20 7v10l-8 4-8-4V7 M12 3v18",
-  Orders: "M7 4h10l1 2h3v2H3V6h3l1-2Z M5 8h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8Z",
-  Sales: "M4 19V9 M10 19V5 M16 19v-8 M22 19v-12",
-  Customers: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M16 3.13a4 4 0 0 1 0 7.75 M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
+  Leads: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M16 3.13a4 4 0 0 1 0 7.75 M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
+  Projects: "M12 2l8 4.5v11L12 22l-8-4.5v-11L12 2Z M12 22V11 M20 6.5l-8 4.5-8-4.5",
+  Reports: "M4 19V9 M10 19V5 M16 19v-8 M22 19v-12",
   Users: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M16 3.13a4 4 0 0 1 0 7.75 M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
-  Newsletter: "M4 6h16v12H4z M4 7l8 6 8-6",
   "Media / Content": "M4 7h16 M4 12h10 M4 17h7 M18 17a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
   Communications: "M4 6h16v12H4z M4 7l8 6 8-6",
   Settings: "M12 3v3 M12 18v3 M4.93 4.93l2.12 2.12 M16.95 16.95l2.12 2.12 M3 12h3 M18 12h3 M4.93 19.07l2.12-2.12 M16.95 7.05l2.12-2.12 M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",

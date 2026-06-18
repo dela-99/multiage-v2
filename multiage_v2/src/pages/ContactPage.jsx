@@ -20,9 +20,9 @@ const SERVICES_OPTIONS = [
 
 const FAQ = [
   { q: "How quickly do you respond to enquiries?", a: "We respond to all WhatsApp and email enquiries within 2 hours during business hours (Mon–Sat, 8am–7pm)." },
-  { q: "Do you deliver devices outside Accra?",    a: "Yes — we ship nationwide via trusted courier services. Delivery to major cities typically takes 1–3 business days." },
-  { q: "Can I visit your showroom?",               a: "Absolutely. Our showroom in Accra is open Monday to Saturday, 9am–6pm. Call ahead to ensure your preferred device is in stock." },
-  { q: "Do you offer payment plans?",              a: "We offer flexible instalment plans on select devices and services. Contact us to discuss options." },
+  { q: "Do you work with clients outside Accra?", a: "Yes — we support clients nationwide and remotely for software, networking, and creative studio projects." },
+  { q: "Can I visit your office?", a: "Absolutely. Our office in Accra is open Monday to Saturday, 9am–6pm. Call ahead to schedule a consultation." },
+  { q: "Do you offer payment plans?", a: "We offer flexible instalment plans on select services and project engagements. Contact us to discuss options." },
 ];
 
 export default function ContactPage() {

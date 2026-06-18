@@ -527,14 +527,14 @@ function DeviceSlider() {
             <span className="hs-variant">{slide.variant}</span>
             <div className="hs-desc">{slide.desc}</div>
             <div className="hs-price">{slide.price}</div>
-            <a href="/store" className="hs-cta"
+            <a href="/services" className="hs-cta"
               onClick={e => {
                 e.preventDefault();
-                window.history.pushState(null, "", "/store");
+                window.history.pushState(null, "", "/services");
                 window.dispatchEvent(new PopStateEvent("popstate"));
                 window.scrollTo(0, 0);
               }}>
-              View in Store →
+              Explore Services →
             </a>
           </div>
         </div>

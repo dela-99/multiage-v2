@@ -2,34 +2,32 @@ import { useMemo, useState } from "react";
 import ChangePasswordForm from "../../components/ChangePasswordForm";
 import RoleDashboardLayout, { StatIcon } from "../../components/admin/RoleDashboardLayout";
 import {
-  InventorySection,
+  LeadsSection,
   MetricOverview,
-  OrdersSection,
-  ProductListSection,
+  ReportsSection,
   SettingsSection,
   SimpleInfoSection,
 } from "../../components/admin/roleSections";
-import { buildTopProducts, comparePeriods, inRange } from "../../components/admin/dashboardUtils";
+import { comparePeriods, computeServiceMetrics, filterByRange } from "../../components/admin/dashboardUtils";
 import { useAdminResources } from "../../hooks/useAdminResources";
 
 export default function CyberDashboard({ role, token, user }) {
   const [rangeDays, setRangeDays] = useState(30);
-  const { products, orders, loading, error } = useAdminResources(token, { products: true, orders: true });
-  const filteredOrders = useMemo(() => orders.filter((order) => inRange(order.createdAt, rangeDays)), [orders, rangeDays]);
-  const topProducts = useMemo(() => buildTopProducts(filteredOrders, products), [filteredOrders, products]);
+  const { messages, loading, error } = useAdminResources(token, { messages: true });
+  const scopedMessages = useMemo(() => filterByRange(messages, rangeDays), [messages, rangeDays]);
+  const metrics = useMemo(() => computeServiceMetrics(messages, rangeDays), [messages, rangeDays]);
 
   const cards = [
-    { label: "Tracked Orders", value: String(filteredOrders.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(orders, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
-    { label: "Catalog Items", value: String(products.length), subtitle: "Live store records", change: 0, icon: <StatIcon type="shield" /> },
-    { label: "Systems Coverage", value: "Operational", subtitle: "Tech and catalog oversight", change: 0, icon: <StatIcon type="media" /> },
+    { label: "Security Events", value: String(scopedMessages.length), subtitle: `Last ${rangeDays} days`, change: comparePeriods(messages, () => 1, rangeDays), icon: <StatIcon type="shield" /> },
+    { label: "Access Logs", value: String(metrics.closedRequests), subtitle: "Reviewed records", change: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays), icon: <StatIcon type="orders" /> },
+    { label: "User Sessions", value: String(metrics.openRequests), subtitle: "Active follow-ups", change: comparePeriods(messages, (message) => (message.status === "unread" ? 1 : 0), rangeDays), icon: <StatIcon type="media" /> },
+    { label: "Security Status", value: "Operational", subtitle: "Systems monitoring", change: 0, icon: <StatIcon type="income" /> },
   ];
 
   const sections = {
-    Dashboard: <MetricOverview cards={cards} topProducts={topProducts} />,
-    Products: <ProductListSection products={products} />,
-    Inventory: <InventorySection products={products} />,
-    Orders: <OrdersSection orders={filteredOrders} title="Operational Orders" description="Order activity visible to the technology and operations team." />,
-    Sales: <SimpleInfoSection title="Sales" description="Restricted commercial overview." body="Sales access for Cyber IT is intentionally limited to operational visibility. Sensitive financial breakdowns remain separated into the finance and executive dashboards." />,
+    Dashboard: <MetricOverview cards={cards} messages={scopedMessages} />,
+    Leads: <LeadsSection messages={messages} title="Access Requests" description="Inbound service and support requests requiring systems review." />,
+    Reports: <ReportsSection messages={scopedMessages} rangeDays={rangeDays} title="System Reports" description="Operational activity summary for technology oversight." />,
     Users: <SimpleInfoSection title="Users" description="System access oversight." body="Use this space for role-aware access reviews, account readiness, and future identity tooling. Backend authorisation still remains the final authority." />,
     "Media / Content": <SimpleInfoSection title="Media / Content" description="Technical support for content systems." body="This dashboard can support media pipelines, upload integrations, and publishing workflows without exposing broader commercial data." iconType="media" />,
     Settings: <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />,
