@@ -1,3 +1,7 @@
+/**
+ * @deprecated E-commerce product model — store removed from application.
+ * MongoDB collection preserved for recovery.
+ */
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(

@@ -1,3 +1,7 @@
+/**
+ * @deprecated E-commerce order controller — store removed from application.
+ * Preserved for MongoDB collection recovery. Routes unmounted in server/index.js.
+ */
 const Order   = require("../models/Order");
 const Product = require("../models/Product");
 const { sendAdminNewOrderNotification } = require("../services/emailService");

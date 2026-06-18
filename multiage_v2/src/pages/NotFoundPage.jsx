@@ -16,11 +16,11 @@ export default function NotFoundPage() {
           Page not found
         </PageHeroHeading>
         <p style={{ fontSize: 16, color: t.textSecondary, lineHeight: 1.7, marginBottom: 32 }}>
-          The link may be broken or the page may have been removed. Try the home page or the store.
+          The link may be broken or the page may have been removed. Try the home page or our services.
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <BtnPrimary href="/">Home</BtnPrimary>
-          <BtnPrimary href="/store">Store</BtnPrimary>
+          <BtnPrimary href="/services">Services</BtnPrimary>
         </div>
       </section>
     </PageLayout>

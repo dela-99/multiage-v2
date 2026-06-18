@@ -1,3 +1,7 @@
+/**
+ * @deprecated E-commerce product controller — store removed from application.
+ * Preserved for MongoDB collection recovery. Routes unmounted in server/index.js.
+ */
 const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const { uploadToCloudinary } = require("../utils/cloudinary");

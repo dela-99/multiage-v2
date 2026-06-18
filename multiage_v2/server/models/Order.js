@@ -1,3 +1,7 @@
+/**
+ * @deprecated E-commerce order model — store removed from application.
+ * MongoDB collection preserved for recovery.
+ */
 const mongoose = require("mongoose");
 
 const orderItemSchema = new mongoose.Schema({

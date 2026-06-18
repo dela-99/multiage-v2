@@ -9,23 +9,19 @@ const { helmetMiddleware, apiLimiter } = require("./middleware/security");
 
 // ── Route imports ─────────────────────────────────────────────────
 const authRoutes    = require("./routes/authRoutes");
+// @deprecated — e-commerce store removed; routes kept for data recovery
 const productRoutes = require("./routes/productRoutes");
 const orderRoutes   = require("./routes/orderRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+// @deprecated — payment gateway tied to removed store checkout
 const paymentRoutes = require("./routes/paymentRoutes");
 const adminRoutes   = require("./routes/adminRoutes");
-const { seedProductCatalog } = require("./controllers/productController");
-const { protect, adminOnly } = require("./middleware/auth");
 
 // ── Validate required environment variables ───────────────────────
 const REQUIRED_ENV_VARS = [
   "MONGO_URI",
   "JWT_SECRET",
   "CLIENT_URL",
-  "CLOUDINARY_CLOUD_NAME",
-  "CLOUDINARY_API_KEY",
-  "CLOUDINARY_API_SECRET",
-  "PAYSTACK_SECRET_KEY",
 ];
 
 const missingVars = REQUIRED_ENV_VARS.filter((v) => !process.env[v]);
@@ -123,14 +119,13 @@ app.get("/api/health", (req, res) => {
 
 // ── API routes ────────────────────────────────────────────────────
 app.use("/api/auth",     authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/orders",   orderRoutes);
 app.use("/api/messages", messageRoutes);
-app.use("/api/payment",  paymentRoutes);
 app.use("/api/admin",    adminRoutes);
 
-// Legacy / docs alias — identical to POST /api/products/seed
-app.post("/api/seed-products", protect, adminOnly, seedProductCatalog);
+// @deprecated — store e-commerce APIs retained for collection recovery only
+// app.use("/api/products", productRoutes);
+// app.use("/api/orders",   orderRoutes);
+// app.use("/api/payment",  paymentRoutes);
 
 // ── Root health route ─────────────────────────────────────────────
 app.get("/", (req, res) => {

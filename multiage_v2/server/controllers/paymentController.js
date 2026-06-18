@@ -1,3 +1,7 @@
+/**
+ * @deprecated Paystack payment controller — tied to removed store checkout.
+ * Routes unmounted in server/index.js.
+ */
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const Product = require("../models/Product");

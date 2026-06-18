@@ -216,7 +216,7 @@ export default function RegisterPage() {
               Create your account
             </h1>
             <p style={{ fontSize: 14, color: t.textSecondary, lineHeight: 1.6 }}>
-              Shop the store, track orders, and manage your password anytime.
+              Request services, track inquiries, and manage your password anytime.
             </p>
           </div>
 

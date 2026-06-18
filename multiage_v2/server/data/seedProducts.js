@@ -1,3 +1,7 @@
+/**
+ * @deprecated E-commerce product seed data — store removed from application.
+ * Preserved for MongoDB collection recovery only.
+ */
 const DEFAULT_PRODUCT_PLACEHOLDER = "https://res.cloudinary.com/delaridge/image/upload/v1777051011/vvujmssqgtoddscpp34m.png";
 
 const _seed = [
