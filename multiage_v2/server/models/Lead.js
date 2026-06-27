@@ -12,6 +12,7 @@ const leadSchema = new mongoose.Schema({
     type: String,
     enum: ["Pending", "Contacted", "Proposal Sent", "In Progress", "Completed", "Closed"],
     default: "Pending",
+    index: true,
   },
   lastContactDate: { type: Date },
   followUpDate: { type: Date },
@@ -23,5 +24,8 @@ const leadSchema = new mongoose.Schema({
   // Link back to the original message if it exists
   originalMessage: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
 }, { timestamps: true });
+
+leadSchema.index({ email: 1 });
+leadSchema.index({ assignedStaff: 1 });
 
 module.exports = mongoose.model("Lead", leadSchema);

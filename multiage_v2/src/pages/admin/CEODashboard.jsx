@@ -1,58 +1,55 @@
-import { useMemo, useState } from "react";
-import ChangePasswordForm from "../../components/ChangePasswordForm";
+import { useMemo } from "react";
 import RoleDashboardLayout, { StatIcon } from "../../components/admin/RoleDashboardLayout";
 import {
   LeadsSection,
   MetricOverview,
   ProjectsSection,
   ReportsSection,
-  SettingsSection,
   SimpleInfoSection,
 } from "../../components/admin/roleSections";
-import { comparePeriods, computeServiceMetrics, filterByRange } from "../../components/admin/dashboardUtils";
-import { useAdminResources } from "../../hooks/useAdminResources";
+import { useApi } from "../../hooks/useApi"; // New centralized API hook
+
+// Helper to format currency
+const formatCurrency = (value) => `GHS ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default function CEODashboard({ role, token, user }) {
-  const [rangeDays, setRangeDays] = useState(30);
-  const { messages, loading, error } = useAdminResources(token, { messages: true });
-  const scopedMessages = useMemo(() => filterByRange(messages, rangeDays), [messages, rangeDays]);
-  const metrics = useMemo(() => computeServiceMetrics(messages, rangeDays), [messages, rangeDays]);
-  const unreadInRange = scopedMessages.filter((message) => message.status === "unread").length;
-  const readInRange = scopedMessages.filter((message) => message.status === "read").length;
+  const { data: metrics, loading, error } = useApi(token, "/api/users/dashboard/metrics");
 
-  const cards = [
-    { label: "Total Service Requests", value: String(metrics.totalServiceRequests), subtitle: `Last ${rangeDays} days`, change: comparePeriods(messages, () => 1, rangeDays), icon: <StatIcon type="orders" /> },
-    { label: "Active Projects", value: String(metrics.activeProjects), subtitle: "Contacted engagements", change: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays), icon: <StatIcon type="income" /> },
-    { label: "Completed Projects", value: String(metrics.completedProjects), subtitle: "Closed engagements", change: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays), icon: <StatIcon type="balance" /> },
-    { label: "New Leads", value: String(metrics.newLeads), subtitle: "Pending follow-up", change: comparePeriods(messages, (message) => (message.status === "unread" ? 1 : 0), rangeDays), icon: <StatIcon type="revenue" /> },
-  ];
+  const netProfit = (metrics?.monthlyRevenue || 0) - (metrics?.monthlyExpenses || 0);
+
+  const cards = useMemo(() => {
+    if (!metrics) return [];
+    return [
+      // Finance
+      { label: "Monthly Revenue", value: formatCurrency(metrics.monthlyRevenue), icon: <StatIcon type="income" /> },
+      { label: "Monthly Expenses", value: formatCurrency(metrics.monthlyExpenses), icon: <StatIcon type="expenses" /> },
+      { label: "Net Profit", value: formatCurrency(netProfit), icon: <StatIcon type="balance" /> },
+      { label: "Outstanding Payments", value: formatCurrency(metrics.outstandingPayments), icon: <StatIcon type="revenue" /> },
+      // Projects
+      { label: "Active Projects", value: String(metrics.activeProjects || 0), icon: <StatIcon type="orders" /> },
+      { label: "Completed Projects", value: String(metrics.completedProjects || 0), icon: <StatIcon type="check" /> },
+      { label: "Pending Projects", value: String(metrics.pendingProjects || 0), icon: <StatIcon type="media" /> },
+      // Leads & Staff
+      { label: "New Leads", value: String(metrics.newClientRequests || 0), subtitle: "Last 30 days", icon: <StatIcon type="users" /> },
+      { label: "Total Staff", value: String(metrics.totalStaff || 0), icon: <StatIcon type="shield" /> },
+      { label: "Active Staff", value: String(metrics.activeStaff || 0), icon: <StatIcon type="shield" /> },
+    ];
+  }, [metrics, netProfit]);
 
   const sections = {
     Dashboard: (
       <MetricOverview
         cards={cards}
-        messages={scopedMessages}
-        analytics={{
-          rangeDays,
-          onRangeChange: setRangeDays,
-          income: scopedMessages.length,
-          expenses: unreadInRange,
-          balance: readInRange,
-          changes: {
-            income: comparePeriods(messages, () => 1, rangeDays),
-            expenses: comparePeriods(messages, (message) => (message.status === "unread" ? 1 : 0), rangeDays),
-            balance: comparePeriods(messages, (message) => (message.status === "read" ? 1 : 0), rangeDays),
-          },
-          hasChartData: scopedMessages.length > 0,
-        }}
+        // Placeholder for charts and recent activity
+        analytics={{ hasChartData: !!metrics }}
+        messages={[]} // To be replaced with Activity Timeline
       />
     ),
     Leads: <LeadsSection messages={messages} />,
     Projects: <ProjectsSection messages={messages} />,
     Reports: <ReportsSection messages={scopedMessages} rangeDays={rangeDays} />,
-    Users: <SimpleInfoSection title="Users" description="Executive visibility only." body="User governance remains backend-protected. This CEO workspace is reserved for high-level user administration and audit decisions." />,
-    "Media / Content": <SimpleInfoSection title="Media / Content" description="Brand and campaign oversight." body="Use this workspace to review content direction and approve media priorities. Dedicated publishing tools can plug in here without changing the dashboard switch logic." iconType="media" />,
-    Settings: <SettingsSection token={token} ChangePasswordForm={ChangePasswordForm} />,
+    Staff: <SimpleInfoSection title="Staff Management" description="Manage all staff records, roles, and departments." />,
+    Finance: <SimpleInfoSection title="Finance Overview" description="Access all financial transactions, reports, and summaries." />,
   };
 
   return (

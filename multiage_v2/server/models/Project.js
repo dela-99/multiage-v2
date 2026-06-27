@@ -15,6 +15,7 @@ const projectSchema = new mongoose.Schema({
     type: String,
     enum: ["New", "Proposal Sent", "Approved", "In Progress", "Review", "Completed", "Cancelled"],
     default: "New",
+    index: true,
   },
   startDate: { type: Date },
   dueDate: { type: Date },
@@ -31,5 +32,8 @@ const projectSchema = new mongoose.Schema({
     uploadDate: { type: Date, default: Date.now },
   }],
 }, { timestamps: true });
+
+projectSchema.index({ assignedStaff: 1 });
+projectSchema.index({ assignedDepartment: 1 });
 
 module.exports = mongoose.model("Project", projectSchema);
