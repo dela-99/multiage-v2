@@ -7,12 +7,10 @@ import ChangePasswordForm from "./ChangePasswordForm";
 
 /* ── Hardware added; Login handled via separate button ───────────── */
 const NAV_LINKS = [
-  { label: "Home",       href: "/" },
-  { label: "Networking", href: "/networking" },
-  { label: "Software",   href: "/software-development" },
-  { label: "Hardware",   href: "/hardware" },
-  { label: "Studios",   href: "/services" },
-  { label: "Contact",    href: "/contact" },
+  { label: "Home",      href: "/" },
+  { label: "Services",  href: "/services" },
+  { label: "About",     href: "/about" }, // Assuming an about page exists or will be created
+  { label: "Contact",   href: "/contact" },
 ];
 
 const ADMIN_ROLES = new Set(["admin", "ceo", "administrator", "cyber_it", "finance", "secretary", "graphics"]);

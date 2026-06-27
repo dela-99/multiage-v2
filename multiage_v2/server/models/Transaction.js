@@ -17,6 +17,7 @@ const transactionSchema = new mongoose.Schema({
     type: String,
     enum: ["Pending", "Paid", "Overdue", "Cancelled"],
     default: "Paid",
+    index: true,
   },
   transactionDate: { type: Date, default: Date.now },
   // Link to related entities
@@ -27,5 +28,8 @@ const transactionSchema = new mongoose.Schema({
   invoiceNumber: { type: String, sparse: true },
   dueDate: { type: Date },
 }, { timestamps: true });
+
+transactionSchema.index({ type: 1, category: 1 });
+transactionSchema.index({ project: 1 });
 
 module.exports = mongoose.model("Transaction", transactionSchema);
