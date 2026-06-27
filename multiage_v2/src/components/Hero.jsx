@@ -1,7 +1,7 @@
 import { useTheme } from "../context/ThemeContext";
 import { useDeviceColor } from "../context/DeviceColorContext";
 import { GlowBlob, Icon, BtnPrimary, BtnGhost } from "./ui";
-import { icons, HERO_SERVICES } from "../constants";
+import { icons, HERO_SERVICES as services } from "../constants";
 
 function ServiceHighlight({ item, t }) {
   return (
@@ -15,7 +15,6 @@ function ServiceHighlight({ item, t }) {
       display: "grid",
       gap: 8,
     }}>
-      <div style={{ fontSize: 28, lineHeight: 1 }}>{item.emoji}</div>
       <div style={{ color: t.textPrimary, fontWeight: 700, fontSize: 15, lineHeight: 1.4 }}>
         {item.label}
       </div>
@@ -84,7 +83,7 @@ export default function Hero() {
           margin: "0 auto",
           textAlign: "left",
         }}>
-          {HERO_SERVICES.map((item) => (
+          {services.map((item) => (
             <ServiceHighlight key={item.label} item={item} t={t} />
           ))}
         </div>
