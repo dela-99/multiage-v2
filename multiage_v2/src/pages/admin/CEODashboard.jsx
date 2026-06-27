@@ -7,7 +7,7 @@ import {
   ReportsSection,
   SimpleInfoSection,
 } from "../../components/admin/roleSections";
-import { useApi } from "../../hooks/useApi"; // New centralized API hook
+import { useApi } from "../../hooks/useApi";
 
 // Helper to format currency
 const formatCurrency = (value) => `GHS ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -45,9 +45,9 @@ export default function CEODashboard({ role, token, user }) {
         messages={[]} // To be replaced with Activity Timeline
       />
     ),
-    Leads: <LeadsSection messages={messages} />,
-    Projects: <ProjectsSection messages={messages} />,
-    Reports: <ReportsSection messages={scopedMessages} rangeDays={rangeDays} />,
+    Leads: <LeadsSection messages={[]} />,
+    Projects: <ProjectsSection messages={[]} />,
+    Reports: <ReportsSection messages={[]} rangeDays={30} />,
     Staff: <SimpleInfoSection title="Staff Management" description="Manage all staff records, roles, and departments." />,
     Finance: <SimpleInfoSection title="Finance Overview" description="Access all financial transactions, reports, and summaries." />,
   };
