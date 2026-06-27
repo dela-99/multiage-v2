@@ -3,7 +3,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { ROLES, normalizeAdminRole } from "../config/adminSidebar";
 import CEODashboard from "./admin/CEODashboard";
-import CyberDashboard from "./admin/CyberDashboard";
+import CyberITDashboard from "./admin/CyberDashboard";
 import FinanceDashboard from "./admin/FinanceDashboard";
 import AdministratorDashboard from "./admin/AdminDashboard";
 import SecretaryDashboard from "./admin/SecretaryDashboard";
@@ -44,7 +44,7 @@ export default function AdminDashboard() {
     case ROLES.CEO:
       return <CEODashboard {...props} />;
     case ROLES.CYBER_IT:
-      return <CyberDashboard {...props} />;
+      return <CyberITDashboard {...props} />;
     case ROLES.FINANCE:
       return <FinanceDashboard {...props} />;
     case ROLES.ADMINISTRATOR:

@@ -4,23 +4,43 @@ import { useTheme } from "../context/ThemeContext";
 import { Icon, SectionLabel, PageHeroHeading, BtnPrimary, BtnGhost, GlowBlob } from "../components/ui";
 import { icons } from "../constants";
 
-/* ── Creative Studio ONLY — IT Consulting + Repair moved to /hardware */
-const ALL_SERVICES = [
+const COMPANY_SERVICES = [
   {
-    category: "Creative Studio",
+    category: "Development & Software",
+    color: "#6c3483",
+    icon: "code",
+    items: [
+      { title: "Website Development", desc: "Custom websites, e-commerce stores, and web applications built with modern, scalable technologies to drive business growth." },
+      { title: "Mobile App Development", desc: "Native and cross-platform mobile apps for iOS and Android, designed for exceptional user experience and performance." },
+      { title: "Software Development", desc: "Bespoke software solutions, including ERPs, CRMs, and automation tools, tailored to your specific operational needs." },
+    ],
+  },
+  {
+    category: "Infrastructure & Security",
+    color: "#2c5f8a",
+    icon: "shield",
+    items: [
+      { title: "Cybersecurity Services", desc: "Protect your digital assets with vulnerability assessments, penetration testing, and 24/7 security monitoring." },
+      { title: "Networking", desc: "Expert design, implementation, and management of secure and reliable office and data center networks." },
+      { title: "Cloud Solutions", desc: "Optimize your operations with our cloud migration, infrastructure management, and server deployment services on AWS, Azure, and GCP." },
+    ],
+  },
+  {
+    category: "Creative & Consultancy",
     color: "#c0392b",
     icon: "camera",
     items: [
-      { title: "Brand Identity Design",   desc: "Logo design, brand guidelines, colour systems, and typography — everything to establish a strong, consistent brand." },
-      { title: "Graphic Design",          desc: "Marketing materials, social media graphics, brochures, banners, and print designs that convert." },
-      { title: "Video Production",        desc: "Corporate videos, product demos, social media reels, and event coverage produced in our fully equipped studio." },
-      { title: "Photography",             desc: "Product photography, corporate headshots, event coverage, and content creation for digital platforms." },
-      { title: "Social Media Management", desc: "Content strategy, creation, scheduling, and community management across all major platforms." },
+      { title: "Graphic Design", desc: "Compelling brand identities, marketing materials, and digital graphics that capture attention and communicate your message." },
+      { title: "Multiage Studios", desc: "High-quality video production, photography, and content creation from our state-of-the-art creative studio." },
+      { title: "IT Consultancy", desc: "Strategic advice on technology roadmapping, digital transformation, and IT procurement to align your technology with your business goals." },
     ],
   },
 ];
 
-/* PRICING — unchanged from original */
+/* This pricing model seems to be for a managed IT service plan, which is a specific offering.
+ * It should be presented in the context of IT Consultancy or as a separate product.
+ * For now, it remains unchanged as requested.
+ */
 const PRICING = [
   {
     name: "Starter", price: "GHS 999", period: "/month",
@@ -141,16 +161,17 @@ export default function ServicesPage() {
       {/* Hero */}
       <section style={{ padding: "80px 0 60px", position: "relative", overflow: "hidden" }}>
         <GlowBlob color="#c0392b" size={500} x="75%" y="45%" opacity={0.12} />
+        <GlowBlob color="#6c3483" size={400} x="15%" y="60%" opacity={0.10} />
         <div style={{ maxWidth: 1260, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 2 }}>
-          <SectionLabel>Creative Studio</SectionLabel>
+          <SectionLabel>Our Services</SectionLabel>
           <PageHeroHeading style={{ marginBottom: 16 }}>
-            Creative work that<br />
-            <span style={{ background: "linear-gradient(135deg,#c0392b,#C5620B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              makes you stand out.
+            Technology & Creative Solutions<br />
+            <span style={{ background: "linear-gradient(135deg,#6c3483,#C5620B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              for Modern Business.
             </span>
           </PageHeroHeading>
           <p style={{ fontSize: 17, color: t.textSecondary, maxWidth: 560, lineHeight: 1.7, marginBottom: 40 }}>
-            Brand identity, graphic design, video production, photography, and social media management — all under one roof.
+            From software development and cloud infrastructure to creative design and strategic consultancy, we provide the end-to-end services your business needs to thrive.
           </p>
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
             <BtnPrimary href="/contact">Request a Service <Icon d={icons.arrow} size={15} /></BtnPrimary>
@@ -159,40 +180,9 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Service Groups — Creative Studio only */}
+      {/* Unified Service Groups */}
       <section style={{ maxWidth: 1260, margin: "0 auto", padding: "0 24px 40px" }}>
-        {ALL_SERVICES.map((group, i) => <ServiceGroup key={i} group={group} />)}
-
-        {/* Pointer to Hardware page */}
-        <div style={{
-          padding: "24px 28px", borderRadius: 18,
-          background: t.surface, border: `1px solid ${t.border}`,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          flexWrap: "wrap", gap: 16,
-        }}>
-          <div>
-            <h4 style={{ fontSize: 15, fontWeight: 700, color: t.textPrimary, marginBottom: 4 }}>
-              Looking for IT Consulting?
-            </h4>
-            <p style={{ fontSize: 13, color: t.textMuted }}>
-              IT Consulting and systems integration are now on our Hardware page.
-            </p>
-          </div>
-          <a href="/hardware"
-            onClick={e => { e.preventDefault(); window.history.pushState(null,"","/hardware"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0,0); }}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "10px 20px", borderRadius: 12,
-              background: t.surface, border: `1px solid ${t.border}`,
-              fontSize: 13, fontWeight: 600, color: t.textPrimary,
-              textDecoration: "none", transition: "all 0.22s", whiteSpace: "nowrap",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(197,98,11,0.35)"; e.currentTarget.style.color = "#C5620B"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.color = t.textPrimary; }}
-          >
-            Go to Hardware <Icon d={icons.arrow} size={14} />
-          </a>
-        </div>
+        {COMPANY_SERVICES.map((group, i) => <ServiceGroup key={i} group={group} />)}
       </section>
 
       {/* Pricing — unchanged */}
