@@ -12,10 +12,17 @@ const CONTACT_OPTIONS = [
   { icon: "globe",    color: "#6c3483", label: "Visit Us",  sub: "Accra, Greater Accra", href: "#map" },
 ];
 
-const SERVICES_OPTIONS = [
-  "Website Development","Mobile App Development",
-  "Networking Setup","Cloud Infrastructure","Creative Studio Services",
-  "IT Consulting","Other",
+const COMPANY_SERVICES = [
+  "Website Development",
+  "Mobile App Development",
+  "Software Development",
+  "Cybersecurity Services",
+  "Networking",
+  "Cloud Solutions",
+  "Graphic Design",
+  "Multiage Studios",
+  "IT Consultancy",
+  "Other", // Keep 'Other' for miscellaneous inquiries
 ];
 
 const FAQ = [
@@ -160,7 +167,7 @@ export default function ContactPage() {
                   <select style={{ ...inputStyle, appearance: "none" }} value={form.service} onChange={upd("service")}
                     onFocus={e => e.target.style.borderColor = "#C5620B"} onBlur={e => e.target.style.borderColor = t.inputBorder}>
                     <option value="">Service Needed</option>
-                    {SERVICES_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                    {COMPANY_SERVICES.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
                   <textarea placeholder="Tell us about your project…" rows={5} style={{ ...inputStyle, resize: "vertical" }} value={form.message} onChange={upd("message")}
                     onFocus={e => e.target.style.borderColor = "#C5620B"} onBlur={e => e.target.style.borderColor = t.inputBorder} />
