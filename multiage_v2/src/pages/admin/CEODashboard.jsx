@@ -15,25 +15,25 @@ const formatCurrency = (value) => `GHS ${Number(value || 0).toLocaleString(undef
 export default function CEODashboard({ role, token, user }) {
   const { data: metrics, loading, error } = useApi(token, "/api/users/dashboard/metrics");
 
-  const netProfit = (metrics?.monthlyRevenue ?? 0) - (metrics?.monthlyExpenses ?? 0);
-
   const cards = useMemo(() => {
+    if (!metrics) return [];
+    const netProfit = (metrics.monthlyRevenue || 0) - (metrics.monthlyExpenses || 0);
     return [
       // Finance
-      { label: "Monthly Revenue", value: formatCurrency(metrics?.monthlyRevenue ?? 0), icon: <StatIcon type="income" /> },
-      { label: "Monthly Expenses", value: formatCurrency(metrics?.monthlyExpenses ?? 0), icon: <StatIcon type="expenses" /> },
+      { label: "Monthly Revenue", value: formatCurrency(metrics.monthlyRevenue), icon: <StatIcon type="income" /> },
+      { label: "Monthly Expenses", value: formatCurrency(metrics.monthlyExpenses), icon: <StatIcon type="expenses" /> },
       { label: "Net Profit", value: formatCurrency(netProfit), icon: <StatIcon type="balance" /> },
-      { label: "Outstanding Payments", value: formatCurrency(metrics?.outstandingPayments ?? 0), icon: <StatIcon type="revenue" /> },
+      { label: "Outstanding Payments", value: formatCurrency(metrics.outstandingPayments), icon: <StatIcon type="revenue" /> },
       // Projects
-      { label: "Active Projects", value: String(metrics?.activeProjects ?? 0), icon: <StatIcon type="orders" /> },
-      { label: "Completed Projects", value: String(metrics?.completedProjects ?? 0), icon: <StatIcon type="check" /> },
-      { label: "Pending Projects", value: String(metrics?.pendingProjects ?? 0), icon: <StatIcon type="media" /> },
+      { label: "Active Projects", value: String(metrics.activeProjects || 0), icon: <StatIcon type="orders" /> },
+      { label: "Completed Projects", value: String(metrics.completedProjects || 0), icon: <StatIcon type="check" /> },
+      { label: "Pending Projects", value: String(metrics.pendingProjects || 0), icon: <StatIcon type="media" /> },
       // Leads & Staff
-      { label: "New Leads", value: String(metrics?.newClientRequests ?? 0), subtitle: "Last 30 days", icon: <StatIcon type="users" /> },
-      { label: "Total Staff", value: String(metrics?.totalStaff ?? 0), icon: <StatIcon type="shield" /> },
-      { label: "Active Staff", value: String(metrics?.activeStaff ?? 0), icon: <StatIcon type="shield" /> },
+      { label: "New Leads", value: String(metrics.newClientRequests || 0), subtitle: "Last 30 days", icon: <StatIcon type="users" /> },
+      { label: "Total Staff", value: String(metrics.totalStaff || 0), icon: <StatIcon type="shield" /> },
+      { label: "Active Staff", value: String(metrics.activeStaff || 0), icon: <StatIcon type="shield" /> },
     ];
-  }, [metrics, netProfit]);
+  }, [metrics]);
 
   const sections = {
     Dashboard: (
