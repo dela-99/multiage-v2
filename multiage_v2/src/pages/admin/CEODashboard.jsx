@@ -15,10 +15,9 @@ const formatCurrency = (value) => `GHS ${Number(value || 0).toLocaleString(undef
 export default function CEODashboard({ role, token, user }) {
   const { data: metrics, loading, error } = useApi(token, "/api/users/dashboard/metrics");
 
-  const netProfit = (metrics?.monthlyRevenue || 0) - (metrics?.monthlyExpenses || 0);
-
   const cards = useMemo(() => {
     if (!metrics) return [];
+    const netProfit = (metrics.monthlyRevenue || 0) - (metrics.monthlyExpenses || 0);
     return [
       // Finance
       { label: "Monthly Revenue", value: formatCurrency(metrics.monthlyRevenue), icon: <StatIcon type="income" /> },
@@ -34,15 +33,15 @@ export default function CEODashboard({ role, token, user }) {
       { label: "Total Staff", value: String(metrics.totalStaff || 0), icon: <StatIcon type="shield" /> },
       { label: "Active Staff", value: String(metrics.activeStaff || 0), icon: <StatIcon type="shield" /> },
     ];
-  }, [metrics, netProfit]);
+  }, [metrics]);
 
   const sections = {
     Dashboard: (
       <MetricOverview
         cards={cards}
         // Placeholder for charts and recent activity
-        analytics={{ hasChartData: !!metrics }}
-        messages={[]} // To be replaced with Activity Timeline
+        analytics={{ hasChartData: !!(metrics && Object.keys(metrics).length > 0) }}
+        messages={metrics?.activityTimeline ?? []} // To be replaced with Activity Timeline
       />
     ),
     Leads: <LeadsSection messages={[]} />,
