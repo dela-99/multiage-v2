@@ -1,0 +1,8 @@
+{
+  "buildCommand": "cd multiage_v2 && npm install && npm run build",
+  "outputDirectory": "multiage_v2/dist",
+  "installCommand": "echo 'Install handled in buildCommand'",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
