@@ -2,7 +2,8 @@ import { useTheme } from "../../context/ThemeContext";
 
 function SummaryMetric({ label, value, change }) {
   const { t } = useTheme();
-  const positive = change >= 0;
+  const safeChange = Number.isFinite(Number(change)) ? Number(change) : 0;
+  const positive = safeChange >= 0;
 
   return (
     <div style={{
@@ -21,15 +22,28 @@ function SummaryMetric({ label, value, change }) {
           background: positive ? "rgba(39,174,96,0.12)" : "rgba(192,57,43,0.12)",
           color: positive ? "#27ae60" : "#c0392b",
         }}>
-          {positive ? "+" : ""}{change.toFixed(1)}%
+          {positive ? "+" : ""}{safeChange.toFixed(1)}%
         </div>
       </div>
     </div>
   );
 }
 
-export default function AnalyticsChart({ rangeDays, onRangeChange, income, expenses, balance, changes, hasChartData }) {
+export default function AnalyticsChart({
+  rangeDays = 30,
+  onRangeChange = () => {},
+  income = 0,
+  expenses = 0,
+  balance = 0,
+  changes = {},
+  hasChartData,
+}) {
   const { t } = useTheme();
+  const safeChanges = {
+    income: Number.isFinite(Number(changes.income)) ? Number(changes.income) : 0,
+    expenses: Number.isFinite(Number(changes.expenses)) ? Number(changes.expenses) : 0,
+    balance: Number.isFinite(Number(changes.balance)) ? Number(changes.balance) : 0,
+  };
 
   return (
     <section style={{
@@ -73,8 +87,8 @@ export default function AnalyticsChart({ rangeDays, onRangeChange, income, expen
       </div>
 
       <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-        <SummaryMetric label="Service Requests" value={String(income)} change={changes.income} />
-        <SummaryMetric label="Pending Follow-ups" value={String(expenses)} change={changes.expenses} />
+        <SummaryMetric label="Service Requests" value={String(income)} change={safeChanges.income} />
+        <SummaryMetric label="Pending Follow-ups" value={String(expenses)} change={safeChanges.expenses} />
         <div style={{ padding: "8px 0", minWidth: 140 }}>
           <div style={{ fontSize: 12, color: t.textMuted, marginBottom: 8 }}>Completed Engagements</div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -84,10 +98,10 @@ export default function AnalyticsChart({ rangeDays, onRangeChange, income, expen
               borderRadius: 999,
               fontSize: 11,
               fontWeight: 700,
-              background: changes.balance >= 0 ? "rgba(39,174,96,0.12)" : "rgba(192,57,43,0.12)",
-              color: changes.balance >= 0 ? "#27ae60" : "#c0392b",
+              background: safeChanges.balance >= 0 ? "rgba(39,174,96,0.12)" : "rgba(192,57,43,0.12)",
+              color: safeChanges.balance >= 0 ? "#27ae60" : "#c0392b",
             }}>
-              {changes.balance >= 0 ? "+" : ""}{changes.balance.toFixed(1)}%
+              {safeChanges.balance >= 0 ? "+" : ""}{safeChanges.balance.toFixed(1)}%
             </div>
           </div>
         </div>
