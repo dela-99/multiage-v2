@@ -110,6 +110,9 @@ export default function RoleDashboardLayout({
     [role, sidebarItemsOverride]
   );
   const [sectionKey, setSectionKey] = useState("");
+  const errorMessage = error
+    ? (typeof error === "string" ? error : error.message || "Failed to load dashboard data")
+    : "";
 
   useEffect(() => {
     if (!isMobile) {
@@ -221,7 +224,7 @@ export default function RoleDashboardLayout({
               </div>
             </div>
 
-            {error && (
+            {errorMessage && (
               <div style={{
                 padding: "12px 14px",
                 borderRadius: 14,
@@ -229,7 +232,7 @@ export default function RoleDashboardLayout({
                 color: "#c0392b",
                 border: "1px solid rgba(192,57,43,0.24)",
               }}>
-                {error}
+                {errorMessage}
               </div>
             )}
 
