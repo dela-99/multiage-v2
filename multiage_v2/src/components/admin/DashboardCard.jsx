@@ -15,7 +15,8 @@ function TrendArrow({ positive }) {
 
 export default function DashboardCard({ title, subtitle, value, change, icon }) {
   const { t } = useTheme();
-  const positive = change >= 0;
+  const safeChange = Number.isFinite(Number(change)) ? Number(change) : 0;
+  const positive = safeChange >= 0;
 
   return (
     <div style={{
@@ -66,7 +67,7 @@ export default function DashboardCard({ title, subtitle, value, change, icon }) 
           whiteSpace: "nowrap",
         }}>
           <TrendArrow positive={positive} />
-          <span>{positive ? "+" : ""}{change.toFixed(1)}%</span>
+          <span>{positive ? "+" : ""}{safeChange.toFixed(1)}%</span>
         </div>
       </div>
     </div>
