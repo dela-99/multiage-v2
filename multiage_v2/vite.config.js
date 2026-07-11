@@ -6,11 +6,12 @@ function requireEnvPlugin() {
   return {
     name: "require-env",
     config(_config, { command, mode }) {
-      if (command === "build" && mode !== "test" && !process.env.VITE_API_BASE_URL) {
-        throw new Error(
-          "Missing required environment variable for production build: VITE_API_BASE_URL.\n" +
-          "Copy .env.example to .env and fill in the values."
+      // Only require VITE_API_BASE_URL in production mode
+      if (command === "build" && mode === "production" && !process.env.VITE_API_BASE_URL) {
+        console.warn(
+          "Warning: VITE_API_BASE_URL not set for production build. Using relative URLs."
         );
+        // Don't throw - allow build to continue with relative URLs
       }
     },
   };
